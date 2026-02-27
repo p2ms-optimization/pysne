@@ -1,10 +1,13 @@
 # Changelog - SDOA Clustering Project
 
-## [2026-02-27] - Inisialisasi & Problem Set
-- **Added**: Modul `initialization` menggunakan Sobol Sequence.
-- **Added**: Modul `problems` berisi Problem 1-7.
-- **Added**: Modul `utils` dengan fungsi transformasi maksimasi $F(x) = 1/(1 + \sum |f_i(x)|)$.
-- **Note**: Pastikan `pip install numpy scipy` sebelum running.
+Semua perubahan signifikan pada proyek library ini akan didokumentasikan di sini.
 
-## [Next Steps]
-- Implementasi `clustering/dynamic.py` untuk Logika 5 Kasus.
+## [2026-02-27] - Inisialisasi & Problem Set
+### Added
+- **Modul Initialization**: Menambahkan fungsi `generate_sobol_points` di `sampling.py`.
+- **Modul Problems**: Menambahkan `benchmarks.py` yang berisi sistem persamaan Problem 1-7 beserta parameter spesifikasinya (m_cluster, gamma, delta, dll).
+- **Modul Utils**: Menambahkan `objective_function` dengan transformasi $F(x) = 1/(1 + \sum |f_i(x)|)$ sesuai Slide 13 PPT Seminar 1.
+- **Progress Tracking**: Membuat file `CHANGELOG.md` ini untuk mempermudah koordinasi tim.
+
+### Note
+- 
