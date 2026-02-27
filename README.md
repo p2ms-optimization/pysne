@@ -38,16 +38,3 @@ pysne/                          <-- Root Folder (Repositori GitHub)
 ├── requirements.txt            # numpy, scipy, matplotlib
 ├── .gitignore                  # Mengabaikan file sampah (__pycache__)
 └── README.md                   # Dokumentasi Proyek
-
-
-## 🛠 Progress & Architecture Tracking
-
-Kami menggunakan struktur modular agar algoritma bersifat *pluggable*.
-- [x] **Initialization**: Sobol Sequence (SciPy QMC) - *Selesai*
-- [x] **Problems**: Benchmark 1-7 (Equations & Params) - *Selesai*
-- [x] **Utils**: Objective Function (Maximization Transformation) - *Selesai*
-- [ ] **Clustering**: Iterative Dynamic Clustering (5 Cases) - *Next Task*
-- [ ] **Core**: SDOA N-Dimensional Engine - *Planned*
-
-**Cara Menjalankan Tes Lokal:**
-`python test_lib.py` atau gunakan `pytest`.
