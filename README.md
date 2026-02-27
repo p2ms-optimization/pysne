@@ -7,6 +7,7 @@ Research for Undergraduate Thesis at Actuarial Science ITB.
 
 ## Repository Structure
 
+```
 pysne/                          <-- Root Folder (Repositori GitHub)
 │
 ├── sdoa_cluster/               <-- Folder Library Utama
@@ -38,3 +39,5 @@ pysne/                          <-- Root Folder (Repositori GitHub)
 ├── requirements.txt            # numpy, scipy, matplotlib
 ├── .gitignore                  # Mengabaikan file sampah (__pycache__)
 └── README.md                   # Dokumentasi Proyek
+```
+
