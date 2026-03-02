@@ -2,6 +2,13 @@
 
 Semua perubahan signifikan pada proyek library ini akan didokumentasikan di sini.
 
+## [2026-03-02] - Integrasi SDOA Engine & Model
+### Added
+- **Modul Optimizers**: Menambahkan `matrix.py` untuk membangkitkan matriks rotasi $n$-dimensi menggunakan perkalian matriks parsial $R_{pq}$.
+- **Modul Optimizers**: Menambahkan `engine.py` sebagai placeholder mesin utama SDOA.
+- **Modul Clustering**: Menambahkan `model.py` yang berisi class `Cluster` untuk representasi wilayah (n-ball) dalam ruang pencarian.
+- **Modul Utils**: Menambahkan fungsi `is_in_domain` untuk memvalidasi posisi titik agar tetap berada dalam batasan domain.
+
 ## [2026-02-27] - Inisialisasi & Problem Set
 ### Added
 - **Modul Initialization**: Menambahkan fungsi `generate_sobol_points` di `sampling.py`.
