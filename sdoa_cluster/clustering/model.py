@@ -2,7 +2,7 @@ import numpy as np
 
 class Cluster:
     """
-    Representasi sebuah wilayah (n-ball) dalam ruang pencarian.
+    Representasi sebuah wilayah dalam ruang pencarian.
     
     Digunakan untuk mengelompokkan kandidat solusi agar algoritma optimasi 
     bisa fokus mencari akar di wilayah yang berbeda-beda.
