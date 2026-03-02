@@ -1,5 +1,5 @@
 import numpy as np
-from typing import List, Callable, Any
+from typing import List, Tuple, Callable
 
 def objective_function(x: np.ndarray, system_of_equations: List[Callable[[np.ndarray], float]]) -> float:
     """
@@ -28,3 +28,19 @@ def objective_function(x: np.ndarray, system_of_equations: List[Callable[[np.nda
         # Menangkap error spesifik input daripada Exception umum
         print(f"Error dalam perhitungan objective_function: {e}")
         return 0.0
+
+def is_in_domain(point: np.ndarray, domain: List[Tuple[float, float]]) -> bool:
+    """
+    Memeriksa apakah sebuah titik berada di dalam batasan domain.
+
+    Arguments:
+        point (np.ndarray): Titik koordinat yang akan diperiksa.
+        domain (List[Tuple]): Daftar batasan [(lo, hi), ...] untuk setiap dimensi.
+
+    Returns:
+        bool: True jika titik berada di dalam domain, False jika di luar.
+    """
+    for i, (lo, hi) in enumerate(domain):
+        if not (lo <= point[i] <= hi):
+            return False
+    return True
