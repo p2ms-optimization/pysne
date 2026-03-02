@@ -4,13 +4,13 @@ from typing import Callable, Dict, List, Tuple, Any
 def get_problem_set() -> Dict[int, Callable]:
     """"Mengembalikan daftar fungsi pemanggil problem."""
     return{
-        1: problem 1,
-        2: problem 2,
-        3: problem 3,
-        4: problem 4,
-        5: problem 5,
-        6: problem 6,
-        7: problem 7
+        1: problem_1,
+        2: problem_2,
+        3: problem_3,
+        4: problem_4,
+        5: problem_5,
+        6: problem_6,
+        7: problem_7
     }
 
 def problem_1():
