@@ -21,7 +21,7 @@ pysne/                          <-- Root Folder
 │   ├── clustering/             
 │   │   ├── __init__.py         # Ekspos: Cluster, DynamicClustering
 │   │   ├── dynamic.py          # Logika Kasus Clustering
-│   │   └── model.py            # Representasi objek Cluster (n-ball)
+│   │   └── model.py            # Representasi objek Cluster
 │   │
 │   ├── optimizers/             
 │   │   └── sdoa/

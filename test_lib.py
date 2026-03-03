@@ -44,4 +44,4 @@ def run_integration_test():
         print("Saran: Pastikan folder 'sdoa_cluster' memiliki file '__init__.py' di setiap sub-foldernya.")
 
 if __name__ == "__main__":
-    run_integration_test()
+    run_integration_test()git
