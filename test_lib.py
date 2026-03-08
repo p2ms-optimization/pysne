@@ -1,11 +1,11 @@
 import numpy as np
 import time
-from sdoa_cluster.problems import get_problem_set
-from sdoa_cluster.utils import objective_function, validate_solutions
-from sdoa_cluster.clustering import perform_iterative_clustering
-from sdoa_cluster.optimizers import run_sdoa_on_clusters, select_final_roots
+from .problems import get_problem_set
+from .utils import objective_function, validate_solutions
+from clustering.dynamic import perform_iterative_clustering
+from .optimizers import run_sdoa_on_clusters, select_final_roots
 
-def run_full_integration_test():
+def test_integration_run():
     print("="*60)
     print("PYSNE FULL INTEGRATION TEST (CLUSTERING + SDOA + SELECTION)")
     print("="*60 + "\n")
@@ -71,4 +71,4 @@ def run_full_integration_test():
         traceback.print_exc()
 
 if __name__ == "__main__":
-    run_full_integration_test()
+    test_integration_run()

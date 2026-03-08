@@ -1,5 +1,5 @@
 import numpy as np
-from clustering.dynamic import perform_iterative_clustering
+# from clustering.dynamic import perform_iterative_clustering
 from .sdoa.engine import spiral_dynamics_optimization
 from initialization.sampling import generate_sobol_points
 from utils import objective_function, is_in_domain

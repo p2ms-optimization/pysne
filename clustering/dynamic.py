@@ -1,9 +1,9 @@
 import numpy as np
 from typing import List, Dict, Any, Tuple, Callable
 from .model import Cluster
-from ..utils import objective_function
-from ..initialization.sampling import generate_sobol_points
-from ..optimizers.sdoa.matrix import get_rotation_matrix
+from utils import objective_function
+from initialization.sampling import generate_sobol_points
+from optimizers.sdoa.matrix import get_rotation_matrix
 
 def process_point_for_clustering(
     y: np.ndarray, 
