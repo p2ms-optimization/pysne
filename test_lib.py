@@ -1,47 +1,74 @@
 import numpy as np
+import time
 from sdoa_cluster.problems import get_problem_set
-from sdoa_cluster.utils import objective_function
+from sdoa_cluster.utils import objective_function, validate_solutions
 from sdoa_cluster.clustering import perform_iterative_clustering
+from sdoa_cluster.optimizers import run_sdoa_on_clusters, select_final_roots
 
-def run_integration_test():
-    print("=== PYSNE INTEGRATION TEST (CLUSTERING PHASE) ===\n")
+def run_full_integration_test():
+    print("="*60)
+    print("PYSNE FULL INTEGRATION TEST (CLUSTERING + SDOA + SELECTION)")
+    print("="*60 + "\n")
 
     try:
-        # 1. Memilih Problem dari Benchmarks (Sesuai parameter TA Anda)
-        # Kita ambil Problem 1 sebagai contoh uji coba
+        # 1. Load Problem
         problems = get_problem_set()
         problem_id = 1
         equations, domain, params, expected_roots = problems[problem_id]()
+        epsilon = params.get('epsilon', 1e-7)
+        delta = params.get('delta', 0.01)
         
-        print(f"[STEP 1] Memuat {params.get('m_cluster')} titik untuk Problem {problem_id}")
-        print(f"Target: Mencari {expected_roots} akar solusi.\n")
+        print(f"[STEP 1] Memuat Problem {problem_id}")
+        print(f"Target: Mencari {expected_roots} akar solusi.")
+        start_time = time.time()
 
-        # 2. Menjalankan Fase Clustering (Manager memanggil Worker)
-        # Fungsi ini akan mengambil params.get('gamma'), params.get('r'), dll secara otomatis
-        print("[STEP 2] Menjalankan Iterative Dynamic Clustering...")
+        # 2. Fase Clustering
+        print("\n[STEP 2] Menjalankan Iterative Dynamic Clustering...")
         clusters = perform_iterative_clustering(equations, domain, params)
-        
-        # 3. Menampilkan Hasil Identifikasi Cluster
-        print(f"\n[STEP 3] Hasil Identifikasi:")
         print(f"Ditemukan {len(clusters)} wilayah potensial (clusters).")
-        
-        for i, cluster in enumerate(clusters):
-            # Menggunakan __repr__ dari model.py milik teman Anda
-            print(f"  - Cluster {i+1}: {cluster}")
-            
-            # Cek nilai fitness di pusat cluster
-            fitness = objective_function(cluster.center, equations)
-            print(f"    Nilai F(x): {fitness:.6f} (Makin dekat ke 1.0 makin potensial)")
 
-        # 4. Evaluasi Sederhana
-        if len(clusters) >= expected_roots:
-            print("\n[STATUS]: SUKSES! Seluruh wilayah akar berhasil diidentifikasi. ✅")
+        # 3. Fase SDOA (Local Optimization)
+        print("\n[STEP 3] Menjalankan SDOA pada setiap cluster...")
+        sdoa_params = {
+            'm': params.get('sdoa_m', 50),
+            'r': params.get('sdoa_r', 0.95),
+            'theta': params.get('sdoa_theta', np.pi/4),
+            'k_max': params.get('sdoa_k_max', 200)
+        }
+        candidates = run_sdoa_on_clusters(clusters, equations, domain, sdoa_params, epsilon)
+        print(f"Dihasilkan {len(candidates)} kandidat titik dari SDOA.")
+
+        # 4. Fase Seleksi & Validasi
+        print("\n[STEP 4] Melakukan seleksi akhir dan eliminasi duplikat...")
+        raw_roots = select_final_roots(candidates, equations, domain, epsilon, delta)
+        final_roots = validate_solutions(raw_roots, equations, domain, epsilon)
+        
+        elapsed = time.time() - start_time
+
+        # 5. Summary Hasil
+        print("\n" + "="*20 + " RINGKASAN HASIL " + "="*20)
+        print(f"Waktu Eksekusi   : {elapsed:.2f} detik")
+        print(f"Akar Diharapkan  : {expected_roots}")
+        print(f"Akar Ditemukan   : {len(final_roots)}")
+        
+        if len(final_roots) > 0:
+            print("\nDaftar Akar yang Ditemukan:")
+            for i, root in enumerate(final_roots):
+                fitness = objective_function(root, equations)
+                print(f"  Akar {i+1}: {root.round(6)} | Residu: {1.0-fitness:.2e}")
+
+        # Evaluasi Akhir
+        if len(final_roots) == expected_roots:
+            print("\n[STATUS]: SUKSES! Seluruh akar ditemukan dengan presisi tinggi. ✅")
+        elif len(final_roots) > expected_roots:
+            print("\n[STATUS]: WARNING! Ditemukan lebih banyak titik (mungkin delta terlalu kecil). ⚠️")
         else:
-            print("\n[STATUS]: PERINGATAN! Jumlah cluster kurang dari jumlah akar. Perlu tuning parameter 'gamma'. ⚠️")
+            print("\n[STATUS]: GAGAL! Beberapa akar terlewat. Perlu tuning parameter. ❌")
 
     except Exception as e:
-        print(f"\n[ERROR]: Terjadi kegagalan integrasi: {e}")
-        print("Saran: Pastikan folder 'sdoa_cluster' memiliki file '__init__.py' di setiap sub-foldernya.")
+        print(f"\n[ERROR]: Terjadi kegagalan sistem: {e}")
+        import traceback
+        traceback.print_exc()
 
 if __name__ == "__main__":
-    run_integration_test()git
+    run_full_integration_test()

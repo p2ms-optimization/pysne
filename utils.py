@@ -44,3 +44,13 @@ def is_in_domain(point: np.ndarray, domain: List[Tuple[float, float]]) -> bool:
         if not (lo <= point[i] <= hi):
             return False
     return True
+
+def validate_solutions(roots, equations, domain, epsilon):
+    """Memastikan setiap root yang ditemukan memenuhi toleransi ε."""
+    valid_roots = []
+    for root in roots:
+        in_domain = is_in_domain(root, domain)
+        residuals = [abs(f(root)) for f in equations]
+        if max(residuals) < epsilon and in_domain:
+            valid_roots.append(root)
+    return valid_roots
