@@ -1,19 +1,19 @@
 import numpy as np
 import time
-from .problems import get_problem_set
-from .utils import objective_function, validate_solutions
+from problems.benchmarks import get_problem_set
+from utils import objective_function, validate_solutions
 from clustering.dynamic import perform_iterative_clustering
-from .optimizers import run_sdoa_on_clusters, select_final_roots
+from optimizers import run_sdoa_on_clusters, select_final_roots
 
 def test_integration_run():
     print("="*60)
-    print("PYSNE FULL INTEGRATION TEST (CLUSTERING + SDOA + SELECTION)")
+    print("PYSNE FULL INTEGRATION TEST")
     print("="*60 + "\n")
 
     try:
-        # 1. Load Problem
+        # 1. Import Problem
         problems = get_problem_set()
-        problem_id = 1
+        problem_id = 3
         equations, domain, params, expected_roots = problems[problem_id]()
         epsilon = params.get('epsilon', 1e-7)
         delta = params.get('delta', 0.01)
@@ -23,7 +23,7 @@ def test_integration_run():
         start_time = time.time()
 
         # 2. Fase Clustering
-        print("\n[STEP 2] Menjalankan Iterative Dynamic Clustering...")
+        print("\n[STEP 2] Menjalankan Iterative Clustering...")
         clusters = perform_iterative_clustering(equations, domain, params)
         print(f"Ditemukan {len(clusters)} wilayah potensial (clusters).")
 
@@ -59,11 +59,11 @@ def test_integration_run():
 
         # Evaluasi Akhir
         if len(final_roots) == expected_roots:
-            print("\n[STATUS]: SUKSES! Seluruh akar ditemukan dengan presisi tinggi. ✅")
+            print("\n[STATUS]: SUKSES! Seluruh akar ditemukan dengan presisi tinggi.")
         elif len(final_roots) > expected_roots:
-            print("\n[STATUS]: WARNING! Ditemukan lebih banyak titik (mungkin delta terlalu kecil). ⚠️")
+            print("\n[STATUS]: WARNING! Ditemukan lebih banyak titik (mungkin delta terlalu kecil).")
         else:
-            print("\n[STATUS]: GAGAL! Beberapa akar terlewat. Perlu tuning parameter. ❌")
+            print("\n[STATUS]: GAGAL! Beberapa akar terlewat. Perlu tuning parameter.")
 
     except Exception as e:
         print(f"\n[ERROR]: Terjadi kegagalan sistem: {e}")
