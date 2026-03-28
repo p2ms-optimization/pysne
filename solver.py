@@ -2,7 +2,7 @@ import numpy as np
 
 # Import internal dari modul lain (asumsi struktur folder pysne sudah dibuat)
 from pysne.initialization.sampling import generate_sobol_points
-from pysne.utils import objective_function
+from pysne.utils import objective_function, is_in_domain
 from pysne.optimizers.sdoa_engine import spiral_dynamics_optimization
 
 def run_sdoa_on_clusters(clusters, equations, domain, sdoa_params, epsilon):
@@ -63,3 +63,68 @@ def run_sdoa_on_clusters(clusters, equations, domain, sdoa_params, epsilon):
         candidates.append(candidate)
 
     return np.array(candidates)
+
+
+def select_final_roots(candidates, equations, domain, epsilon, delta):
+    """
+    Melakukan seleksi tahap akhir untuk menentukan akar-akar valid dari
+    titik-titik kandidat hasil optimasi SDOA.
+    
+    Fungsi ini mengimplementasikan Step 10 dan 11 dari metode clustering
+    Sidarto & Kania (2015). Proses seleksi melibatkan:
+    1. Membuang kandidat yang keluar dari batas domain.
+    2. Membuang kandidat dengan residual 1 - F(x) >= epsilon.
+    3. Menggabungkan kandidat yang berdekatan (jarak <= delta), dengan 
+       hanya mempertahankan kandidat yang memiliki nilai F(x) tertinggi.
+
+    Parameters
+    ----------
+    candidates : numpy.ndarray or list
+        Daftar titik kandidat akar hasil dari fase optimasi.
+    equations : list of callable
+        Daftar fungsi sistem persamaan non-linear.
+    domain : list of tuple
+        Batasan domain global dalam format [(min, max), ...].
+    epsilon : float
+        Nilai toleransi akurasi akar. Kandidat diterima jika 1 - F(x) < epsilon.
+    delta : float
+        Batas jarak minimum antar akar yang berbeda (radius ekuivalensi).
+
+    Returns
+    -------
+    numpy.ndarray
+        Array berisi titik-titik akar final yang telah tervalidasi dan unik.
+    """
+    # Filter 1: Validasi domain dan nilai threshold epsilon
+    accurate_candidates = []
+    for cand in candidates:
+        if not is_in_domain(cand, domain):
+            continue
+            
+        F_val = objective_function(cand, equations)
+        if 1.0 - F_val < epsilon:
+            accurate_candidates.append((cand, F_val))
+
+    if not accurate_candidates:
+        return np.array([])
+
+    # Filter 2: Eliminasi kandidat berdekatan (berdasarkan delta)
+    # Urutkan secara descending berdasarkan nilai F_val agar akar 
+    # dengan akurasi tertinggi selalu dievaluasi lebih dulu.
+    accurate_candidates.sort(key=lambda x: x[1], reverse=True)
+    
+    final_roots = []
+
+    # bagian ke bawah ada sedikit perubahan dengan main code
+    for cand, F_val in accurate_candidates:
+        found_close = False
+        for existing, _ in final_roots:
+            distance = np.linalg.norm(cand - existing)
+            if distance <= delta:
+                found_close = True
+                break  # Langsung buang cand karena existing pasti lebih baik (hasil sorting)
+                
+        if not found_close:
+            final_roots.append((cand, F_val))
+
+    return np.array([root for root, _ in final_roots])
