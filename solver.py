@@ -1,8 +1,10 @@
 import numpy as np
+import time
 
-# Import internal dari modul lain (asumsi struktur folder pysne sudah dibuat)
+# Import internal dari modul lain
+from pysne.clustering.model import perform_iterative_clustering
 from pysne.initialization.sampling import generate_sobol_points
-from pysne.utils import objective_function, is_in_domain
+from pysne.utils import objective_function, is_in_domain, validate_solutions
 from pysne.optimizers.sdoa_engine import spiral_dynamics_optimization
 
 def run_sdoa_on_clusters(clusters, equations, domain, sdoa_params, epsilon):
@@ -128,3 +130,69 @@ def select_final_roots(candidates, equations, domain, epsilon, delta):
             final_roots.append((cand, F_val))
 
     return np.array([root for root, _ in final_roots])
+    
+
+def solve_system(equations, domain, params, verbose=False):
+    """
+    Menyelesaikan sistem persamaan non-linear menggunakan integrasi 
+    Spiral Dynamics Inspired Optimization (SDOA) dan metode Clustering.
+    
+    Fungsi ini mengeksekusi pipeline utuh yang terdiri dari tiga fase:
+    1. Fase Clustering: Melokalisasi area akar potensial.
+    2. Fase Optimasi: Menjalankan SDOA pada setiap cluster.
+    3. Fase Seleksi: Menyaring dan memvalidasi akar akhir yang unik.
+
+    Parameters
+    ----------
+    equations : list of callable
+        Daftar fungsi sistem persamaan non-linear f_i(x).
+    domain : list of tuple
+        Batas ruang pencarian dalam format [(min, max), (min, max), ...].
+    params : dict
+        Kamus (dictionary) yang memuat seluruh hyperparameter algoritma 
+        (epsilon, delta, gamma, m_cluster, k_cluster, sdoa_m, sdoa_k_max, r, theta).
+    verbose : bool, optional
+        Jika True, mencetak informasi waktu eksekusi dan jumlah cluster (default: False).
+
+    Returns
+    -------
+    dict
+        Kamus berisi hasil eksekusi dengan kunci:
+        - 'roots': numpy.ndarray dari akar-akar yang tervalidasi.
+        - 'clusters': list objek Cluster yang ditemukan pada Fase 1.
+        - 'time_elapsed': float waktu komputasi dalam detik.
+    """
+    start_time = time.time()
+
+    # Ekstrak parameter khusus SDOA
+    sdoa_params = {
+        'm': params['sdoa_m'],
+        'r': params['r'],  # Menggunakan parameter 'r' dari kamus utama
+        'theta': params['theta'],
+        'k_max': params['sdoa_k_max']
+    }
+    epsilon = params['epsilon']
+
+    # FASE 1: Iterative Clustering
+    clusters = perform_iterative_clustering(equations, domain, params)
+    
+    # FASE 2: SDOA pada setiap cluster
+    candidates = run_sdoa_on_clusters(clusters, equations, domain, sdoa_params, epsilon)
+    
+    # FASE 3: Seleksi dan Validasi Akhir
+    final_roots = select_final_roots(candidates, equations, domain, epsilon, params['delta'])
+    
+    # Validasi residual untuk memastikan keakuratan (opsional, tergantung implementasimu)
+    valid_roots = validate_solutions(final_roots, equations, domain, epsilon)
+
+    elapsed_time = time.time() - start_time
+
+    if verbose:
+        print(f"Pencarian selesai dalam {elapsed_time:.3f} detik.")
+        print(f"Ditemukan {len(clusters)} cluster dan {len(valid_roots)} akar valid.")
+
+    return {
+        'roots': np.array(valid_roots),
+        'clusters': clusters,
+        'time_elapsed': elapsed_time
+    }
