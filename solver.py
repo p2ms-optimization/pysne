@@ -2,10 +2,10 @@ import numpy as np
 import time
 
 # Import internal dari modul lain
-from pysne.clustering.model import perform_iterative_clustering
-from pysne.initialization.sampling import generate_sobol_points
-from pysne.utils import objective_function, is_in_domain, validate_solutions
-from pysne.optimizers.sdoa_engine import spiral_dynamics_optimization
+from clustering.dynamic import perform_iterative_clustering
+from initialization.sampling import generate_sobol_points
+from utils import objective_function, is_in_domain, validate_solutions
+from optimizers.sdoa.engine import spiral_dynamics_optimization
 
 def run_sdoa_on_clusters(clusters, equations, domain, sdoa_params, epsilon):
     """
