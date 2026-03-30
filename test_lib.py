@@ -1,9 +1,15 @@
 import numpy as np
 import time
+import sys
+from typing import Dict, List, Tuple, Any
+
 from problems.benchmarks import get_problem_set
 from utils import objective_function, validate_solutions
 from clustering.dynamic import perform_iterative_clustering
 from optimizers import run_sdoa_on_clusters, select_final_roots
+from solver import solve_system
+
+
 
 def test_integration_run():
     print("="*60)
@@ -13,7 +19,7 @@ def test_integration_run():
     try:
         # 1. Import Problem
         problems = get_problem_set()
-        problem_id = 3
+        problem_id = 1
         equations, domain, params, expected_roots = problems[problem_id]()
         epsilon = params.get('epsilon', 1e-7)
         delta = params.get('delta', 0.01)
