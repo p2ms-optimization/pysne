@@ -1,4 +1,4 @@
-# ini nantinya akan jadi mesin utama optimisasi dengan SDOA setelah semua fungsi yang berkaitan di push
+# this will later become the main optimization engine with SDOA after all related functions are pushed
 
 import numpy as np
 from .matrix import get_rotation_matrix
@@ -8,7 +8,7 @@ from scipy.stats import qmc
 def spiral_dynamics_optimization(objective_func, domain, params, minimization=False,
                                  custom_initial_points=None, equations=None, epsilon=None):
     """
-    Implementasi SDOA dengan early stopping.
+    Implementation of SDOA with early stopping.
     """
     m = params.get('m', 20)
     r = params.get('r', 0.95)

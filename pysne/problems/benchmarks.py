@@ -2,7 +2,7 @@ import numpy as np
 from typing import Callable, Dict, List, Tuple, Any
 
 def get_problem_set() -> Dict[int, Callable]:
-    """"Mengembalikan daftar fungsi pemanggil problem."""
+    """Returns a dictionary of problem caller functions."""
     return{
         1: problem_1,
         2: problem_2,

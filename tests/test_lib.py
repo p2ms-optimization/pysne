@@ -18,22 +18,22 @@ def test_integration_run():
     try:
         # 1. Import Problem
         problems = get_problem_set()
-        problem_id = 1
+        problem_id = 2
         equations, domain, params, expected_roots = problems[problem_id]()
         epsilon = params.get('epsilon', 1e-7)
         delta = params.get('delta', 0.01)
         
-        print(f"[STEP 1] Memuat Problem {problem_id}")
-        print(f"Target: Mencari {expected_roots} akar solusi.")
+        print(f"[STEP 1] Loading Problem {problem_id}")
+        print(f"Target: Finding {expected_roots} solution roots.")
         start_time = time.time()
 
-        # 2. Fase Clustering
-        print("\n[STEP 2] Menjalankan Iterative Clustering...")
+        # 2. Clustering Phase
+        print("\n[STEP 2] Running Iterative Clustering...")
         clusters = perform_iterative_clustering(equations, domain, params)
-        print(f"Ditemukan {len(clusters)} wilayah potensial (clusters).")
+        print(f"Found {len(clusters)} potential regions (clusters).")
 
-        # 3. Fase SDOA (Local Optimization)
-        print("\n[STEP 3] Menjalankan SDOA pada setiap cluster...")
+        # 3. SDOA Phase (Local Optimization)
+        print("\n[STEP 3] Running SDOA on each cluster...")
         sdoa_params = {
             'm': params.get('sdoa_m', 50),
             'r': params.get('sdoa_r', 0.95),
@@ -41,37 +41,37 @@ def test_integration_run():
             'k_max': params.get('sdoa_k_max', 200)
         }
         candidates = run_sdoa_on_clusters(clusters, equations, domain, sdoa_params, epsilon)
-        print(f"Dihasilkan {len(candidates)} kandidat titik dari SDOA.")
+        print(f"Generated {len(candidates)} candidate points from SDOA.")
 
-        # 4. Fase Seleksi & Validasi
-        print("\n[STEP 4] Melakukan seleksi akhir dan eliminasi duplikat...")
+        # 4. Selection & Validation Phase
+        print("\n[STEP 4] Performing final selection and duplicate elimination...")
         raw_roots = select_final_roots(candidates, equations, domain, epsilon, delta)
         final_roots = validate_solutions(raw_roots, equations, domain, epsilon)
         
         elapsed = time.time() - start_time
 
-        # 5. Summary Hasil
-        print("\n" + "="*20 + " RINGKASAN HASIL " + "="*20)
-        print(f"Waktu Eksekusi   : {elapsed:.2f} detik")
-        print(f"Akar Diharapkan  : {expected_roots}")
-        print(f"Akar Ditemukan   : {len(final_roots)}")
+        # 5. Result Summary
+        print("\n" + "="*20 + " RESULT SUMMARY " + "="*20)
+        print(f"Execution Time   : {elapsed:.2f} seconds")
+        print(f"Expected Roots   : {expected_roots}")
+        print(f"Roots Found      : {len(final_roots)}")
         
         if len(final_roots) > 0:
-            print("\nDaftar Akar yang Ditemukan:")
+            print("\nList of Found Roots:")
             for i, root in enumerate(final_roots):
                 fitness = objective_function(root, equations)
-                print(f"  Akar {i+1}: {root.round(6)} | Residu: {1.0-fitness:.2e}")
+                print(f"  Root {i+1}: {root.round(6)} | Residual: {1.0-fitness:.2e}")
 
-        # Evaluasi Akhir
+        # Final Evaluation
         if len(final_roots) == expected_roots:
-            print("\n[STATUS]: SUKSES! Seluruh akar ditemukan dengan presisi tinggi.")
+            print("\n[STATUS]: SUCCESS! All roots found with high precision.")
         elif len(final_roots) > expected_roots:
-            print("\n[STATUS]: WARNING! Ditemukan lebih banyak titik (mungkin delta terlalu kecil).")
+            print("\n[STATUS]: WARNING! Found more points (delta might be too small).")
         else:
-            print("\n[STATUS]: GAGAL! Beberapa akar terlewat. Perlu tuning parameter.")
+            print("\n[STATUS]: FAILED! Some roots missed. Needs parameter tuning.")
 
     except Exception as e:
-        print(f"\n[ERROR]: Terjadi kegagalan sistem: {e}")
+        print(f"\n[ERROR]: System failure occurred: {e}")
         import traceback
         traceback.print_exc()
 

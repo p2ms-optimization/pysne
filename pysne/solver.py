@@ -1,7 +1,7 @@
 import numpy as np
 import time
 
-# Import internal dari modul lain
+# Internal imports from other modules
 from pysne.clustering.clustering_process import perform_iterative_clustering
 from pysne.initialization.sampling import generate_sobol_points
 from pysne.utils import objective_function, is_in_domain, validate_solutions
@@ -9,39 +9,39 @@ from pysne.optimizers.sdoa.engine import spiral_dynamics_optimization
 
 def run_sdoa_on_clusters(clusters, equations, domain, sdoa_params, epsilon):
     """
-    Menjalankan proses optimasi Spiral Dynamics (SDOA) pada setiap cluster 
-    untuk menemukan titik akar yang lebih presisi.
+    Executes the Spiral Dynamics Optimization Algorithm (SDOA) on each cluster
+    to find more precise root points.
 
-    Fungsi ini membangun batasan domain lokal (hypercube) untuk setiap cluster
-    berdasarkan pusat dan radiusnya[cite: 536], membangkitkan titik awal baru menggunakan 
-    Sobol sequence, dan menjalankan SDOA pada domain lokal tersebut.
+    This function constructs local domain boundaries (hypercubes) for each cluster
+    based on its center and radius [cite: 536], generates new initial points using
+    a Sobol sequence, and runs SDOA within those local domains.
 
     Parameters
     ----------
     clusters : list
-        Daftar objek Cluster yang dihasilkan dari fase iteratif clustering.
+        List of Cluster objects generated from the iterative clustering phase.
     equations : list of callable
-        Daftar fungsi sistem persamaan non-linear.
+        A list of functions representing the system of nonlinear equations.
     domain : list of tuple
-        Batasan domain global ruang pencarian dalam format [(min, max), ...].
+        The global search space boundaries in the format [(min, max), ...].
     sdoa_params : dict
-        Hyperparameter untuk algoritma SDOA (m, k_max, r, theta).
+        Hyperparameters for the SDOA algorithm (m, k_max, r, theta).
     epsilon : float
-        Nilai toleransi (residual) untuk kriteria early stopping.
+        Tolerance value (residual) for the early stopping criteria.
 
     Returns
     -------
     numpy.ndarray
-        Array berisi titik-titik kandidat akar yang telah dioptimasi oleh SDOA.
+        Array containing the candidate root points optimized by SDOA.
     """
     candidates = []
 
-    # DEFINISI FUNGSI DI LUAR LOOP UNTUK EFISIENSI MEMORI
+    # DEFINE FUNCTION OUTSIDE LOOP FOR MEMORY EFFICIENCY
     def cluster_objective(x):
         return objective_function(x, equations)
 
     for i, cluster in enumerate(clusters):
-        # Determine cluster domain (memastikan tidak keluar dari batas global)
+        # Determine cluster domain (ensuring it does not exceed global boundaries)
         cluster_domain = []
         for dim in range(len(domain)):
             cluster_lo = max(domain[dim][0], cluster.center[dim] - cluster.radius)
@@ -69,35 +69,35 @@ def run_sdoa_on_clusters(clusters, equations, domain, sdoa_params, epsilon):
 
 def select_final_roots(candidates, equations, domain, epsilon, delta):
     """
-    Melakukan seleksi tahap akhir untuk menentukan akar-akar valid dari
-    titik-titik kandidat hasil optimasi SDOA.
+    Performs the final selection phase to determine valid roots from
+    the candidate points optimized by SDOA.
     
-    Fungsi ini mengimplementasikan Step 10 dan 11 dari metode clustering
-    Sidarto & Kania (2015). Proses seleksi melibatkan:
-    1. Membuang kandidat yang keluar dari batas domain.
-    2. Membuang kandidat dengan residual 1 - F(x) >= epsilon.
-    3. Menggabungkan kandidat yang berdekatan (jarak <= delta), dengan 
-       hanya mempertahankan kandidat yang memiliki nilai F(x) tertinggi.
+    This function implements Steps 10 and 11 from the clustering method
+    by Sidarto & Kania (2015). The selection process involves:
+    1. Discarding candidates that fall outside the domain boundaries.
+    2. Discarding candidates with a residual 1 - F(x) >= epsilon.
+    3. Merging candidates that are close to each other (distance <= delta),
+       retaining only the candidate with the highest F(x) value.
 
     Parameters
     ----------
     candidates : numpy.ndarray or list
-        Daftar titik kandidat akar hasil dari fase optimasi.
+        List of candidate root points resulting from the optimization phase.
     equations : list of callable
-        Daftar fungsi sistem persamaan non-linear.
+        A list of functions representing the system of nonlinear equations.
     domain : list of tuple
-        Batasan domain global dalam format [(min, max), ...].
+        The global search space boundaries in the format [(min, max), ...].
     epsilon : float
-        Nilai toleransi akurasi akar. Kandidat diterima jika 1 - F(x) < epsilon.
+        Tolerance value for root accuracy. Candidates are accepted if 1 - F(x) < epsilon.
     delta : float
-        Batas jarak minimum antar akar yang berbeda (radius ekuivalensi).
+        Minimum distance boundary between distinct roots (equivalence radius).
 
     Returns
     -------
     numpy.ndarray
-        Array berisi titik-titik akar final yang telah tervalidasi dan unik.
+        Array containing the final validated and unique root points.
     """
-    # Filter 1: Validasi domain dan nilai threshold epsilon
+    # Filter 1: Validate domain and epsilon threshold value
     accurate_candidates = []
     for cand in candidates:
         if not is_in_domain(cand, domain):
@@ -110,21 +110,21 @@ def select_final_roots(candidates, equations, domain, epsilon, delta):
     if not accurate_candidates:
         return np.array([])
 
-    # Filter 2: Eliminasi kandidat berdekatan (berdasarkan delta)
-    # Urutkan secara descending berdasarkan nilai F_val agar akar 
-    # dengan akurasi tertinggi selalu dievaluasi lebih dulu.
+    # Filter 2: Eliminate adjacent candidates (based on delta)
+    # Sort in descending order based on F_val so that the root 
+    # with the highest accuracy is always evaluated first.
     accurate_candidates.sort(key=lambda x: x[1], reverse=True)
     
     final_roots = []
 
-    # bagian ke bawah ada sedikit perubahan dengan main code
+    # the section below contains slight modifications from the main code
     for cand, F_val in accurate_candidates:
         found_close = False
         for existing, _ in final_roots:
             distance = np.linalg.norm(cand - existing)
             if distance <= delta:
                 found_close = True
-                break  # Langsung buang cand karena existing pasti lebih baik (hasil sorting)
+                break  # Immediately discard the candidate because the existing one is guaranteed to be better (due to sorting)
                 
         if not found_close:
             final_roots.append((cand, F_val))
@@ -134,62 +134,62 @@ def select_final_roots(candidates, equations, domain, epsilon, delta):
 
 def solve_system(equations, domain, params, verbose=False):
     """
-    Menyelesaikan sistem persamaan non-linear menggunakan integrasi 
-    Spiral Dynamics Inspired Optimization (SDOA) dan metode Clustering.
+    Solves a system of nonlinear equations using the integration of
+    Spiral Dynamics Inspired Optimization (SDOA) and the Clustering method.
     
-    Fungsi ini mengeksekusi pipeline utuh yang terdiri dari tiga fase:
-    1. Fase Clustering: Melokalisasi area akar potensial.
-    2. Fase Optimasi: Menjalankan SDOA pada setiap cluster.
-    3. Fase Seleksi: Menyaring dan memvalidasi akar akhir yang unik.
+    This function executes an entire pipeline consisting of three phases:
+    1. Clustering Phase: Localizes potential root areas.
+    2. Optimization Phase: Runs SDOA on each cluster.
+    3. Selection Phase: Filters and validates the unique final roots.
 
     Parameters
     ----------
     equations : list of callable
-        Daftar fungsi sistem persamaan non-linear f_i(x).
+        A list of functions representing the nonlinear equation system f_i(x).
     domain : list of tuple
-        Batas ruang pencarian dalam format [(min, max), (min, max), ...].
+        The search space boundaries in the format [(min, max), (min, max), ...].
     params : dict
-        Kamus (dictionary) yang memuat seluruh hyperparameter algoritma 
+        Dictionary containing all hyperparameters for the algorithm
         (epsilon, delta, gamma, m_cluster, k_cluster, sdoa_m, sdoa_k_max, r, theta).
     verbose : bool, optional
-        Jika True, mencetak informasi waktu eksekusi dan jumlah cluster (default: False).
+        If True, prints execution time and the number of clusters found (default: False).
 
     Returns
     -------
     dict
-        Kamus berisi hasil eksekusi dengan kunci:
-        - 'roots': numpy.ndarray dari akar-akar yang tervalidasi.
-        - 'clusters': list objek Cluster yang ditemukan pada Fase 1.
-        - 'time_elapsed': float waktu komputasi dalam detik.
+        Dictionary containing the execution results with the keys:
+        - 'roots': numpy.ndarray of the validated roots.
+        - 'clusters': list of Cluster objects found in Phase 1.
+        - 'time_elapsed': float representing the computation time in seconds.
     """
     start_time = time.time()
 
-    # Ekstrak parameter khusus SDOA
+    # Extract SDOA-specific parameters
     sdoa_params = {
         'm': params['sdoa_m'],
-        'r': params['r'],  # Menggunakan parameter 'r' dari kamus utama
+        'r': params['r'],  # Uses the 'r' parameter from the main dictionary
         'theta': params['theta'],
         'k_max': params['sdoa_k_max']
     }
     epsilon = params['epsilon']
 
-    # FASE 1: Iterative Clustering
+    # PHASE 1: Iterative Clustering
     clusters = perform_iterative_clustering(equations, domain, params)
     
-    # FASE 2: SDOA pada setiap cluster
+    # PHASE 2: SDOA on each cluster
     candidates = run_sdoa_on_clusters(clusters, equations, domain, sdoa_params, epsilon)
     
-    # FASE 3: Seleksi dan Validasi Akhir
+    # PHASE 3: Final Selection and Validation
     final_roots = select_final_roots(candidates, equations, domain, epsilon, params['delta'])
     
-    # Validasi residual untuk memastikan keakuratan (opsional, tergantung implementasimu)
+    # Residual validation to ensure accuracy (optional, depending on implementation)
     valid_roots = validate_solutions(final_roots, equations, domain, epsilon)
 
     elapsed_time = time.time() - start_time
 
     if verbose:
-        print(f"Pencarian selesai dalam {elapsed_time:.3f} detik.")
-        print(f"Ditemukan {len(clusters)} cluster dan {len(valid_roots)} akar valid.")
+        print(f"Search completed in {elapsed_time:.3f} seconds.")
+        print(f"Found {len(clusters)} clusters and {len(valid_roots)} valid roots.")
 
     return {
         'roots': np.array(valid_roots),

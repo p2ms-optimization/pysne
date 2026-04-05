@@ -74,8 +74,8 @@ def test_problem(problem_id: int, verbose: bool = True) -> Dict[str, Any]:
         delta = params.get('delta', 0.01)
         
         if verbose:
-            print(f"[STEP 1] Memuat Problem {problem_id}")
-            print(f"Target: Mencari {expected_roots} akar solusi.")
+            print(f"[STEP 1] Loading Problem {problem_id}")
+            print(f"Target: Finding {expected_roots} solution roots.")
         
         start_time = time.time()
         
@@ -96,11 +96,11 @@ def test_problem(problem_id: int, verbose: bool = True) -> Dict[str, Any]:
         result['roots_found'] = len(final_roots)
         
         if verbose:
-            print(f"\n[STEP 2] Menjalankan Iterative Clustering...")
-            print(f"Ditemukan {len(clusters)} wilayah potensial (clusters).")
-            print(f"\n[STEP 3] Menjalankan SDOA pada setiap cluster...")
-            print(f"Dihasilkan {len(final_roots)} kandidat titik dari SDOA.")
-            print(f"\n[STEP 4] Melakukan seleksi akhir dan eliminasi duplikat...")
+            print(f"\n[STEP 2] Running Iterative Clustering...")
+            print(f"Found {len(clusters)} potential regions (clusters).")
+            print(f"\n[STEP 3] Running SDOA on each cluster...")
+            print(f"Generated {len(final_roots)} candidate points from SDOA.")
+            print(f"\n[STEP 4] Performing final selection and duplicate elimination...")
         
         # === DETERMINE SUCCESS ===
         success_rate = len(final_roots) / expected_roots if expected_roots > 0 else 0
@@ -115,33 +115,33 @@ def test_problem(problem_id: int, verbose: bool = True) -> Dict[str, Any]:
         
         if verbose:
             # === DISPLAY RESULTS ===
-            print("\n" + "="*20 + " RINGKASAN HASIL " + "="*20)
-            print(f"Waktu Eksekusi   : {elapsed_time:.2f} detik")
-            print(f"Akar Diharapkan  : {expected_roots}")
-            print(f"Akar Ditemukan   : {len(final_roots)}")
+            print("\n" + "="*20 + " RESULT SUMMARY " + "="*20)
+            print(f"Execution Time   : {elapsed_time:.2f} seconds")
+            print(f"Expected Roots   : {expected_roots}")
+            print(f"Roots Found      : {len(final_roots)}")
             
             if len(final_roots) > 0:
-                print("\nDaftar Akar yang Ditemukan:")
+                print("\nList of Found Roots:")
                 for i, root in enumerate(final_roots):
                     fitness = objective_function(root, equations)
                     residual = 1.0 - fitness
-                    print(f"  Akar {i+1}: {root.round(6)} | Residu: {residual:.2e}")
+                    print(f"  Root {i+1}: {root.round(6)} | Residual: {residual:.2e}")
             
             # === STATUS ===
             if len(final_roots) == expected_roots:
-                print("\n[STATUS]: SUKSES! Seluruh akar ditemukan dengan presisi tinggi.")
+                print("\n[STATUS]: SUCCESS! All roots found with high precision.")
             elif len(final_roots) > expected_roots:
-                print("\n[STATUS]: WARNING! Ditemukan lebih banyak titik (mungkin delta terlalu kecil).")
+                print("\n[STATUS]: WARNING! Found more points (delta might be too small).")
             elif len(final_roots) >= expected_roots * 0.8:
-                print(f"\n[STATUS]: BERHASIL! Ditemukan {len(final_roots)}/{expected_roots} akar ({100*len(final_roots)/expected_roots:.0f}%).")
+                print(f"\n[STATUS]: SUCCESS! Found {len(final_roots)}/{expected_roots} roots ({100*len(final_roots)/expected_roots:.0f}%).")
             else:
-                print("\n[STATUS]: GAGAL! Beberapa akar terlewat. Perlu tuning parameter.")
+                print("\n[STATUS]: FAILED! Some roots missed. Needs parameter tuning.")
     
     except Exception as e:
         result['success'] = False
         result['error'] = str(e)
         if verbose:
-            print(f"\n[ERROR]: Terjadi kegagalan sistem: {e}")
+            print(f"\n[ERROR]: System failure occurred: {e}")
             import traceback
             traceback.print_exc()
     
