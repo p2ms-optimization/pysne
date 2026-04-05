@@ -14,7 +14,12 @@ release = '0.1.0'
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = []
+extensions = [
+    'sphinx.ext.autodoc',      # Mengambil docstring dari kode
+    'sphinx.ext.napoleon',     # Mendukung format Google/NumPy docstrings
+    'sphinx.ext.viewcode',     # Menampilkan link ke source code asli
+    'sphinx.ext.mathjax',      # Merender persamaan LaTeX (Penting untuk TA Anda!)
+]
 
 templates_path = ['_templates']
 exclude_patterns = []

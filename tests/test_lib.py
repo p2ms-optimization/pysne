@@ -3,7 +3,7 @@ import time
 import sys
 from typing import Dict, List, Tuple, Any
 
-from problems.benchmarks import get_problem_set
+from pysne.problems.benchmarks import get_problem_set
 from pysne.utils import objective_function, validate_solutions
 from pysne.clustering.clustering_process import perform_iterative_clustering
 from pysne.optimizers import run_sdoa_on_clusters, select_final_roots

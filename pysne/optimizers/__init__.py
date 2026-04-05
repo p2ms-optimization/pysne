@@ -1,8 +1,8 @@
 import numpy as np
-# from clustering.dynamic import perform_iterative_clustering
-from .sdoa.engine import spiral_dynamics_optimization
-from initialization.sampling import generate_sobol_points
-from utils import objective_function, is_in_domain
+# from pysne.clustering.clustering_process import perform_iterative_clustering
+from pysne.sdoa.engine import spiral_dynamics_optimization
+from pysne.initialization.sampling import generate_sobol_points
+from pysne.utils import objective_function, is_in_domain
 
 def run_sdoa_on_clusters(clusters, equations, domain, sdoa_params, epsilon):
     """Jalankan SDOA pada setiap cluster dengan early stopping."""

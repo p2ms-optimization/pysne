@@ -19,9 +19,9 @@ from typing import Dict, List, Any
 # IMPORTS
 # ============================================================================
 
-from problems.benchmarks import get_problem_set
-from utils import objective_function, validate_solutions
-from solver import solve_system
+from pysne.problems.benchmarks import get_problem_set
+from pysne.utils import objective_function, validate_solutions
+from pysne.solver import solve_system
 
 
 # ============================================================================

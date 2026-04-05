@@ -2,7 +2,7 @@
 
 import numpy as np
 from .matrix import get_rotation_matrix
-from utils import is_in_domain
+from pysne.utils import is_in_domain
 from scipy.stats import qmc
 
 def spiral_dynamics_optimization(objective_func, domain, params, minimization=False,

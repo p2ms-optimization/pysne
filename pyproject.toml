@@ -10,7 +10,8 @@ readme = "README.md"
 requires-python = ">=3.8"
 license = { text = "MIT License" }
 authors = [
-    { name = "", email = "" }
+    { name = "Aldy Nugraha Hermawan", email = "aldynugrahahermawan1702@gmail.com" },
+    { name = "Azarya Benhanan Isriyanto", email = "azaryaben@gmail.com" }
 ]
 keywords = ["optimization", "nonlinear-equations", "sdoa", "clustering", "numerical-methods", "sobol-sequence"]
 classifiers = [
@@ -30,6 +31,10 @@ dependencies = [
     "numpy>=1.20.0",
     "scipy>=1.7.0"
 ]
+
+[tool.setuptools]
+# Ini kuncinya: Hanya anggap folder 'pysne' sebagai paket library
+packages = ["pysne", "pysne.clustering", "pysne.initialization", "pysne.optimizers", "pysne.problems"]
 
 [project.urls]
 "Homepage" = "https://github.com/p2ms-optimization/pysne"
