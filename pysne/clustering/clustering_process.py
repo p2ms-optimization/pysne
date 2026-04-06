@@ -1,7 +1,7 @@
 import numpy as np
 from typing import List, Dict, Any, Tuple, Callable
 from .model import Cluster
-from ..utils import objective_function
+from ..utils import objective_function, is_in_domain
 from ..initialization.sampling import generate_sobol_points
 from ..optimizers.sdoa.matrix import get_rotation_matrix
 
@@ -138,6 +138,10 @@ def perform_iterative_clustering(
     for k in range(k_cluster):
         # Process points for clustering
         for i in range(m_cluster):
+            # Dismiss points outside of the domain
+            if not is_in_domain(points[i], domain):
+                continue
+            
             F_val = objective_function(points[i], equations)
             if F_val > gamma:
                 is_center = any(np.allclose(points[i], cluster.center, atol=1e-8) for cluster in clusters)
