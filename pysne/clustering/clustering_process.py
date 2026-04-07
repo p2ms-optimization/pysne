@@ -44,7 +44,7 @@ def process_point_for_clustering(
 
     # Initialize the first cluster if the list is empty
     if not clusters:
-        initial_radius = 0.1 * min(hi - lo for lo, hi in domain)
+        initial_radius = 0.5 * min(hi - lo for lo, hi in domain)
         clusters.append(Cluster(y, initial_radius))
         return clusters
 
