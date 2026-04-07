@@ -18,7 +18,7 @@ def test_integration_run():
     try:
         # 1. Import Problem
         problems = get_problem_set()
-        problem_id = 2
+        problem_id = 1
         equations, domain, params, expected_roots = problems[problem_id]()
         epsilon = params.get('epsilon', 1e-7)
         delta = params.get('delta', 0.01)
