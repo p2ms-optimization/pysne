@@ -8,9 +8,10 @@ from ..optimizers.sdoa.matrix import get_rotation_matrix
 def process_point_for_clustering(
     y: np.ndarray, 
     clusters: List[Cluster], 
-    equations: List[Callable], 
+    # equations: List[Callable], 
     gamma: float, 
-    domain: List[Tuple[float, float]]
+    problem 
+    # domain: List[Tuple[float, float]]
 ) -> List[Cluster]:
     """
     Evaluates a single coordinate point to determine its cluster assignment or if it should form a new cluster based on the objective function landscape.
@@ -37,14 +38,15 @@ def process_point_for_clustering(
     list of Cluster
         The updated list of clusters after processing the point `y`.
     """
-    F_y = objective_function(y, equations)
+    # F_y = objective_function(y, equations)
+    F_y = problem.evaluate_fitness(y)
 
     if F_y <= gamma:
         return clusters
 
     # Initialize the first cluster if the list is empty
     if not clusters:
-        initial_radius = 0.5 * min(hi - lo for lo, hi in domain)
+        initial_radius = 0.5 * min(hi - lo for lo, hi in problem.domain)
         clusters.append(Cluster(y, initial_radius))
         return clusters
 
@@ -59,9 +61,11 @@ def process_point_for_clustering(
 
     # Mid-point Check Logic
     x_C = nearest_cluster.center
-    F_xC = objective_function(x_C, equations)
+    # F_xC = objective_function(x_C, equations)
+    F_xC = problem.evaluate_fitness(x_C)
     x_t = (y + x_C) / 2.0
-    F_xt = objective_function(x_t, equations)
+    # F_xt = objective_function(x_t, equations)
+    F_xt = problem.evaluate_fitness(x_t)
 
     # Clustering Logic
     if F_xt < F_y and F_xt < F_xC:
@@ -72,7 +76,8 @@ def process_point_for_clustering(
         # Case 2: Midpoint is a better peak; form a new cluster and recurse
         new_radius = np.linalg.norm(y - x_t)
         clusters.append(Cluster(y, new_radius))
-        clusters = process_point_for_clustering(x_t, clusters, equations, gamma, domain)
+        # clusters = process_point_for_clustering(x_t, clusters, equations, gamma, domain)
+        clusters = process_point_for_clustering(x_t, clusters, problem, gamma)
     elif F_y > F_xC:
         # Case 3: Update center as y is closer to the root's peak
         nearest_cluster.center = y.copy()
@@ -84,8 +89,9 @@ def process_point_for_clustering(
     return clusters
 
 def perform_iterative_clustering(
-    equations: List[Callable], 
-    domain: List[Tuple[float, float]], 
+    # equations: List[Callable], 
+    # domain: List[Tuple[float, float]],
+    problem, 
     params: Dict[str, Any]
 ) -> List[Cluster]:
     """
@@ -110,12 +116,20 @@ def perform_iterative_clustering(
         A list of distinct Cluster objects representing the neighborhoods of potential roots found in the search space.
     """
     # Parameter Extraction
-    m_cluster = int(params.get('m_cluster', 200))
-    gamma = float(params.get('gamma', 0.1))
-    k_cluster = int(params.get('k_cluster', 10))
-    r = float(params.get('r', 0.95))
-    theta = float(params.get('theta', np.pi/4))
-    n = len(domain)
+    # m_cluster = int(params.get('m_cluster', 200))
+    m_cluster = params['m_cluster']
+    # gamma = float(params.get('gamma', 0.1))
+    gamma = params.get('gamma', -float('inf'))
+    # k_cluster = int(params.get('k_cluster', 10))
+    k_cluster = params['k_cluster']
+    # r = float(params.get('r', 0.95))
+    r = params.get('r_cl', 0.95)
+    # theta = float(params.get('theta', np.pi/4))
+    theta = params.get('theta_cl', np.pi/4)
+    # n = len(domain)
+
+    n = problem.n_var
+    domain = problem.domain
 
     # 1. Initialize Points Using Sobol Sequence
     points = generate_sobol_points(m_cluster, n, domain)
@@ -127,7 +141,8 @@ def perform_iterative_clustering(
 
     # 3. Initialize First Cluster based on the current Best Point
     clusters: List[Cluster] = []
-    F_values = np.array([objective_function(p, equations) for p in points])
+    # F_values = np.array([objective_function(p, equations) for p in points])
+    F_values = np.array([problem.evaluate_fitness(p) for p in points])
     best_idx = np.argmax(F_values)
     
     x_prime = points[best_idx].copy()
@@ -142,14 +157,17 @@ def perform_iterative_clustering(
             if not is_in_domain(points[i], domain):
                 continue
             
-            F_val = objective_function(points[i], equations)
+            # F_val = objective_function(points[i], equations)
+            F_val = problem.evaluate_fitness(points[i])
             if F_val > gamma:
                 is_center = any(np.allclose(points[i], cluster.center, atol=1e-8) for cluster in clusters)
                 if not is_center:
-                    clusters = process_point_for_clustering(points[i], clusters, equations, gamma, domain)
+                    # clusters = process_point_for_clustering(points[i], clusters, equations, gamma, domain)
+                    clusters = process_point_for_clustering(points[i], clusters, problem, gamma)
 
         # Update points using spiral dynamics
-        F_values = np.array([objective_function(p, equations) for p in points])
+        # F_values = np.array([objective_function(p, equations) for p in points])
+        F_values = np.array([problem.evaluate_fitness(p) for p in points])
         best_idx = np.argmax(F_values)
         x_p = points[best_idx].copy()
 
