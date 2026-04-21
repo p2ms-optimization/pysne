@@ -40,10 +40,10 @@ def run_sdoa_on_clusters(clusters, problem, params):
 
     # Ambil parameter khusus SDOA
     sdoa_params = {
-        'm': params['sdoa_m'],
-        'r': params['r'], 
-        'theta': params['theta'],
-        'k_max': params['sdoa_k_max']
+        'm': params.get('sdoa_m', params.get('m', 20)),
+        'r': params.get('sdoa_r', params.get('r', 0.95)), 
+        'theta': params.get('sdoa_r', params.get('r', 0.95)),
+        'k_max': params.get('sdoa_k_max', params.get('k_max', 100))
     }
 
     epsilon = params.get('epsilon', 1e-7)
@@ -82,7 +82,7 @@ def run_sdoa_on_clusters(clusters, problem, params):
             minimization=False, 
             custom_initial_points=initial_points,
             # equations=equations, 
-            equations=problem.equations if is_sne else None
+            equations=problem.equations if is_sne else None,
             epsilon=epsilon
         )
 
@@ -218,10 +218,10 @@ def solve_system(problem, params, verbose=False):
 
     if verbose:
         print(f"Search completed in {elapsed_time:.3f} seconds.")
-        print(f"Found {len(clusters)} clusters and {len(valid_roots)} valid roots.")
+        print(f"Found {len(clusters)} clusters and {len(final_roots)} valid roots.")
 
     return {
-        'roots': np.array(valid_roots),
+        'roots': np.array(final_roots),
         'clusters': clusters,
         'time_elapsed': elapsed_time
     }
