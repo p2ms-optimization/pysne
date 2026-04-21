@@ -9,8 +9,8 @@ def process_point_for_clustering(
     y: np.ndarray, 
     clusters: List[Cluster], 
     # equations: List[Callable], 
-    gamma: float, 
-    problem 
+    problem,
+    gamma: float
     # domain: List[Tuple[float, float]]
 ) -> List[Cluster]:
     """
