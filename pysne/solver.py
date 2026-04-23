@@ -42,7 +42,7 @@ def run_sdoa_on_clusters(clusters, problem, params):
     sdoa_params = {
         'm': params.get('sdoa_m', params.get('m', 20)),
         'r': params.get('sdoa_r', params.get('r', 0.95)), 
-        'theta': params.get('sdoa_r', params.get('r', 0.95)),
+        'theta': params.get('sdoa_theta', params.get('theta', np.pi/4)),
         'k_max': params.get('sdoa_k_max', params.get('k_max', 100))
     }
 
