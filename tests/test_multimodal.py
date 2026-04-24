@@ -184,7 +184,7 @@ def test_multimodal_problem(
             print("\nList of MINIMA Points:")
             for i, root in enumerate(final_min):
                 # print(f"  Min {i+1}: {root.round(6)} | g(x): {g_func(root):.6f}")
-                print(f" Min {i+1}: {root.round(6)} | g(x): {prob.evaluate_fitness(root)}")
+                print(f" Min {i+1}: {root.round(9)} | g(x): {prob.evaluate_fitness(root)}")
                 
             print("\n[STATUS]: SUCCESS! Multimodal analysis complete.")
 
