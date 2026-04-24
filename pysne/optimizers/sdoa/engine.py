@@ -49,7 +49,12 @@ def spiral_dynamics_optimization(objective_func, domain, params, minimization=Fa
     I_n = np.identity(n)
 
     # Initialize best solution
-    best_values = np.array(objective_func(search_points))
+    try:
+        best_values = np.array(objective_func(search_points))
+        if best_values.shape != (m,):
+            raise ValueError("Shape mismatch")
+    except:
+        best_values = np.array([objective_func(p) for p in search_points])
     best_idx = np.argmin(best_values) if minimization else np.argmax(best_values)
     x_star = search_points[best_idx].copy()
     best_value = best_values[best_idx]
@@ -72,8 +77,17 @@ def spiral_dynamics_optimization(objective_func, domain, params, minimization=Fa
         search_points = search_points @ S_n.T - term2
 
         # Evaluate all points
-        # current_values = np.array([objective_func(point) for point in search_points])
-        current_values = np.array(objective_func(search_points))
+        try:
+            # Vectorized
+            current_values = np.array(objective_func(search_points))
+            
+            # Validasi aman: jika shape kacau akibat persamaan SNE yang tidak mendukung 2D
+            if current_values.shape != (m,):
+                raise ValueError("Shape mismatch")
+        except:
+            # list comprehension
+            current_values = np.array([objective_func(point) for point in search_points])
+
 
         # Update best solution
         # if minimization:
