@@ -3,10 +3,10 @@ import time
 import sys
 from typing import Dict, List, Tuple, Any
 
-from pysne.problems.benchmarks import get_problem_set
+from pysne.problems.benchmarks_sne import get_problem_set
 from pysne.utils import objective_function, validate_solutions
 from pysne.clustering.clustering_process import perform_iterative_clustering
-from pysne.solver import solve_system, run_sdoa_on_clusters, select_final_roots
+from pysne.solver import solve_system, run_sdoa_on_clusters
 
 
 
@@ -18,8 +18,10 @@ def test_integration_run():
     try:
         # 1. Import Problem
         problems = get_problem_set()
-        problem_id = 1
-        equations, domain, params, expected_roots = problems[problem_id]()
+        problem_id = 4
+        problem = problems[problem_id]()
+        domain, params = problem.get_info()
+        expected_roots = params.get('expected_roots', 0)
         epsilon = params.get('epsilon', 1e-7)
         delta = params.get('delta', 0.01)
         
@@ -29,7 +31,7 @@ def test_integration_run():
 
         # 2. Clustering Phase
         print("\n[STEP 2] Running Iterative Clustering...")
-        clusters = perform_iterative_clustering(equations, domain, params)
+        clusters = perform_iterative_clustering(problem, params)
         print(f"Found {len(clusters)} potential regions (clusters).")
 
         # 3. SDOA Phase (Local Optimization)
@@ -40,13 +42,13 @@ def test_integration_run():
             'theta': params.get('sdoa_theta', np.pi/4),
             'k_max': params.get('sdoa_k_max', 200)
         }
-        candidates = run_sdoa_on_clusters(clusters, equations, domain, sdoa_params, epsilon)
+        candidates = run_sdoa_on_clusters(clusters, problem, params)
         print(f"Generated {len(candidates)} candidate points from SDOA.")
 
         # 4. Selection & Validation Phase
         print("\n[STEP 4] Performing final selection and duplicate elimination...")
-        raw_roots = select_final_roots(candidates, equations, domain, epsilon, delta)
-        final_roots = validate_solutions(raw_roots, equations, domain, epsilon)
+        raw_roots = problem.select_final_roots(candidates)
+        final_roots = validate_solutions(raw_roots, problem.equations, domain, epsilon)
         
         elapsed = time.time() - start_time
 
@@ -59,7 +61,7 @@ def test_integration_run():
         if len(final_roots) > 0:
             print("\nList of Found Roots:")
             for i, root in enumerate(final_roots):
-                fitness = objective_function(root, equations)
+                fitness = problem.evaluate_fitness(root)
                 print(f"  Root {i+1}: {root.round(6)} | Residual: {1.0-fitness:.2e}")
 
         # Final Evaluation
