@@ -73,8 +73,11 @@ def spiral_dynamics_optimization(objective_func, domain, params, minimization=Fa
         # search_points = new_search_points
 
         # Update all search points (Vectorized version)
-        term2 = (S_n - I_n) @ x_star
-        search_points = search_points @ S_n.T - term2
+        # term2 = (S_n - I_n) @ x_star
+        # search_points = search_points @ S_n.T - term2
+        term1 = search_points @ S_n.T  # (m, n) @ (n, n) = (m, n)
+        term2 = (S_n - I_n) @ x_star   # (n,)
+        search_points = term1 - term2  # Broadcasting benar
 
         # Evaluate all points
         try:
