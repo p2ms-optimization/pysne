@@ -10,7 +10,8 @@ def process_point_for_clustering(
     clusters: List[Cluster], 
     # equations: List[Callable], 
     problem,
-    gamma: float
+    gamma: float,
+    history: List[Dict[str, Any]] = None
     # domain: List[Tuple[float, float]]
 ) -> List[Cluster]:
     """
@@ -48,6 +49,10 @@ def process_point_for_clustering(
     if not clusters:
         initial_radius = 0.5 * min(hi - lo for lo, hi in problem.domain)
         clusters.append(Cluster(y, initial_radius))
+        if history is not None:
+            history.append({
+                'case': 'Init', 'y': y.copy(), 'center': y.copy(), 'radius': initial_radius, 'F_y': F_y
+            })
         return clusters
 
     # Nearest Cluster Search
@@ -68,23 +73,38 @@ def process_point_for_clustering(
     F_xt = problem.evaluate_fitness(x_t)
 
     # Clustering Logic
+    dist_y_xt = np.linalg.norm(y - x_t)
+    case_triggered = None
     if F_xt < F_y and F_xt < F_xC:
         # Case 1: Valley between points; form a new cluster
-        new_radius = np.linalg.norm(y - x_t)
-        clusters.append(Cluster(y, new_radius))
+        case_triggered = 'Case 1 (Valley)'
+        clusters.append(Cluster(y.copy(), dist_y_xt))
     elif F_xt > F_y and F_xt > F_xC:
         # Case 2: Midpoint is a better peak; form a new cluster and recurse
-        new_radius = np.linalg.norm(y - x_t)
-        clusters.append(Cluster(y, new_radius))
+        case_triggered = 'Case 2 (Mid better)'
+        clusters.append(Cluster(y.copy(), dist_y_xt))
         # clusters = process_point_for_clustering(x_t, clusters, equations, gamma, domain)
-        clusters = process_point_for_clustering(x_t, clusters, problem, gamma)
+        clusters = process_point_for_clustering(x_t, clusters, problem, gamma, history)
     elif F_y > F_xC:
         # Case 3: Update center as y is closer to the root's peak
+        case_triggered = 'Case 3 (Update Center)'
         nearest_cluster.center = y.copy()
-        nearest_cluster.radius = np.linalg.norm(y - x_t)
     else:
-        # Case 4: x_C remains the best center; just update the radius
-        nearest_cluster.radius = np.linalg.norm(y - x_t)
+        case_triggered = 'None (Only radius updated)'
+        
+    nearest_cluster.radius = dist_y_xt
+
+    if history is not None and case_triggered is not None:
+        history.append({
+            'case': case_triggered,
+            'y': y.copy(),
+            'x_C': x_C.copy(),
+            'x_t': x_t.copy(),
+            'dist': dist_y_xt,
+            'F_y': F_y,
+            'F_xC': F_xC,
+            'F_xt': F_xt
+        })
 
     return clusters
 
@@ -92,7 +112,8 @@ def perform_iterative_clustering(
     # equations: List[Callable], 
     # domain: List[Tuple[float, float]],
     problem, 
-    params: Dict[str, Any]
+    params: Dict[str, Any],
+    history: List[Dict[str, Any]] = None
 ) -> List[Cluster]:
     """
     Executes the main iterative clustering phase to identify all potential root regions within the bounded domain.
@@ -151,6 +172,9 @@ def perform_iterative_clustering(
 
     # 4. Main clustering loop
     for k in range(k_cluster):
+        F_values = np.array([problem.evaluate_fitness(p) for p in points])
+        F_best = np.max(F_values)
+        
         # Process points for clustering
         for i in range(m_cluster):
             # Dismiss points outside of the domain
@@ -159,11 +183,21 @@ def perform_iterative_clustering(
             
             # F_val = objective_function(points[i], equations)
             F_val = problem.evaluate_fitness(points[i])
-            if F_val > gamma:
+            is_sne = getattr(problem, 'problem_type', None) == 'SNE'
+            
+            if is_sne:
+                cutoff = gamma
+            else:
+                if gamma != -float('inf') and gamma is not None:
+                    cutoff = gamma * F_best if F_best > 0 else gamma
+                else:
+                    cutoff = -float('inf')
+                    
+            if F_val > cutoff:
                 is_center = any(np.allclose(points[i], cluster.center, atol=1e-8) for cluster in clusters)
                 if not is_center:
                     # clusters = process_point_for_clustering(points[i], clusters, equations, gamma, domain)
-                    clusters = process_point_for_clustering(points[i], clusters, problem, gamma)
+                    clusters = process_point_for_clustering(points[i], clusters, problem, cutoff, history)
 
         # Update points using spiral dynamics
         # F_values = np.array([objective_function(p, equations) for p in points])
