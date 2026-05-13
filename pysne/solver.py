@@ -64,6 +64,11 @@ def run_sdoa_on_clusters(clusters, problem, params):
             cluster_hi = min(domain[dim][1], cluster.center[dim] + cluster.radius)
             cluster_domain.append((cluster_lo, cluster_hi))
 
+        # Skip degenerate domains
+        if any(hi - lo < 1e-12 for lo, hi in cluster_domain):
+            candidates.append(cluster.center.copy())
+            continue
+
         # Generate initial points in cluster domain
         initial_points = generate_sobol_points(sdoa_params['m'], len(domain), cluster_domain)
 
