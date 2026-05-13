@@ -19,7 +19,7 @@ def test_multimodal_pipeline_execution():
     problems = get_multimodal_problems()
     
     # 2. Inisialisasi Problem 2 (Six Hump Camel Back)
-    # Gunakan problem ini karena fungsi polinomialnya dievaluasi sangat cepat
+    # Problem yang digunakan
     prob2 = problems[3]()
     
     # 3. Ambil domain dan parameter asli
@@ -37,15 +37,9 @@ def test_multimodal_pipeline_execution():
 
     # 5. Eksekusi fungsi utama
     # Pastikan solve_multimodal menerima (objective_function, domain, params)
-    # roots = solve_multimodal(prob2.g_func, domain, test_params)
-
     result = solve_system(prob2, test_params, verbose=True)
 
     # 6. Assertions
-    # assert roots is not None, "Output solver tidak boleh None"
-    # assert isinstance(roots, (np.ndarray, list)), "Output harus berupa Numpy array atau list"
-    # assert len(roots) > 0, f"Harus menemukan setidaknya satu optima untuk {prob2.name}"
-
     assert result is not None, "Output solver tidak boleh None"
     assert 'roots' in result, "Hasil harus mengandung key 'roots'"
 
@@ -53,7 +47,7 @@ def test_multimodal_pipeline_execution():
     assert isinstance(roots, np.ndarray), "Output roots harus berupa numpy array"
     assert len(roots) > 0, f"Harus menemukan setidaknya satu optima untuk {prob2.name}"
 
-    # Print hasil untuk verifikasi manual saat running dengan -s
+    # Print hasil untuk verifikasi
     print(f"\n[TEST RESULT] Found {len(roots)} optima for {prob2.name}")
 
 # if __name__ == "__main__":
@@ -95,23 +89,10 @@ def test_multimodal_problem(
         if verbose:
             print(f"\n[STEP 1] Loading Problem {problem_id} (Multimodal)")
         
+        print(f"info parameter: {prob.get_info()}")
         # Using solve_system
         res_max = solve_system(prob, prob.get_info()[1], verbose=verbose)
         final_max = res_max['roots']
-        
-        # if verbose:
-        #     print("\n[STEP 2] Running Iterative Clustering (Maxima)...")
-        # clusters_max = perform_iterative_clustering(g_func, domain, params)
-        # if verbose:
-        #     print(f"Found {len(clusters_max)} potential regions (clusters).")
-
-        # if verbose:
-        #     print("\n[STEP 3] Running SDOA on each cluster (Maxima)...")
-        # candidates_max = run_sdoa_on_clusters(clusters_max, g_func, domain, params)
-        
-        # if verbose:
-        #     print("\n[STEP 4] Polishing final Maxima solutions...")
-        # final_max = select_final_roots(candidates_max, g_func, domain, params)
 
         # ===============================================
         # 2. FIND MINIMA
@@ -119,7 +100,7 @@ def test_multimodal_problem(
         if verbose:
             print("\n[STEP 2] Running Universal Solver (Finding Minima)...")
         
-        # Kita buat class sementara untuk membalik fitness (Minimization)
+        # Buat class sementara untuk membalik fitness (Minimization)
         class MinimizedProblem:
             def __init__(self, original_prob):
                 self.original = original_prob
@@ -141,26 +122,6 @@ def test_multimodal_problem(
         prob_min = MinimizedProblem(prob)
         res_min = solve_system(prob_min, prob.get_info()[1], verbose=verbose)
         final_min = res_min['roots']
-
-        # def neg_g_func(x):
-        #     try:
-        #         return -g_func(x)
-        #     except:
-        #         return np.array([-g_func(p) for p in np.atleast_2d(x)])
-
-        # if verbose:
-        #     print("\n[STEP 5] Running Iterative Clustering (Minima)...")
-        # clusters_min = perform_iterative_clustering(neg_g_func, domain, params)
-        # if verbose:
-        #     print(f"Found {len(clusters_min)} potential regions (clusters).")
-
-        # if verbose:
-        #     print("\n[STEP 6] Running SDOA on each cluster (Minima)...")
-        # candidates_min = run_sdoa_on_clusters(clusters_min, neg_g_func, domain, params)
-        
-        # if verbose:
-        #     print("\n[STEP 7] Polishing final Minima solutions...")
-        # final_min = select_final_roots(candidates_min, neg_g_func, domain, params)
 
         # ===============================================
         # 3. CONSOLIDATE RESULTS
@@ -199,7 +160,7 @@ def test_multimodal_problem(
 
 def test_all_multimodal_problems(problem_ids: list = None, show_details: bool = False):
     if problem_ids is None:
-        problem_ids = [1, 2, 3]
+        problem_ids = [1, 2, 3, 4, 5, 6]
         
     print("="*60)
     print("PYSNE MULTIMODAL COMPREHENSIVE TEST")
