@@ -64,27 +64,31 @@ def process_point_for_clustering(
             min_dist = dist
             nearest_cluster = cluster
 
-    # Mid-point Check Logic
+    # Multi-point Check Logic (25%, 50%, 75%)
     x_C = nearest_cluster.center
-    # F_xC = objective_function(x_C, equations)
     F_xC = problem.evaluate_fitness(x_C)
-    x_t = (y + x_C) / 2.0
-    # F_xt = objective_function(x_t, equations)
-    F_xt = problem.evaluate_fitness(x_t)
+    
+    t_vals = [0.25, 0.5, 0.75]
+    x_ts = [y + t * (x_C - y) for t in t_vals]
+    F_xts = [problem.evaluate_fitness(xt) for xt in x_ts]
+    
+    F_xt_min = min(F_xts)
+    F_xt_max = max(F_xts)
 
     # Clustering Logic
-    dist_y_xt = np.linalg.norm(y - x_t)
+    dist_half = np.linalg.norm(y - x_C) / 2.0
     case_triggered = None
-    if F_xt < F_y and F_xt < F_xC:
+    if F_xt_min < F_y and F_xt_min < F_xC:
         # Case 1: Valley between points; form a new cluster
         case_triggered = 'Case 1 (Valley)'
-        clusters.append(Cluster(y.copy(), dist_y_xt))
-    elif F_xt > F_y and F_xt > F_xC:
+        clusters.append(Cluster(y.copy(), dist_half))
+    elif F_xt_max > F_y and F_xt_max > F_xC:
         # Case 2: Midpoint is a better peak; form a new cluster and recurse
         case_triggered = 'Case 2 (Mid better)'
-        clusters.append(Cluster(y.copy(), dist_y_xt))
-        # clusters = process_point_for_clustering(x_t, clusters, equations, gamma, domain)
-        clusters = process_point_for_clustering(x_t, clusters, problem, gamma, history)
+        clusters.append(Cluster(y.copy(), dist_half))
+        best_xt_idx = int(np.argmax(F_xts))
+        x_t_best = x_ts[best_xt_idx]
+        clusters = process_point_for_clustering(x_t_best, clusters, problem, gamma, history)
     elif F_y > F_xC:
         # Case 3: Update center as y is closer to the root's peak
         case_triggered = 'Case 3 (Update Center)'
@@ -92,18 +96,20 @@ def process_point_for_clustering(
     else:
         case_triggered = 'None (Only radius updated)'
         
-    nearest_cluster.radius = dist_y_xt
+    nearest_cluster.radius = dist_half
 
     if history is not None and case_triggered is not None:
         history.append({
             'case': case_triggered,
             'y': y.copy(),
             'x_C': x_C.copy(),
-            'x_t': x_t.copy(),
-            'dist': dist_y_xt,
+            'x_t': x_ts[1].copy(), # Log the 50% midpoint
+            'dist': dist_half,
             'F_y': F_y,
             'F_xC': F_xC,
-            'F_xt': F_xt
+            'F_xt': F_xts[1],
+            'F_xt_min': F_xt_min,
+            'F_xt_max': F_xt_max
         })
 
     return clusters
