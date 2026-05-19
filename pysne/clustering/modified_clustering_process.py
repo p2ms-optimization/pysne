@@ -11,8 +11,8 @@ def process_point_for_clustering(
     # equations: List[Callable], 
     problem,
     gamma: float,
-    history: List[Dict[str, Any]] = None
-    # domain: List[Tuple[float, float]]
+    history: List[Dict[str, Any]] = None,
+    num_check_points: int = 1
 ) -> List[Cluster]:
     """
     Evaluates a single coordinate point to determine its cluster assignment or if it should form a new cluster based on the objective function landscape.
@@ -64,11 +64,12 @@ def process_point_for_clustering(
             min_dist = dist
             nearest_cluster = cluster
 
-    # Multi-point Check Logic (25%, 50%, 75%)
+    # Dynamic Multi-point Check Logic
     x_C = nearest_cluster.center
     F_xC = problem.evaluate_fitness(x_C)
     
-    t_vals = [0.25, 0.5, 0.75]
+    # Generate t values dynamically based on num_check_points parameter
+    t_vals = [i / (num_check_points + 1) for i in range(1, num_check_points + 1)]
     x_ts = [y + t * (x_C - y) for t in t_vals]
     F_xts = [problem.evaluate_fitness(xt) for xt in x_ts]
     
@@ -78,17 +79,18 @@ def process_point_for_clustering(
     # Clustering Logic
     dist_half = np.linalg.norm(y - x_C) / 2.0
     case_triggered = None
+    
     if F_xt_min < F_y and F_xt_min < F_xC:
         # Case 1: Valley between points; form a new cluster
         case_triggered = 'Case 1 (Valley)'
         clusters.append(Cluster(y.copy(), dist_half))
     elif F_xt_max > F_y and F_xt_max > F_xC:
-        # Case 2: Midpoint is a better peak; form a new cluster and recurse
+        # Case 2: A better peak found; form a new cluster and recurse
         case_triggered = 'Case 2 (Mid better)'
         clusters.append(Cluster(y.copy(), dist_half))
         best_xt_idx = int(np.argmax(F_xts))
         x_t_best = x_ts[best_xt_idx]
-        clusters = process_point_for_clustering(x_t_best, clusters, problem, gamma, history)
+        clusters = process_point_for_clustering(x_t_best, clusters, problem, gamma, history, num_check_points)
     elif F_y > F_xC:
         # Case 3: Update center as y is closer to the root's peak
         case_triggered = 'Case 3 (Update Center)'
@@ -99,15 +101,16 @@ def process_point_for_clustering(
     nearest_cluster.radius = dist_half
 
     if history is not None and case_triggered is not None:
+        mid_idx = num_check_points // 2
         history.append({
             'case': case_triggered,
             'y': y.copy(),
             'x_C': x_C.copy(),
-            'x_t': x_ts[1].copy(), # Log the 50% midpoint
+            'x_t': x_ts[mid_idx].copy(),
             'dist': dist_half,
             'F_y': F_y,
             'F_xC': F_xC,
-            'F_xt': F_xts[1],
+            'F_xt': F_xts[mid_idx],
             'F_xt_min': F_xt_min,
             'F_xt_max': F_xt_max
         })
@@ -153,6 +156,8 @@ def perform_iterative_clustering(
     r = params.get('r_cl', 0.95)
     # theta = float(params.get('theta', np.pi/4))
     theta = params.get('theta_cl', np.pi/4)
+    # Number of multi-point checks
+    num_check_points = params.get('num_check_points', 1)
     # n = len(domain)
 
     n = problem.n_var
@@ -203,7 +208,7 @@ def perform_iterative_clustering(
                 is_center = any(np.allclose(points[i], cluster.center, atol=1e-8) for cluster in clusters)
                 if not is_center:
                     # clusters = process_point_for_clustering(points[i], clusters, equations, gamma, domain)
-                    clusters = process_point_for_clustering(points[i], clusters, problem, cutoff, history)
+                    clusters = process_point_for_clustering(points[i], clusters, problem, cutoff, history, num_check_points)
 
         # Update points using spiral dynamics
         # F_values = np.array([objective_function(p, equations) for p in points])
