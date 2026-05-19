@@ -58,7 +58,9 @@ class Problem2(BaseProblem):
             'sdoa_k_max': 250,
             'r': 0.95,
             'theta': np.pi/4,
-            'gamma': -float('inf')
+            'gamma': -float('inf'),
+            'num_check_points': 2
+
         }
         return domain, params
 
@@ -85,17 +87,18 @@ class Problem3(BaseProblem):
         
         # Contoh pengambilan parameter berdasarkan dimensi n
         params = {
-            'm_cluster': 500 * (1 if self.n == 2 else 40 if self.n == 3 else self.n),
+            'm_cluster': 500 * (1 if self.n == 2 else 1 if self.n == 3 else self.n),
             'r_cl': 0.95,
             'theta_cl': np.pi/4,
-            'k_cluster': 10 if self.n != 3 else 20,
+            'k_cluster': 10 if self.n != 3 else 10,
             'epsilon': 1e-6 if self.n == 2 else 1e-5,
             'delta': 0.1,
             'sdoa_m': 200,
-            'sdoa_k_max': 200,
+            'sdoa_k_max': 300,
             'r': 0.95,
             'theta': np.pi/4,
-            'gamma': -float('inf')
+            'gamma': -float('inf'),
+            'num_check_points': 2
         }
         return domain, params
 
@@ -114,9 +117,9 @@ class Problem4(BaseProblem):
         x1 = x[0] if x.ndim == 1 else x[:, 0]
         x2 = x[1] if x.ndim == 1 else x[:, 1]
         
-        # Protect log from negative values when Nelder-Mead probes out of bounds
-        # x1 = np.clip(x1, 1e-9, None)
-        # x2 = np.clip(x2, 1e-9, None)
+        # Protect log from negative values
+        x1 = np.clip(x1, 1e-9, None)
+        x2 = np.clip(x2, 1e-9, None)
         
         term1 = np.sin(10 * np.log(x1))
         term2 = np.sin(10 * np.log(x2))
@@ -136,7 +139,8 @@ class Problem4(BaseProblem):
             'k_max': 150,
             'r': 0.95,
             'theta': np.pi/4,
-            'gamma': 0.2
+            'gamma': 0.2,
+            'num_check_points': 3
         }
         return domain, params
 
