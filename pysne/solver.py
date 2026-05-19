@@ -2,7 +2,7 @@ import numpy as np
 import time
 
 # Internal imports from other modules
-from pysne.clustering.clustering_process import perform_iterative_clustering
+from pysne.clustering.modified_clustering_proces import perform_iterative_clustering
 from pysne.initialization.sampling import generate_sobol_points
 from pysne.utils import objective_function, is_in_domain, validate_solutions
 from pysne.optimizers.sdoa.engine import spiral_dynamics_optimization
