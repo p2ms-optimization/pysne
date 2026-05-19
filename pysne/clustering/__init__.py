@@ -1,2 +1,2 @@
-from .clustering_process import perform_iterative_clustering
+from .modified_clustering_process import perform_iterative_clustering
 # from .clustering_process import process_point_for_clustering

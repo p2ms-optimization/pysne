@@ -24,7 +24,7 @@ class Problem1(BaseProblem):
             'epsilon': 1e-7,
             'delta': 0.1,
             'sdoa_m': 200,
-            'sdoa_k_max': 210,
+            'sdoa_k_max': 230,
             'r': 0.95,
             'theta': np.pi/4,
             'gamma': -float('inf')
@@ -48,17 +48,19 @@ class Problem2(BaseProblem):
     def get_info(self):
         domain = [(-1.9, 1.9), (-1.1, 1.1)]
         params = {
-            'm_cluster': 1024,
+            'm_cluster': 300,
             'r_cl': 0.95,
             'theta_cl': np.pi/4,
-            'k_cluster': 10,
+            'k_cluster': 5,
             'epsilon': 1e-5,
             'delta': 0.1,
-            'sdoa_m': 200,
-            'sdoa_k_max': 500,
+            'sdoa_m': 50,
+            'sdoa_k_max': 250,
             'r': 0.95,
             'theta': np.pi/4,
-            'gamma': -float('inf')
+            'gamma': -float('inf'),
+            'num_check_points': 2
+
         }
         return domain, params
 
@@ -85,17 +87,18 @@ class Problem3(BaseProblem):
         
         # Contoh pengambilan parameter berdasarkan dimensi n
         params = {
-            'm_cluster': 500 * (1 if self.n == 2 else 40 if self.n == 3 else self.n),
+            'm_cluster': 500 * (1 if self.n == 2 else 1 if self.n == 3 else self.n),
             'r_cl': 0.95,
             'theta_cl': np.pi/4,
-            'k_cluster': 10 if self.n != 3 else 20,
+            'k_cluster': 10 if self.n != 3 else 10,
             'epsilon': 1e-6 if self.n == 2 else 1e-5,
             'delta': 0.1,
             'sdoa_m': 200,
-            'sdoa_k_max': 200,
+            'sdoa_k_max': 300,
             'r': 0.95,
             'theta': np.pi/4,
-            'gamma': -float('inf')
+            'gamma': -float('inf'),
+            'num_check_points': 2
         }
         return domain, params
 
@@ -114,9 +117,9 @@ class Problem4(BaseProblem):
         x1 = x[0] if x.ndim == 1 else x[:, 0]
         x2 = x[1] if x.ndim == 1 else x[:, 1]
         
-        # Protect log from negative values when Nelder-Mead probes out of bounds
-        # x1 = np.clip(x1, 1e-9, None)
-        # x2 = np.clip(x2, 1e-9, None)
+        # Protect log from negative values
+        x1 = np.clip(x1, 1e-9, None)
+        x2 = np.clip(x2, 1e-9, None)
         
         term1 = np.sin(10 * np.log(x1))
         term2 = np.sin(10 * np.log(x2))
@@ -136,7 +139,8 @@ class Problem4(BaseProblem):
             'k_max': 150,
             'r': 0.95,
             'theta': np.pi/4,
-            'gamma': 0.2
+            'gamma': 0.2,
+            'num_check_points': 3
         }
         return domain, params
 
@@ -148,33 +152,47 @@ class Problem5(BaseProblem):
 
     @property
     def name(self):
-        return f"Problem 5: 2D Shubert Function"
+        return f"Problem 5: {self.n}D Shubert Function"
 
     def g_func(self, x):
         x = np.asarray(x)
-        x1 = x[0] if x.ndim == 1 else x[:, 0]
-        x2 = x[1] if x.ndim == 1 else x[:, 1]
-        
-        sum1 = sum(i * np.cos((i + 1) * x1 + i) for i in range(1, 6))
-        sum2 = sum(i * np.cos((i + 1) * x2 + i) for i in range(1, 6))
-        return -(sum1 * sum2)
+        prod = 1.0
+        for j in range(self.n):
+            xj = x[j] if x.ndim == 1 else x[:, j]
+            prod *= sum(i * np.cos((i + 1) * xj + i) for i in range(1, 6))
+        return -prod
 
     def get_info(self):
-        domain = [(-10, 10), (-10, 10)]
+        domain = [(-10, 10)] * self.n
         
-        params = {
-            'm_cluster': 2500,
-            'r_cl': 0.95,
-            'theta_cl': np.pi/4,
-            'k_cluster': 20,
-            'epsilon': 1e-6,
-            'delta': 0.1,
-            'sdoa_m': 200,
-            'sdoa_k_max': 500,
-            'r': 0.95,
-            'theta': np.pi/4,
-            'gamma': 150.0
-        }
+        if self.n == 2:
+            params = {
+                'm_cluster': 2000,
+                'r_cl': 0.95,
+                'theta_cl': np.pi/4,
+                'k_cluster': 15,
+                'epsilon': 1e-06,
+                'delta': 0.1,
+                'sdoa_m': 100,
+                'sdoa_k_max': 500,
+                'r': 0.95,
+                'theta': np.pi/4,
+                'gamma': 250.0
+            }
+        else:
+            params = {
+                'm_cluster': 50000,
+                'r_cl': 0.99,
+                'theta_cl': np.pi/4,
+                'k_cluster': 100,
+                'epsilon': 1e-2,
+                'delta': 0.3,
+                'sdoa_m': 300,
+                'sdoa_k_max': 300,
+                'r': 0.95,
+                'theta': np.pi/4,
+                'gamma': 0.5
+            }
         return domain, params
 
 
@@ -186,5 +204,6 @@ def get_multimodal_problems():
         3: lambda: Problem3(n=2),
         4: lambda: Problem3(n=3),
         5: lambda: Problem4(),
-        6: lambda: Problem5()
+        6: lambda: Problem5(),
+        7: lambda: Problem5(n=3)
     }

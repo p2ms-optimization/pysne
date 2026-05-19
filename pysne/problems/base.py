@@ -54,6 +54,16 @@ class BaseProblem(ABC):
         print(f"DEBUG: Filtering with delta = {delta}")
         print(f"DEBUG: Filtering with epsilon = {epsilon}")
 
+        is_sne = getattr(self, 'problem_type', None) == 'SNE'
+        gamma = params.get('gamma', None)
+        
+        # Calculate F_star for multimodal global filter
+        F_star = 0
+        if not is_sne and candidates is not None and len(candidates) > 0:
+            evals = [self.evaluate_fitness(c) for c in candidates if is_in_domain(c, domain)]
+            if evals:
+                F_star = max(evals)
+
         accurate_candidates = []
         for cand in candidates:
             # Pengecekan is_in_domain menggunakan fungsi dari pysne.utils
@@ -61,24 +71,39 @@ class BaseProblem(ABC):
                 continue
             
             f_val = self.evaluate_fitness(cand)
+            # print(f"DEBUG CAND: {cand}, f_val: {f_val}")
             # Panggil fungsi objektif asli
             # F_val = self.g_func(cand)
-            if getattr(self, 'problem_type', None) == 'SNE':
+            if is_sne:
                 if 1.0 - f_val < epsilon:
                     accurate_candidates.append((cand, f_val))
             else:
+                if gamma is not None and gamma != -float('inf') and F_star > 0:
+                    if f_val <= (1.0 - gamma) * F_star:
+                        continue
+                        
                 # 2. Filter Tetangga (Khusus Multimodal)
                 # Cek apakah cand benar-benar lebih tinggi dari tetangganya
                 # Menggunakan parameter epsilon bawaan dari paper
                 is_peak = True
+                pert_step = epsilon
                 
                 for i in range(len(cand)):
                     step = np.zeros_like(cand)
-                    step[i] = epsilon
-                    if self.evaluate_fitness(cand - step) > f_val or \
-                       self.evaluate_fitness(cand + step) > f_val:
+                    step[i] = pert_step
+                    
+                    nb_minus = cand - step
+                    if is_in_domain(nb_minus, domain) and self.evaluate_fitness(nb_minus) > f_val:
+                        # print(f"REJECTED {cand}: f_val={f_val}, minus={self.evaluate_fitness(nb_minus)}")
                         is_peak = False
                         break
+                        
+                    nb_plus = cand + step
+                    if is_in_domain(nb_plus, domain) and self.evaluate_fitness(nb_plus) > f_val:
+                        # print(f"REJECTED {cand}: f_val={f_val}, plus={self.evaluate_fitness(nb_plus)}")
+                        is_peak = False
+                        break
+                        
                 if is_peak:
                     accurate_candidates.append((cand, f_val))
 

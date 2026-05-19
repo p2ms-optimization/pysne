@@ -2,7 +2,7 @@ import numpy as np
 import time
 
 # Internal imports from other modules
-from pysne.clustering.clustering_process import perform_iterative_clustering
+from pysne.clustering.modified_clustering_process import perform_iterative_clustering
 from pysne.initialization.sampling import generate_sobol_points
 from pysne.utils import objective_function, is_in_domain, validate_solutions
 from pysne.optimizers.sdoa.engine import spiral_dynamics_optimization
@@ -63,6 +63,11 @@ def run_sdoa_on_clusters(clusters, problem, params):
             cluster_lo = max(domain[dim][0], cluster.center[dim] - cluster.radius)
             cluster_hi = min(domain[dim][1], cluster.center[dim] + cluster.radius)
             cluster_domain.append((cluster_lo, cluster_hi))
+
+        # Skip degenerate domains
+        if any(hi - lo < 1e-12 for lo, hi in cluster_domain):
+            candidates.append(cluster.center.copy())
+            continue
 
         # Generate initial points in cluster domain
         initial_points = generate_sobol_points(sdoa_params['m'], len(domain), cluster_domain)

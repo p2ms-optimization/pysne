@@ -2,7 +2,6 @@ import numpy as np
 from pysne.problems.base import BaseProblem
 
 
-
 class F1_FiveUnevenPeakTrap(BaseProblem):
     @property
     def name(self):
@@ -172,49 +171,6 @@ class F5_SixHumpCamelBack(BaseProblem):
         }
         return domain, params
 
-
-class Problem4(BaseProblem):
-    def __init__(self, n=2):
-        self.n = n
-        # Panggil init parent untuk setup n_var dan domain
-        super().__init__()
-
-    @property
-    def name(self):
-        return f"Problem 4: 2D Vincent Function"
-
-    def g_func(self, x):
-        x = np.asarray(x)
-        x1 = x[0] if x.ndim == 1 else x[:, 0]
-        x2 = x[1] if x.ndim == 1 else x[:, 1]
-        
-        # Protect log from negative values when Nelder-Mead probes out of bounds
-        # x1 = np.clip(x1, 1e-9, None)
-        # x2 = np.clip(x2, 1e-9, None)
-        
-        term1 = np.sin(10 * np.log(x1))
-        term2 = np.sin(10 * np.log(x2))
-        return 0.5 * (term1 + term2)
-
-    def get_info(self):
-        domain = [(0.25, 10), (0.25, 10)]
-        
-        params = {
-            'm_cluster': 1000,
-            'r_cl': 0.95,
-            'theta_cl': np.pi/4,
-            'k_cluster': 10,
-            'epsilon': 1e-5,
-            'delta': 0.01,
-            'm': 150,
-            'k_max': 150,
-            'r': 0.95,
-            'theta': np.pi/4,
-            'gamma': 0.2
-        }
-        return domain, params
-
-
 class F6_Shubert(BaseProblem):
     def __init__(self, n=2):
         self.n = n
@@ -334,6 +290,42 @@ class F8_ModifiedRastrigin(BaseProblem):
             'gamma': -5.0
         }
         return domain, params
+
+class Pool_Basic_Function():
+    def sphere(x):
+        """Sphere function"""
+        return np.sup(x**2, axis=-1)
+    
+    def rastrigin(x):
+        """Rastrigin function"""
+        return np.sum(x**2 - 10 * np.cos(2*np.pi*x) + 10, axis=-1)
+    
+    def griewank_fn(x):
+        """Griewank function"""
+        x = np.asarray(x)
+        n = len(x)
+        sum_term = np.sum(x**2)/4000.0
+        prod_term = np.prod(np.cos(x/np.sqrt(np.arange(1, n+1))))
+        return sum_term - prod_term + 1.0
+
+class Composition_Function():
+    
+    def composition_function(x, basic_functions, params):
+        # params berisi o_i, lambda_i, M_i, dan sigma_i untuk tiap fungsi
+        total_fitness = 0
+        weights = calculate_weights(x, params) # langkah 3
+        
+        for i, func in enumerate(basic_functions):
+            # 1. Transformasi koordinat
+            z = (x - params['o'][i]) / params['lambda'][i] @ params['M'][i]
+            
+            # 2. Hitung nilai fungsi ter-normalisasi
+            f_hat = normalized_basic_func(func, z) # langkah 2
+            
+            # 3. Akumulasi terbobot
+            total_fitness += weights[i] * f_hat
+            
+        return total_fitness  
 
 def get_gecco_problems():
     """Dictionary pemanggil problem."""
