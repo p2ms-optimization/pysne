@@ -5,9 +5,9 @@ dengan SDOA algorithm di pysne.
 
 import numpy as np
 import opfunu
-from pysne.problems.base import BaseProblem
+from pysne.problems.base import MultimodalProblem
 
-class OpfunuBenchmarkWrapper(BaseProblem):
+class OpfunuBenchmarkWrapper(MultimodalProblem):
     """Base class untuk wrapper opfunu benchmark functions, compatible with pysne solver"""
 
     def __init__(self, func_instance, ndim, name=None, custom_params=None):

@@ -277,6 +277,63 @@ class ProblemGriewank(MultimodalProblem):
         }
         return domain, params
 
+class ProblemIWM(MultimodalProblem):
+    @property
+    def name(self):
+        return "Problem IWM"
+
+    @property
+    def optima_type(self):
+        return "both"
+
+    def g_func(self, x):
+        x = np.asarray(x)
+        coefs = np.array([
+            60.0, 70.0, 30.0, 80.0, 90.0, 
+            40.0, 55.0, 65.0, 55.0, 200.0, 
+            180.0, 30.0, 80.0, 130.0, 110.0, 
+            50.0, 40.0, 250.0, 40.0, 20.0, 
+            10.0, 10.0, 30.0, 40.0, 0.0
+        ])
+        if x.ndim == 1:
+            return np.dot(coefs, x)
+        else:
+            return np.dot(x, coefs)
+
+    def get_info(self):
+        bounds = [
+            (7, 10), (7, 10), (5, 7), (18, 22), (25, 30), 
+            (6, 8), (12, 17), (25, 30), (14, 19), (25, 30), 
+            (20, 30), (4, 5), (15, 20), (25, 30), (25, 30), 
+            (15, 20), (3, 5), (18, 23), (8, 12), (1, 1), 
+            (1, 1), (1, 1), (6, 9), (10, 14), (1, 1)
+        ]
+        params = {
+            'm_cluster': 1000,
+            'r_cl': 0.95,
+            'theta_cl': np.pi/4,
+            'k_cluster': 100,
+            'epsilon': 1e-5,
+            'delta': 0.5,
+            'sdoa_m': 500,
+            'sdoa_k_max': 1000,
+            'r': 0.95,
+            'theta': np.pi/4,
+            'gamma': -float('inf'),
+            'num_check_points': 2
+        }
+        return bounds, params
+
+    # def select_final_roots(self, candidates):
+    #     domain, params = self.get_info()
+    #     delta = params.get('delta', 0.5)
+    #     accurate_candidates = []
+    #     for cand in candidates:
+    #         if is_in_domain(cand, domain):
+    #             accurate_candidates.append((cand, self.evaluate_fitness(cand)))
+    #     return filter_unique_roots(accurate_candidates, delta)
+
+
 def get_multimodal_problems():
     """Dictionary pemanggil problem."""
     return {
@@ -290,5 +347,6 @@ def get_multimodal_problems():
         'schwefel': lambda: ProblemSchwefel(n=3),
         'griewank': lambda: ProblemGriewank(n=2),
         'two_n_minima': lambda: Problem1(),
-        'rastrigin': lambda: Problem3(n=2)
+        'rastrigin': lambda: Problem3(n=2),
+        'iwm': lambda: ProblemIWM()
     }

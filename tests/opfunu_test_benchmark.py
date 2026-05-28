@@ -6,7 +6,7 @@ from typing import Dict, Any
 
 from pysne.problems.cec_benchmarks import CEC2014Benchmark, NameBasedBenchmark
 from pysne.solver import solve_system
-from pysne.problems.base import BaseProblem
+from pysne.problems.base import BaseProblem, MinimizedProblem
 
 def test_composition_problem(func_name: str, ndim: int = 10, verbose: bool = True) -> Dict[str, Any]:
     """
@@ -78,25 +78,6 @@ def test_composition_problem(func_name: str, ndim: int = 10, verbose: bool = Tru
         if verbose:
             print("\n[STEP 2] Running Minimized Solver (Finding Minima)...")
         
-        # Buat class sementara untuk membalik fitness (Minimization) seperti di test_multimodal.py
-        class MinimizedProblem:
-            def __init__(self, original_prob):
-                self.original = original_prob
-                self.domain = original_prob.domain
-                self.n_var = original_prob.n_var
-                self.equations = None
-                self.problem_type = getattr(original_prob, 'problem_type', 'Multimodal')
-                self.name = original_prob.name + " (Minimized)"
-            
-            def get_info(self):
-                return self.original.get_info()
-
-            def evaluate_fitness(self, x):
-                return -self.original.evaluate_fitness(x)
-            
-            def select_final_roots(self, candidates):
-                return BaseProblem.select_final_roots(self, candidates)
-
         prob_min = MinimizedProblem(prob)
         res_min = solve_system(prob_min, prob.get_info()[1], verbose=verbose)
         final_min = res_min['roots']

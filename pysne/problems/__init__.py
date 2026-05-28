@@ -1,1 +1,3 @@
 from .benchmarks_sne import get_problem_set
+from .benchmarks_multimodal import get_multimodal_problems
+from .benchmarks_diophantine import get_diophantine_problems

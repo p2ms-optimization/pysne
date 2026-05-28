@@ -89,3 +89,14 @@ def validate_solutions(
         if max(residuals) < epsilon and in_domain:
             valid_roots.append(root)
     return valid_roots
+
+def create_continuous_bounds() :
+    """
+
+    """
+
+def filter_unique_roots() :
+    """
+    """
+
+    return 
