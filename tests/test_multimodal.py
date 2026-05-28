@@ -6,86 +6,8 @@ import pytest
 
 from pysne.problems.benchmarks_multimodal import get_multimodal_problems
 from pysne.solver import solve_system
-from pysne.problems.base import BaseProblem, MinimizedProblem, MultimodalProblem
-from pysne.utils import filter_unique_roots, is_in_domain
+from pysne.problems.base import BaseProblem, MinimizedProblem
 
-
-class ProblemIWM(MultimodalProblem):
-    @property
-    def name(self):
-        return "Problem IWM"
-
-    @property
-    def optima_type(self):
-        return "both"
-
-    def g_func(self, x):
-        x = np.asarray(x)
-        coefs = np.array([
-            60.0, 70.0, 30.0, 80.0, 90.0, 
-            40.0, 55.0, 65.0, 55.0, 200.0, 
-            180.0, 30.0, 80.0, 130.0, 110.0, 
-            50.0, 40.0, 250.0, 40.0, 20.0, 
-            10.0, 10.0, 30.0, 40.0, 0.0
-        ])
-        if x.ndim == 1:
-            return np.dot(coefs, x)
-        else:
-            return np.dot(x, coefs)
-
-    def get_info(self):
-        bounds = [
-            (7, 10), (7, 10), (5, 7), (18, 22), (25, 30), 
-            (6, 8), (12, 17), (25, 30), (14, 19), (25, 30), 
-            (20, 30), (4, 5), (15, 20), (25, 30), (25, 30), 
-            (15, 20), (3, 5), (18, 23), (8, 12), (1, 1), 
-            (1, 1), (1, 1), (6, 9), (10, 14), (1, 1)
-        ]
-        params = {
-            'm_cluster': 1000,
-            'r_cl': 0.95,
-            'theta_cl': np.pi/4,
-            'k_cluster': 100,
-            'epsilon': 1e-5,
-            'delta': 0.5,
-            'sdoa_m': 500,
-            'sdoa_k_max': 1000,
-            'r': 0.95,
-            'theta': np.pi/4,
-            'gamma': -float('inf'),
-            'num_check_points': 2
-        }
-        return bounds, params
-
-    def select_final_roots(self, candidates):
-        domain, params = self.get_info()
-        delta = params.get('delta', 0.5)
-        accurate_candidates = []
-        for cand in candidates:
-            if is_in_domain(cand, domain):
-                accurate_candidates.append((cand, self.evaluate_fitness(cand)))
-        return filter_unique_roots(accurate_candidates, delta)
-
-
-def test_iwm_pipeline_execution():
-    """
-    Smoke test for ProblemIWM to ensure it executes without errors.
-    """
-    prob = ProblemIWM()
-    _, original_params = prob.get_info()
-    test_params = original_params.copy()
-    test_params.update({
-        'm_cluster': 20,
-        'k_cluster': 3,
-        'sdoa_m': 10,
-        'sdoa_k_max': 10
-    })
-    
-    # We solve for minima using MinimizedProblem wrapper
-    prob_min = MinimizedProblem(prob)
-    result = solve_system(prob_min, test_params, verbose=True)
-    assert result is not None, "Output solver tidak boleh None"
-    assert 'roots' in result, "Hasil harus mengandung key 'roots'"
 
 
 def test_multimodal_pipeline_execution():
@@ -114,7 +36,6 @@ def test_multimodal_pipeline_execution():
     # })
 
     # 5. Eksekusi fungsi utama
-    # Pastikan solve_multimodal menerima (objective_function, domain, params)
     result = solve_system(prob2, test_params, verbose=True)
 
     # 6. Assertions
@@ -143,17 +64,13 @@ def test_multimodal_problem(
         'error': None,
     }
     try:
-        if problem_id == "iwm":
-            prob = ProblemIWM()
-        else:
-            problems = get_multimodal_problems()
-            if problem_id not in problems:
-                result['error'] = f"Problem {problem_id} not found"
-                return result
-            # Inisialisasi object problem
-            prob = problems[problem_id]()
-        # domain, params = prob.get_info()
-        # g_func = prob.g_func
+        problems = get_multimodal_problems()
+        if problem_id not in problems:
+            result['error'] = f"Problem {problem_id} not found"
+            return result
+            
+        # Inisialisasi object problem
+        prob = problems[problem_id]()
 
         if verbose:
             print("="*60)
@@ -186,7 +103,7 @@ def test_multimodal_problem(
         if prob.optima_type in ['min', 'both']:
             if verbose:
                 print("\n[STEP 2] Running Universal Solver (Finding Minima)...")
-            
+
             prob_min = MinimizedProblem(prob)
             res_min = solve_system(prob_min, prob.get_info()[1], verbose=verbose)
             final_min = res_min['roots']
@@ -231,7 +148,7 @@ def test_multimodal_problem(
 
 def test_all_multimodal_problems(problem_ids: list = None, show_details: bool = False):
     if problem_ids is None:
-        problem_ids = [1, 2, 3, 4, 5, 6]
+        problem_ids = [1, 2, 3, 4, 5, 6, 7]
         
     print("="*60)
     print("PYSNE MULTIMODAL COMPREHENSIVE TEST")
@@ -271,8 +188,6 @@ if __name__ == "__main__":
             test_all_multimodal_problems(show_details=False)
         elif command == "all-verbose":
             test_all_multimodal_problems(show_details=True)
-        elif command == "iwm":
-            test_multimodal_problem("iwm", verbose=True)
         elif command.isdigit():
             test_multimodal_problem(int(command), verbose=True)
     else:

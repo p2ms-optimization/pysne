@@ -277,31 +277,31 @@ class ProblemGriewank(MultimodalProblem):
         }
         return domain, params
 
-class ProblemIWM(MultimodalProblem):
+class Problemiwm(MultimodalProblem):
     @property
     def name(self):
-        return "Problem IWM"
-
-    @property
-    def optima_type(self):
-        return "both"
-
+        return "Problem project IWM"
+    
     def g_func(self, x):
         x = np.asarray(x)
-        coefs = np.array([
-            60.0, 70.0, 30.0, 80.0, 90.0, 
-            40.0, 55.0, 65.0, 55.0, 200.0, 
-            180.0, 30.0, 80.0, 130.0, 110.0, 
-            50.0, 40.0, 250.0, 40.0, 20.0, 
-            10.0, 10.0, 30.0, 40.0, 0.0
-        ])
-        if x.ndim == 1:
-            return np.dot(coefs, x)
-        else:
-            return np.dot(x, coefs)
+        cost_function = lambda d: (
+    60.0*d[0] + 70.0*d[1] + 30.0*d[2] + 80.0*d[3] + 90.0*d[4] + 
+    40.0*d[5] + 55.0*d[6] + 65.0*d[7] + 55.0*d[8] + 200.0*d[9] + 
+    180.0*d[10] + 30.0*d[11] + 80.0*d[12] + 130.0*d[13] + 110.0*d[14] + 
+    50.0*d[15] + 40.0*d[16] + 250.0*d[17] + 40.0*d[18] + 20.0*d[19] + 
+    10.0*d[20] + 10.0*d[21] + 30.0*d[22] + 40.0*d[23] + 0.0*d[24]
+)
+
+        x1 = x[0] if x.ndim == 1 else x[:, 0]
+        x2 = x[1] if x.ndim == 1 else x[:, 1]
+        term1 = (4 - 2.1 * x1**2 + (x1**4) / 3) * x1**2
+        term2 = x1 * x2
+        term3 = (-4 + 4 * x2**2) * x2**2
+        return (term1 + term2 + term3)
 
     def get_info(self):
-        bounds = [
+        # Hardcoded bounds for each task (d_min, d_max)
+        domain = [
             (7, 10), (7, 10), (5, 7), (18, 22), (25, 30), 
             (6, 8), (12, 17), (25, 30), (14, 19), (25, 30), 
             (20, 30), (4, 5), (15, 20), (25, 30), (25, 30), 
@@ -309,30 +309,21 @@ class ProblemIWM(MultimodalProblem):
             (1, 1), (1, 1), (6, 9), (10, 14), (1, 1)
         ]
         params = {
-            'm_cluster': 1000,
+            'm_cluster': 300,
             'r_cl': 0.95,
             'theta_cl': np.pi/4,
-            'k_cluster': 100,
+            'k_cluster': 5,
             'epsilon': 1e-5,
-            'delta': 0.5,
-            'sdoa_m': 500,
-            'sdoa_k_max': 1000,
+            'delta': 0.1,
+            'sdoa_m': 50,
+            'sdoa_k_max': 250,
             'r': 0.95,
             'theta': np.pi/4,
             'gamma': -float('inf'),
             'num_check_points': 2
+
         }
-        return bounds, params
-
-    # def select_final_roots(self, candidates):
-    #     domain, params = self.get_info()
-    #     delta = params.get('delta', 0.5)
-    #     accurate_candidates = []
-    #     for cand in candidates:
-    #         if is_in_domain(cand, domain):
-    #             accurate_candidates.append((cand, self.evaluate_fitness(cand)))
-    #     return filter_unique_roots(accurate_candidates, delta)
-
+        return domain, params
 
 def get_multimodal_problems():
     """Dictionary pemanggil problem."""
@@ -348,5 +339,5 @@ def get_multimodal_problems():
         'griewank': lambda: ProblemGriewank(n=2),
         'two_n_minima': lambda: Problem1(),
         'rastrigin': lambda: Problem3(n=2),
-        'iwm': lambda: ProblemIWM()
+        'iwm': lambda: Problemiwm()
     }
