@@ -11,8 +11,8 @@ def process_point_for_clustering(
     # equations: List[Callable], 
     problem,
     gamma: float,
-    history: List[Dict[str, Any]] = None,
-    num_check_points: int = 1
+    params: Dict[str, Any],
+    history: List[Dict[str, Any]] = None
 ) -> List[Cluster]:
     """
     Evaluates a single coordinate point to determine its cluster assignment or if it should form a new cluster based on the objective function landscape.
@@ -69,6 +69,7 @@ def process_point_for_clustering(
     F_xC = problem.evaluate_fitness(x_C)
     
     # Generate t values dynamically based on num_check_points parameter
+    num_check_points = params.get('num_check_points', 1)
     t_vals = [i / (num_check_points + 1) for i in range(1, num_check_points + 1)]
     x_ts = [y + t * (x_C - y) for t in t_vals]
     F_xts = [problem.evaluate_fitness(xt) for xt in x_ts]
@@ -90,7 +91,7 @@ def process_point_for_clustering(
         clusters.append(Cluster(y.copy(), dist_half))
         best_xt_idx = int(np.argmax(F_xts))
         x_t_best = x_ts[best_xt_idx]
-        clusters = process_point_for_clustering(x_t_best, clusters, problem, gamma, history, num_check_points)
+        clusters = process_point_for_clustering(x_t_best, clusters, problem, gamma, params, history)
     elif F_y > F_xC:
         # Case 3: Update center as y is closer to the root's peak
         case_triggered = 'Case 3 (Update Center)'
@@ -208,7 +209,7 @@ def perform_iterative_clustering(
                 is_center = any(np.allclose(points[i], cluster.center, atol=1e-8) for cluster in clusters)
                 if not is_center:
                     # clusters = process_point_for_clustering(points[i], clusters, equations, gamma, domain)
-                    clusters = process_point_for_clustering(points[i], clusters, problem, cutoff, history, num_check_points)
+                    clusters = process_point_for_clustering(points[i], clusters, problem, cutoff, params, history)
 
         # Update points using spiral dynamics
         # F_values = np.array([objective_function(p, equations) for p in points])

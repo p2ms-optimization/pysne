@@ -1,8 +1,8 @@
 import numpy as np
-from pysne.problems.base import BaseProblem
+from pysne.problems.base import MultimodalProblem
 
 
-class F1_FiveUnevenPeakTrap(BaseProblem):
+class F1_FiveUnevenPeakTrap(MultimodalProblem):
     @property
     def name(self):
         return "F1: Five-Uneven-Peak Trap (1D)"
@@ -40,7 +40,7 @@ class F1_FiveUnevenPeakTrap(BaseProblem):
         }
         return domain, params
 
-class F2_EqualMaxima(BaseProblem):
+class F2_EqualMaxima(MultimodalProblem):
     @property
     def name(self):
         return "F2: Equal Maxima (1D)"
@@ -68,7 +68,7 @@ class F2_EqualMaxima(BaseProblem):
         return domain, params
 
 
-class F3_UnevenDecreasingMaxima(BaseProblem):
+class F3_UnevenDecreasingMaxima(MultimodalProblem):
     @property
     def name(self):
         return "F3: Uneven Decreasing Maxima (1D)"
@@ -100,7 +100,7 @@ class F3_UnevenDecreasingMaxima(BaseProblem):
         }
         return domain, params
 
-class F4_Himmelblau(BaseProblem):
+class F4_Himmelblau(MultimodalProblem):
     def __init__(self, n=2):
         self.n = n
         # Panggil init parent untuk setup n_var dan domain
@@ -135,7 +135,7 @@ class F4_Himmelblau(BaseProblem):
         return domain, params
 
 
-class F5_SixHumpCamelBack(BaseProblem):
+class F5_SixHumpCamelBack(MultimodalProblem):
     def __init__(self, n=2):
         self.n = n
         super().__init__()
@@ -171,7 +171,7 @@ class F5_SixHumpCamelBack(BaseProblem):
         }
         return domain, params
 
-class F6_Shubert(BaseProblem):
+class F6_Shubert(MultimodalProblem):
     def __init__(self, n=2):
         self.n = n
         super().__init__()
@@ -217,7 +217,7 @@ class F6_Shubert(BaseProblem):
         }
         return domain, params
 
-class F7_Vincent(BaseProblem):
+class F7_Vincent(MultimodalProblem):
     def __init__(self, n=2):
         self.n = n
         # Panggil init parent untuk setup n_var dan domain
@@ -258,7 +258,7 @@ class F7_Vincent(BaseProblem):
         }
         return domain, params
 
-class F8_ModifiedRastrigin(BaseProblem):
+class F8_ModifiedRastrigin(MultimodalProblem):
     
     @property
     def name(self):

@@ -6,7 +6,7 @@ import pytest
 
 from pysne.problems.benchmarks_multimodal import get_multimodal_problems
 from pysne.solver import solve_system
-from pysne.problems.base import BaseProblem
+from pysne.problems.base import BaseProblem, MinimizedProblem
 
 
 
@@ -36,7 +36,6 @@ def test_multimodal_pipeline_execution():
     # })
 
     # 5. Eksekusi fungsi utama
-    # Pastikan solve_multimodal menerima (objective_function, domain, params)
     result = solve_system(prob2, test_params, verbose=True)
 
     # 6. Assertions
@@ -72,8 +71,6 @@ def test_multimodal_problem(
             
         # Inisialisasi object problem
         prob = problems[problem_id]()
-        # domain, params = prob.get_info()
-        # g_func = prob.g_func
 
         if verbose:
             print("="*60)
@@ -86,42 +83,33 @@ def test_multimodal_problem(
         # 1. FIND MAXIMA (Running the standard solver)
         # ===============================================
 
-        if verbose:
-            print(f"\n[STEP 1] Loading Problem {problem_id} (Multimodal)")
-        
-        print(f"info parameter: {prob.get_info()}")
-        # Using solve_system
-        res_max = solve_system(prob, prob.get_info()[1], verbose=verbose)
-        final_max = res_max['roots']
+        final_max = []
+        if prob.optima_type in ['max', 'both']:
+            if verbose:
+                print(f"\n[STEP 1] Loading Problem {problem_id} (Multimodal) - Finding Maxima")
+            
+            print(f"info parameter: {prob.get_info()}")
+            # Using solve_system
+            res_max = solve_system(prob, prob.get_info()[1], verbose=verbose)
+            final_max = res_max['roots']
+        else:
+            if verbose:
+                print(f"\n[STEP 1] Skipping Maxima search for Problem {problem_id} (optima_type='{prob.optima_type}')")
 
         # ===============================================
         # 2. FIND MINIMA
         # ===============================================
-        if verbose:
-            print("\n[STEP 2] Running Universal Solver (Finding Minima)...")
-        
-        # Buat class sementara untuk membalik fitness (Minimization)
-        class MinimizedProblem:
-            def __init__(self, original_prob):
-                self.original = original_prob
-                self.domain = original_prob.domain
-                self.n_var = original_prob.n_var
-                self.equations = None
-                self.problem_type = getattr(original_prob, 'problem_type', 'Multimodal')
-            
-            def get_info(self):
-                return self.original.get_info()
+        final_min = []
+        if prob.optima_type in ['min', 'both']:
+            if verbose:
+                print("\n[STEP 2] Running Universal Solver (Finding Minima)...")
 
-            def evaluate_fitness(self, x):
-                return -self.original.evaluate_fitness(x)
-            
-            def select_final_roots(self, candidates):
-                # Panggil class baseproblem
-                return BaseProblem.select_final_roots(self, candidates)
-
-        prob_min = MinimizedProblem(prob)
-        res_min = solve_system(prob_min, prob.get_info()[1], verbose=verbose)
-        final_min = res_min['roots']
+            prob_min = MinimizedProblem(prob)
+            res_min = solve_system(prob_min, prob.get_info()[1], verbose=verbose)
+            final_min = res_min['roots']
+        else:
+            if verbose:
+                print(f"\n[STEP 2] Skipping Minima search for Problem {problem_id} (optima_type='{prob.optima_type}')")
 
         # ===============================================
         # 3. CONSOLIDATE RESULTS
@@ -160,7 +148,7 @@ def test_multimodal_problem(
 
 def test_all_multimodal_problems(problem_ids: list = None, show_details: bool = False):
     if problem_ids is None:
-        problem_ids = [1, 2, 3, 4, 5, 6]
+        problem_ids = [1, 2, 3, 4, 5, 6, 7]
         
     print("="*60)
     print("PYSNE MULTIMODAL COMPREHENSIVE TEST")
@@ -193,6 +181,7 @@ if __name__ == "__main__":
     print("\nPySNE Multimodal Test Suite")
     print("Testing objective function optimizers\n")
     
+    # test_multimodal_problem(2, verbose=True)
     if len(sys.argv) > 1:
         command = sys.argv[1].lower()
         if command == "all":

@@ -1,7 +1,7 @@
 import numpy as np
-from pysne.problems.base import BaseProblem
+from pysne.problems.base import MultimodalProblem
 
-class Problem1(BaseProblem):
+class Problem1(MultimodalProblem):
     @property
     def name(self):
         return "Problem 1: 2D Second Minima Function"
@@ -31,7 +31,7 @@ class Problem1(BaseProblem):
         }
         return domain, params
 
-class Problem2(BaseProblem):
+class Problem2(MultimodalProblem):
     @property
     def name(self):
         return "Problem 2: Six Hump Camel Back Function"
@@ -65,7 +65,7 @@ class Problem2(BaseProblem):
         return domain, params
 
 
-class Problem3(BaseProblem):
+class Problem3(MultimodalProblem):
     def __init__(self, n=2):
         self.n = n
         # Panggil init parent untuk setup n_var dan domain
@@ -98,11 +98,11 @@ class Problem3(BaseProblem):
             'r': 0.95,
             'theta': np.pi/4,
             'gamma': -float('inf'),
-            'num_check_points': 2
+            'num_check_points': 1 * (1 if self.n == 2 else 2 if self.n == 3 else self.n) 
         }
         return domain, params
 
-class Problem4(BaseProblem):
+class Problem4(MultimodalProblem):
     def __init__(self, n=2):
         self.n = n
         # Panggil init parent untuk setup n_var dan domain
@@ -111,6 +111,10 @@ class Problem4(BaseProblem):
     @property
     def name(self):
         return f"Problem 4: 2D Vincent Function"
+
+    @property
+    def optima_type(self):
+        return "max"
 
     def g_func(self, x):
         x = np.asarray(x)
@@ -144,8 +148,7 @@ class Problem4(BaseProblem):
         }
         return domain, params
 
-
-class Problem5(BaseProblem):
+class Problem5(MultimodalProblem):
     def __init__(self, n=2):
         self.n = n
         super().__init__()
@@ -153,6 +156,10 @@ class Problem5(BaseProblem):
     @property
     def name(self):
         return f"Problem 5: {self.n}D Shubert Function"
+
+    @property
+    def optima_type(self):
+        return "max"
 
     def g_func(self, x):
         x = np.asarray(x)
@@ -177,33 +184,160 @@ class Problem5(BaseProblem):
                 'sdoa_k_max': 500,
                 'r': 0.95,
                 'theta': np.pi/4,
-                'gamma': 250.0
+                'gamma': 0.5,
+                'num_check_points': 2
             }
         else:
             params = {
-                'm_cluster': 50000,
+                'm_cluster': 16384,
                 'r_cl': 0.99,
                 'theta_cl': np.pi/4,
                 'k_cluster': 100,
-                'epsilon': 1e-2,
-                'delta': 0.3,
-                'sdoa_m': 300,
+                'epsilon': 1e-4,
+                'delta': 0.2,
+                'sdoa_m': 512,
                 'sdoa_k_max': 300,
                 'r': 0.95,
                 'theta': np.pi/4,
-                'gamma': 0.5
+                'gamma': 0.1,
+                'num_check_points': 2
             }
         return domain, params
 
+class ProblemSchwefel(MultimodalProblem):
+    def __init__(self, n=3):
+        self.n = n
+        super().__init__()
+
+    @property
+    def name(self):
+        return f"Schwefel - {self.n}D"
+
+    def g_func(self, x):
+        x = np.asarray(x)
+        # Using Schwefel 2.22 which has minimum at 0 with value 0
+        if x.ndim == 1:
+            return np.sum(np.abs(x)) + np.prod(np.abs(x))
+        else:
+            return np.sum(np.abs(x), axis=1) + np.prod(np.abs(x), axis=1)
+
+    def get_info(self):
+        domain = [(-4.0, 6.0)] * self.n
+        params = {
+            'm_cluster': 1000,
+            'r_cl': 0.95,
+            'theta_cl': np.pi/4,
+            'k_cluster': 10,
+            'epsilon': 1e-6,
+            'delta': 0.1,
+            'sdoa_m': 20,
+            'sdoa_k_max': 100,
+            'r': 0.95,
+            'theta': np.pi/4,
+            'gamma': -float('inf'),
+            'num_check_points': 2
+        }
+        return domain, params
+
+class ProblemGriewank(MultimodalProblem):
+    def __init__(self, n=2):
+        self.n = n
+        super().__init__()
+
+    @property
+    def name(self):
+        return f"Griewank - {self.n}D"
+
+    def g_func(self, x):
+        x = np.asarray(x)
+        if x.ndim == 1:
+            sum_sq = np.sum(x**2) / 4000.0
+            prod_cos = np.prod(np.cos(x / np.sqrt(np.arange(1, self.n + 1))))
+            return sum_sq - prod_cos + 1.0
+        else:
+            sum_sq = np.sum(x**2, axis=1) / 4000.0
+            prod_cos = np.prod(np.cos(x / np.sqrt(np.arange(1, self.n + 1))), axis=1)
+            return sum_sq - prod_cos + 1.0
+
+    def get_info(self):
+        domain = [(-600, 600)] * self.n
+        params = {
+            'm_cluster': 1000,
+            'r_cl': 0.95,
+            'theta_cl': np.pi/4,
+            'k_cluster': 10,
+            'epsilon': 1e-6,
+            'delta': 0.1,
+            'sdoa_m': 50,
+            'sdoa_k_max': 200,
+            'r': 0.95,
+            'theta': np.pi/4,
+            'gamma': -float('inf'),
+            'num_check_points': 2
+        }
+        return domain, params
+
+class Problemiwm(MultimodalProblem):
+    @property
+    def name(self):
+        return "Problem project IWM"
+    
+    def g_func(self, x):
+        x = np.asarray(x)
+        cost_function = lambda d: (
+    60.0*d[0] + 70.0*d[1] + 30.0*d[2] + 80.0*d[3] + 90.0*d[4] + 
+    40.0*d[5] + 55.0*d[6] + 65.0*d[7] + 55.0*d[8] + 200.0*d[9] + 
+    180.0*d[10] + 30.0*d[11] + 80.0*d[12] + 130.0*d[13] + 110.0*d[14] + 
+    50.0*d[15] + 40.0*d[16] + 250.0*d[17] + 40.0*d[18] + 20.0*d[19] + 
+    10.0*d[20] + 10.0*d[21] + 30.0*d[22] + 40.0*d[23] + 0.0*d[24]
+)
+
+        x1 = x[0] if x.ndim == 1 else x[:, 0]
+        x2 = x[1] if x.ndim == 1 else x[:, 1]
+        term1 = (4 - 2.1 * x1**2 + (x1**4) / 3) * x1**2
+        term2 = x1 * x2
+        term3 = (-4 + 4 * x2**2) * x2**2
+        return (term1 + term2 + term3)
+
+    def get_info(self):
+        # Hardcoded bounds for each task (d_min, d_max)
+        domain = [
+            (7, 10), (7, 10), (5, 7), (18, 22), (25, 30), 
+            (6, 8), (12, 17), (25, 30), (14, 19), (25, 30), 
+            (20, 30), (4, 5), (15, 20), (25, 30), (25, 30), 
+            (15, 20), (3, 5), (18, 23), (8, 12), (1, 1), 
+            (1, 1), (1, 1), (6, 9), (10, 14), (1, 1)
+        ]
+        params = {
+            'm_cluster': 300,
+            'r_cl': 0.95,
+            'theta_cl': np.pi/4,
+            'k_cluster': 5,
+            'epsilon': 1e-5,
+            'delta': 0.1,
+            'sdoa_m': 50,
+            'sdoa_k_max': 250,
+            'r': 0.95,
+            'theta': np.pi/4,
+            'gamma': -float('inf'),
+            'num_check_points': 2
+
+        }
+        return domain, params
 
 def get_multimodal_problems():
     """Dictionary pemanggil problem."""
     return {
-        1: lambda: Problem1(),
-        2: lambda: Problem2(),
-        3: lambda: Problem3(n=2),
-        4: lambda: Problem3(n=3),
+        1: lambda: Problem1(), # Two N Minima
+        2: lambda: Problem2(), # Camel Back
+        3: lambda: Problem3(n=2), # Rastrigin 2D
+        4: lambda: Problem3(n=3), # Rastrigin 3D
         5: lambda: Problem4(),
         6: lambda: Problem5(),
-        7: lambda: Problem5(n=3)
+        7: lambda: Problem5(n=3),
+        'schwefel': lambda: ProblemSchwefel(n=3),
+        'griewank': lambda: ProblemGriewank(n=2),
+        'two_n_minima': lambda: Problem1(),
+        'rastrigin': lambda: Problem3(n=2),
+        'iwm': lambda: Problemiwm()
     }

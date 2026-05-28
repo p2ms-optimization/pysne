@@ -48,13 +48,6 @@ def run_sdoa_on_clusters(clusters, problem, params):
 
     epsilon = params.get('epsilon', 1e-7)
 
-    # Cek apakah ini problem SNE (untuk trigger early stopping di engine)
-    is_sne = hasattr(problem, 'equations')
-
-    # DEFINE FUNCTION OUTSIDE LOOP FOR MEMORY EFFICIENCY
-    # def cluster_objective(x):
-        # return objective_function(x, equations)
-
     for i, cluster in enumerate(clusters):
         # Determine cluster domain (ensuring it does not exceed global boundaries)
         cluster_domain = []
@@ -72,10 +65,6 @@ def run_sdoa_on_clusters(clusters, problem, params):
         # Generate initial points in cluster domain
         initial_points = generate_sobol_points(sdoa_params['m'], len(domain), cluster_domain)
 
-        # Definisikan fungsi objektif lokal
-        # def cluster_objective(x):
-            # return problem.evaluate_fitness(x)
-
         # Run SDOA in cluster domain
         candidate = spiral_dynamics_optimization(
             # cluster_objective, 
@@ -86,80 +75,15 @@ def run_sdoa_on_clusters(clusters, problem, params):
             params=sdoa_params,
             minimization=False, 
             custom_initial_points=initial_points,
-            # equations=equations, 
-            equations=problem.equations if is_sne else None,
+            equations=problem.equations,
             epsilon=epsilon
         )
 
         candidates.append(candidate)
 
+
     return np.array(candidates)
 
-# def select_final_roots dipindah ke base problem 
-# def select_final_roots(candidates, equations, domain, epsilon, delta):
-#     """
-#     Performs the final selection phase to determine valid roots from
-#     the candidate points optimized by SDOA.
-    
-#     This function implements Steps 10 and 11 from the clustering method
-#     by Sidarto & Kania (2015). The selection process involves:
-#     1. Discarding candidates that fall outside the domain boundaries.
-#     2. Discarding candidates with a residual 1 - F(x) >= epsilon.
-#     3. Merging candidates that are close to each other (distance <= delta),
-#        retaining only the candidate with the highest F(x) value.
-
-#     Parameters
-#     ----------
-#     candidates : numpy.ndarray or list
-#         List of candidate root points resulting from the optimization phase.
-#     equations : list of callable
-#         A list of functions representing the system of nonlinear equations.
-#     domain : list of tuple
-#         The global search space boundaries in the format [(min, max), ...].
-#     epsilon : float
-#         Tolerance value for root accuracy. Candidates are accepted if 1 - F(x) < epsilon.
-#     delta : float
-#         Minimum distance boundary between distinct roots (equivalence radius).
-
-#     Returns
-#     -------
-#     numpy.ndarray
-#         Array containing the final validated and unique root points.
-#     """
-#     # Filter 1: Validate domain and epsilon threshold value
-#     accurate_candidates = []
-#     for cand in candidates:
-#         if not is_in_domain(cand, domain):
-#             continue
-            
-#         F_val = objective_function(cand, equations)
-#         if 1.0 - F_val < epsilon:
-#             accurate_candidates.append((cand, F_val))
-
-#     if not accurate_candidates:
-#         return np.array([])
-
-#     # Filter 2: Eliminate adjacent candidates (based on delta)
-#     # Sort in descending order based on F_val so that the root 
-#     # with the highest accuracy is always evaluated first.
-#     accurate_candidates.sort(key=lambda x: x[1], reverse=True)
-    
-#     final_roots = []
-
-#     # the section below contains slight modifications from the main code
-#     for cand, F_val in accurate_candidates:
-#         found_close = False
-#         for existing, _ in final_roots:
-#             distance = np.linalg.norm(cand - existing)
-#             if distance <= delta:
-#                 found_close = True
-#                 break  # Immediately discard the candidate because the existing one is guaranteed to be better (due to sorting)
-                
-#         if not found_close:
-#             final_roots.append((cand, F_val))
-
-#     return np.array([root for root, _ in final_roots])
-    
 
 # def solve_system(equations, domain, params, verbose=False):
 def solve_system(problem, params, verbose=False):
@@ -193,15 +117,6 @@ def solve_system(problem, params, verbose=False):
         - 'time_elapsed': float representing the computation time in seconds.
     """
     start_time = time.time()
-
-    # Extract SDOA-specific parameters
-    # sdoa_params = {
-    #     'm': params['sdoa_m'],
-    #     'r': params['r'],  # Uses the 'r' parameter from the main dictionary
-    #     'theta': params['theta'],
-    #     'k_max': params['sdoa_k_max']
-    # }
-    # epsilon = params['epsilon']
 
     # PHASE 1: Iterative Clustering
     # clusters = perform_iterative_clustering(equations, domain, params)

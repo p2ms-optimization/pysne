@@ -7,7 +7,7 @@ from typing import Dict, List, Any
 # Import dari pysne repository
 from pysne.problems.benchmarks_multimodal import get_multimodal_problems
 from pysne.solver import solve_system
-from pysne.problems.base import BaseProblem
+from pysne.problems.base import BaseProblem, MinimizedProblem
 
 class PysneTuner:
     """
@@ -64,18 +64,6 @@ class PysneTuner:
                     if skip_min:
                         min_roots = []
                     else:
-                        # Mencari Minima (menggunakan teknik wrapper negasi dari test_multimodal.py)
-                        class MinimizedProblem:
-                            def __init__(self, original):
-                                self.original = original
-                                self.domain = original.domain
-                                self.n_var = original.n_var
-                                self.equations = None
-                                self.name = original.name
-                            def get_info(self): return self.original.get_info()
-                            def evaluate_fitness(self, x): return -self.original.evaluate_fitness(x)
-                            def select_final_roots(self, c): return BaseProblem.select_final_roots(self, c)
-                            
                         res_min = solve_system(MinimizedProblem(problem), params, verbose=False)
                         min_roots = res_min['roots']
                     
@@ -141,26 +129,27 @@ if __name__ == "__main__":
     
     # Ambil problem multimodal 
     problems = get_multimodal_problems()
-    problem_to_tune = problems[5]() # Menggunakan Problem 2: Six Hump Camel Back Function
+    problem_to_tune = problems["iwm"]() #1. 2d second minima 2. six hump camel back 3. 2d rastrigin 4. 3d 5. 2d vincent 6. 2d shubert 7. 2d shubert 
     
     # 1. Tentukan Parameter Grid untuk dievaluasi
-    # Ini merepresentasikan kombinasi-kombinasi yang akan dites secara grid search
+    # Fokus pada delta, num_check_points, dan m_cluster untuk menemukan 81 peak
     param_grid = {
-        'm_cluster': [2000, 2500, 3000],  # Mencoba variasi size populasi clustering awal
-        'k_cluster': [15, 20, 25],           # Mencoba variasi seberapa lama clustering iteratif
-        'sdoa_m': [100, 200, 300],            # Mencoba jumlah populasi untuk local search (SDOA)
-        'sdoa_k_max': [250, 500, 750],       # Iterasi maksimal untuk pencarian SDOA
-        'delta': [0.1, 0.05, 0.01],                 # Nilai yang dijaga tetap
-        'epsilon': [1e-5, 1e-6, 1e-7],              # Nilai yang dijaga tetap
-        'gamma': [150, 200, 250]        # Nilai yang dijaga tetap
+        'm_cluster': [300], # Menggunakan pangkat 2 (2^14) untuk Sobol points
+        'k_cluster': [5],
+        'sdoa_m': [50],
+        'sdoa_k_max': [250],
+        'delta': [0.1],
+        'epsilon': [1e-5],
+        'gamma': [-float('inf')],
+        'num_check_points': [1, 2]
     }
     
     # 2. Inisialisasi Tuner
     tuner = PysneTuner(param_grid=param_grid)
     
     # 3. Eksekusi Tuning (Grid Search)
-    # n_trials=3 berarti algoritma akan merunning tiap kombinasi sebanyak 3x untuk menstabilkan probabilitas stokastiknya
-    tuner.execute(problem_to_tune, n_trials=3, verbose=True)
+    # n_trials=1 agar tidak memakan waktu terlalu lama dalam pencarian awal
+    tuner.execute(problem_to_tune, n_trials=1, verbose=True)
     
-    # 4. Ekspor ke CSV agar bisa dianalisis/diplot via Excel atau library visualisasi
+    # 4. Ekspor ke CSV
     tuner.export_results("pysne_tuner_results.csv")
