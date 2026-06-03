@@ -90,12 +90,35 @@ def validate_solutions(
             valid_roots.append(root)
     return valid_roots
 
-def create_continuous_bounds(integer_domain: List[Tuple[int, int]]) -> List[Tuple[float, float]]:
+def create_continuous_bounds(
+    integer_domain: List[Tuple[int, int]],
+    margin: float = 0.5
+) -> List[Tuple[float, float]]:
     """
-    Converts an integer domain to continuous bounds by adding a half-unit pad on both ends.
-    For example, [(1, 5)] becomes [(0.5, 5.5)].
+    Memperluas setiap dimensi integer_domain sebesar margin ke kiri dan kanan.
+
+    Tujuan: titik spiral bebas bergerak di ruang kontinu yang sedikit
+    lebih lebar dari grid integer, sehingga titik-titik di tepi domain
+    integer tetap bisa dievaluasi dengan benar.
+
+    Contoh:
+        integer_domain = [(-50, 50), (-50, 50)]
+        create_continuous_bounds(integer_domain, margin=0.5)
+        → [(-50.5, 50.5), (-50.5, 50.5)]
+
+    Parameters
+    ----------
+    integer_domain : list of tuple
+        Batas bilangan bulat per dimensi, misal [(-50, 50), (-50, 50)].
+    margin : float
+        Besarnya perluasan ke kiri dan kanan. Default 0.5 (setengah jarak antar integer).
+
+    Returns
+    -------
+    list of tuple
+        Continuous bounds yang sudah diperluas.
     """
-    return [(float(lo) - 0.5, float(hi) + 0.5) for lo, hi in integer_domain]
+    return [(lo - margin, hi + margin) for lo, hi in integer_domain]
 
 def filter_unique_roots(candidates: List[Tuple[np.ndarray, float]], delta: float) -> np.ndarray:
     """
@@ -123,3 +146,90 @@ def filter_unique_roots(candidates: List[Tuple[np.ndarray, float]], delta: float
             
     return np.array([root for root, _ in final_roots])
 
+def calculate_sobol_discrepancy(
+    num_points: int = None, 
+    dimension: int = None, 
+    points: np.ndarray = None, 
+    domain: List[Tuple[float, float]] = None
+) -> float:
+    """
+    Menghitung nilai discrepancy dari distribusi titik.
+    Jika `points` diberikan, menghitung discrepancy dari titik tersebut (diskalakan kembali ke [0, 1]^d jika `domain` diberikan).
+    Jika tidak, men-generate titik Sobol baru menggunakan scipy.stats.qmc pada dimensi dan jumlah titik tertentu.
+    
+    Parameters
+    ----------
+    num_points : int, optional
+        Jumlah titik sampel yang digenerasikan (jika points tidak disuapkan).
+    dimension : int, optional
+        Dimensi dari ruang pencarian (jika points tidak disuapkan).
+    points : numpy.ndarray, optional
+        Titik-titik sampel yang akan dihitung nilai discrepancy-nya.
+    domain : list of tuple, optional
+        Batas pencarian untuk penskalaan kembali titik sampel ke [0, 1]^d.
+        
+    Returns
+    -------
+    float
+        Nilai discrepancy (discrepancy yang lebih rendah menunjukkan distribusi yang lebih merata).
+    """
+    from scipy.stats import qmc
+    
+    if points is not None:
+        try:
+            pts = np.asarray(points)
+            if domain is not None:
+                lower_bounds = np.array([d[0] for d in domain])
+                upper_bounds = np.array([d[1] for d in domain])
+                denom = upper_bounds - lower_bounds
+                denom[denom == 0] = 1.0
+                pts = (pts - lower_bounds) / denom
+            pts = np.clip(pts, 0.0, 1.0)
+            discrepancy_val = qmc.discrepancy(pts)
+            return float(discrepancy_val)
+        except Exception as e:
+            warnings.warn(f"Gagal menghitung discrepancy dari points: {e}", RuntimeWarning)
+            return -1.0
+
+    if num_points is None or dimension is None:
+        warnings.warn("Parameter num_points dan dimension harus diberikan jika points tidak disuapkan.", RuntimeWarning)
+        return -1.0
+
+    # Menggunakan Sobol sampler bawaan scipy
+    sampler = qmc.Sobol(d=dimension, scramble=True)
+    
+    try:
+        points_gen = sampler.random(n=num_points)
+        discrepancy_val = qmc.discrepancy(points_gen)
+        return float(discrepancy_val)
+    except Exception as e:
+        warnings.warn(f"Gagal menghitung discrepancy: {e}", RuntimeWarning)
+        return -1.0
+    
+def sort_unique_roots(roots, sort=False):
+    """
+    Menghapus solusi duplikat berdasarkan nilai, dengan opsi mengabaikan urutan.
+
+    Parameters
+    ----------
+    roots : list of tuple
+        Solusi-solusi yang sudah terseleksi (masing-masing sebagai tuple integer).
+    sort : bool
+        Jika True, setiap solusi diurutkan (sorted) sebelum dibandingkan,
+        sehingga solusi yang hanya berbeda urutan dianggap sama.
+        Jika False, hanya solusi identik persis yang akan dihapus.
+
+    Returns
+    -------
+    list of tuple
+        Solusi unik dalam format tuple.
+    """
+    seen = set()
+    unique = []
+    for root in roots:
+        # Buat kunci: urutkan jika sort=True, jika tidak gunakan aslinya
+        key = tuple(sorted(root)) if sort else tuple(root)
+        if key not in seen:
+            seen.add(key)
+            unique.append(root)
+    return unique
