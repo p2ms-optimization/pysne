@@ -56,13 +56,21 @@ def process_point_for_clustering(
         return clusters
 
     # Nearest Cluster Search
-    min_dist = float('inf')
-    nearest_cluster = None
-    for cluster in clusters:
-        dist = np.linalg.norm(y - cluster.center)
-        if dist < min_dist:
-            min_dist = dist
-            nearest_cluster = cluster
+    # min_dist = float('inf')
+    # nearest_cluster = None
+    # for cluster in clusters:
+    #     dist = np.linalg.norm(y - cluster.center)
+    #     if dist < min_dist:
+    #         min_dist = dist
+    #         nearest_cluster = cluster
+
+    # Nearest Cluster Search (Vectorized)
+    centers = np.array([c.center for c in clusters])
+    dists = np.linalg.norm(centers - y, axis=1)
+    closest_idx = np.argmin(dists)
+    nearest_cluster = clusters[closest_idx]
+    min_dist = dists[closest_idx]
+
 
     # Dynamic Multi-point Check Logic
     x_C = nearest_cluster.center
@@ -98,7 +106,7 @@ def process_point_for_clustering(
         nearest_cluster.center = y.copy()
     else:
         case_triggered = 'None (Only radius updated)'
-        
+
     nearest_cluster.radius = dist_half
 
     if history is not None and case_triggered is not None:
@@ -182,6 +190,13 @@ def perform_iterative_clustering(
     initial_radius = 0.5 * min(hi - lo for lo, hi in domain)
     clusters.append(Cluster(x_prime, initial_radius))
 
+    if history is not None:
+        history.append({
+            'case': 'InitialState',
+            'points': points.copy(),
+            'clusters': [Cluster(x_prime.copy(), initial_radius)]
+        })
+
     # 4. Main clustering loop
     for k in range(k_cluster):
         F_values = np.array([problem.evaluate_fitness(p) for p in points])
@@ -206,10 +221,13 @@ def perform_iterative_clustering(
                     cutoff = -float('inf')
                     
             if F_val > cutoff:
-                is_center = any(np.allclose(points[i], cluster.center, atol=1e-8) for cluster in clusters)
+                centers = np.array([c.center for c in clusters])
+                is_center = np.any(np.all(np.abs(centers - points[i]) < 1e-8, axis=1)) if len(centers) > 0 else False
+                # is_center = any(np.allclose(points[i], cluster.center, atol=1e-8) for cluster in clusters)
                 if not is_center:
                     # clusters = process_point_for_clustering(points[i], clusters, equations, gamma, domain)
                     clusters = process_point_for_clustering(points[i], clusters, problem, cutoff, params, history)
+
 
         # Update points using spiral dynamics
         # F_values = np.array([objective_function(p, equations) for p in points])
