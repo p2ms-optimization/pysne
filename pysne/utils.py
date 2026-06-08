@@ -90,13 +90,35 @@ def validate_solutions(
             valid_roots.append(root)
     return valid_roots
 
-def create_continuous_bounds() :
+def create_continuous_bounds(integer_domain: List[Tuple[int, int]]) -> List[Tuple[float, float]]:
     """
+    Converts an integer domain to continuous bounds by adding a half-unit pad on both ends.
+    For example, [(1, 5)] becomes [(0.5, 5.5)].
+    """
+    return [(float(lo) - 0.5, float(hi) + 0.5) for lo, hi in integer_domain]
 
+def filter_unique_roots(candidates: List[Tuple[np.ndarray, float]], delta: float) -> np.ndarray:
     """
-
-def filter_unique_roots() :
+    Filters candidates such that only unique roots are kept.
+    Each candidate in the input list is a tuple of (coordinate_point, fitness_value).
+    If two points are closer than delta, only the one with the higher fitness value is retained.
     """
-    """
-
-    return 
+    if not candidates:
+        return np.array([])
+    
+    # Sort in descending order based on fitness value
+    sorted_candidates = sorted(candidates, key=lambda x: x[1], reverse=True)
+    
+    final_roots = []
+    for cand, f_val in sorted_candidates:
+        found_close = False
+        for i, (existing, existing_f) in enumerate(final_roots):
+            if np.linalg.norm(cand - existing) <= delta:
+                found_close = True
+                if f_val > existing_f:
+                    final_roots[i] = (cand, f_val)
+                break
+        if not found_close:
+            final_roots.append((cand, f_val))
+            
+    return np.array([root for root, _ in final_roots])
