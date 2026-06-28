@@ -71,6 +71,13 @@ def process_point_for_clustering(
     nearest_cluster = clusters[closest_idx]
     min_dist = dists[closest_idx]
 
+    # Nearest Cluster Search (Optimized without array allocation overhead)
+    # Using squared distance is faster than np.linalg.norm in a loop
+    # sq_dists = [np.sum((c.center - y)**2) for c in clusters]
+    # closest_idx = np.argmin(sq_dists)
+    # nearest_cluster = clusters[closest_idx]
+    # min_dist = np.sqrt(sq_dists[closest_idx])
+
 
     # Dynamic Multi-point Check Logic
     x_C = nearest_cluster.center
@@ -224,6 +231,8 @@ def perform_iterative_clustering(
                 centers = np.array([c.center for c in clusters])
                 is_center = np.any(np.all(np.abs(centers - points[i]) < 1e-8, axis=1)) if len(centers) > 0 else False
                 # is_center = any(np.allclose(points[i], cluster.center, atol=1e-8) for cluster in clusters)
+                # Optimized is_center: generator with early exit, avoiding np.allclose and array allocation overhead
+                # is_center = any(np.all(np.abs(c.center - points[i]) < 1e-8) for c in clusters)
                 if not is_center:
                     # clusters = process_point_for_clustering(points[i], clusters, equations, gamma, domain)
                     clusters = process_point_for_clustering(points[i], clusters, problem, cutoff, params, history)
