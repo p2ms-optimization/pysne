@@ -39,4 +39,3 @@ pysne/                          <-- Root Folder
 ├── CHANGELOG.md                # Log perubahan proyek
 └── README.md                   # Dokumentasi utama Proyek
 ```
-
