@@ -48,8 +48,8 @@ class BaseProblem(ABC):
         pass
 
     @abstractmethod
-    def select_final_roots(self, candidates):
-        """Setiap tipe problem mendefinisikan sendiri cara memfilter solusi."""
+    def select_final_optimal(self, candidates):
+        """Setiap tipe problem mendefinisikan sendiri cara memfilter solusi akhir (optimal)."""
         pass
 
 
@@ -86,6 +86,10 @@ class SNEProblem(BaseProblem):
                 
         return filter_unique_roots(accurate_candidates, delta)
 
+    def select_final_optimal(self, candidates):
+        """Alias: SNE tetap menggunakan istilah roots."""
+        return self.select_final_roots(candidates)
+
 
 class MultimodalProblem(BaseProblem):
     """Base class khusus Multimodal"""
@@ -94,7 +98,7 @@ class MultimodalProblem(BaseProblem):
     def evaluate_fitness(self, x):
         return self.g_func(x)
 
-    def select_final_roots(self, candidates):
+    def select_final_optimal(self, candidates):
         domain, params = self.get_info()
         delta = params.get('delta', 0.1)
         epsilon = params.get('epsilon', 1e-7)
@@ -223,6 +227,10 @@ class DiophantineProblem(BaseProblem):
             
         return roots
 
+    def select_final_optimal(self, candidates):
+        """Alias: Diophantine tetap menggunakan istilah roots."""
+        return self.select_final_roots(candidates)
+
 class MinimizedProblem(MultimodalProblem):
     """
     Wrapper class to invert the fitness of an existing problem for minimization search.
@@ -247,9 +255,9 @@ class MinimizedProblem(MultimodalProblem):
     def evaluate_fitness(self, x):
         return -self.original.evaluate_fitness(x)
 
-    def select_final_roots(self, candidates):
+    def select_final_optimal(self, candidates):
         original_class = self.original.__class__
-        if hasattr(self.original, 'select_final_roots') and original_class.select_final_roots != MultimodalProblem.select_final_roots:
+        if hasattr(self.original, 'select_final_optimal') and original_class.select_final_optimal != MultimodalProblem.select_final_optimal:
             domain, params = self.get_info()
             delta = params.get('delta', 0.5)
             accurate_candidates = []
@@ -258,4 +266,4 @@ class MinimizedProblem(MultimodalProblem):
                     accurate_candidates.append((cand, self.evaluate_fitness(cand)))
             return filter_unique_roots(accurate_candidates, delta)
         else:
-            return super().select_final_roots(candidates)
+            return super().select_final_optimal(candidates)
