@@ -212,8 +212,8 @@ def solve_system(problem, params, verbose=False):
     candidates = run_sdoa_on_clusters(clusters, problem, params)
     
     # PHASE 3: Final Selection and Validation
-    # final_roots = select_final_roots(candidates, equations, domain, epsilon, params['delta'])
-    final_roots = problem.select_final_roots(candidates)
+    # final_roots = select_final_optimal(candidates, equations, domain, epsilon, params['delta'])
+    final_roots = problem.select_final_optimal(candidates)
 
     # Dipindahkan ke class problem
     # Residual validation to ensure accuracy (optional, depending on implementation)
@@ -223,10 +223,12 @@ def solve_system(problem, params, verbose=False):
 
     if verbose:
         print(f"Search completed in {elapsed_time:.3f} seconds.")
-        print(f"Found {len(clusters)} clusters and {len(final_roots)} valid roots.")
+        solution_label = "roots" if getattr(problem, 'problem_type', '') in ('SNE', 'Diophantine') else "optimal solutions"
+        print(f"Found {len(clusters)} clusters and {len(final_roots)} valid {solution_label}.")
 
     return {
         'roots': np.array(final_roots),
+        'optimals': np.array(final_roots),
         'clusters': clusters,
         'time_elapsed': elapsed_time
     }
