@@ -1,0 +1,65 @@
+{
+    "Excavation": {
+        "required_activities": [],
+        "activity_min_time": 6,
+        "activity_normal_time": 6,
+        "normal_cost": 360,
+        "crash_cost": 999.0
+    },
+    "Path A-1": {
+        "required_activities": ["Excavation"],
+        "activity_min_time": 4,
+        "activity_normal_time": 5,
+        "normal_cost": 150,
+        "crash_cost": 30.0
+    },
+    "Path B-1": {
+        "required_activities": ["Excavation"],
+        "activity_min_time": 4,
+        "activity_normal_time": 5,
+        "normal_cost": 250,
+        "crash_cost": 50.0
+    },
+    "Path C-1": {
+        "required_activities": ["Excavation"],
+        "activity_min_time": 3,
+        "activity_normal_time": 4,
+        "normal_cost": 240,
+        "crash_cost": 60.0
+    },
+    "Path A-2": {
+        "required_activities": ["Path A-1"],
+        "activity_min_time": 4,
+        "activity_normal_time": 15,
+        "normal_cost": 300,
+        "crash_cost": 20.0
+    },
+    "Path B-2": {
+        "required_activities": ["Path B-1"],
+        "activity_min_time": 1,
+        "activity_normal_time": 2,
+        "normal_cost": 20,
+        "crash_cost": 10.0
+    },
+    "Path C-2": {
+        "required_activities": ["Path C-1"],
+        "activity_min_time": 8,
+        "activity_normal_time": 12,
+        "normal_cost": 120,
+        "crash_cost": 10.0
+    },
+    "Merge": {
+        "required_activities": ["Path A-2", "Path B-2", "Path C-2"],
+        "activity_min_time": 1,
+        "activity_normal_time": 1,
+        "normal_cost": 10,
+        "crash_cost": 0.0
+    },
+    "Final": {
+        "required_activities": ["Merge"],
+        "activity_min_time": 1,
+        "activity_normal_time": 1,
+        "normal_cost": 10,
+        "crash_cost": 0.0
+    }
+}

@@ -55,18 +55,45 @@ def run_sdoa_on_clusters(clusters, problem, params):
     # def cluster_objective(x):
         # return objective_function(x, equations)
 
+    # is_diophantine = getattr(problem, 'problem_type', None) == 'Diophantine'
+    # init_method = params.get('init_method', 'sobol')
+
+    # for i, cluster in enumerate(clusters):
+    #     effective_radius = max(cluster.radius, 1.0) if is_diophantine else cluster.radius
+
+    #     cluster_domain = []
+    #     for dim in range(problem.n_var):
+    #         cluster_lo = max(domain[dim][0], cluster.center[dim] - effective_radius)
+    #         cluster_hi = min(domain[dim][1], cluster.center[dim] + effective_radius)
+
+    #         if is_diophantine and cluster_lo >= cluster_hi:
+    #             mid = (domain[dim][0] + domain[dim][1]) / 2.0
+    #             half = max(0.5, (domain[dim][1] - domain[dim][0]) / 2.0)
+    #             cluster_lo = max(domain[dim][0], mid - half)
+    #             cluster_hi = min(domain[dim][1], mid + half)
+
+    #         cluster_domain.append((cluster_lo, cluster_hi))
+
     is_diophantine = getattr(problem, 'problem_type', None) == 'Diophantine'
+    # Dimensi mana saja yang harus diperlakukan sebagai integer saat melebarkan
+    # domain lokal cluster. Diophantine -> semua dimensi. MixedInteger -> hanya
+    # dimensi yang ditandai lewat problem.integer_dims. Selain itu -> tidak ada.
+    if is_diophantine:
+        integer_dims = set(range(problem.n_var))
+    else:
+        integer_dims = set(getattr(problem, 'integer_dims', ()) or ())
     init_method = params.get('init_method', 'sobol')
 
     for i, cluster in enumerate(clusters):
-        effective_radius = max(cluster.radius, 1.0) if is_diophantine else cluster.radius
-
         cluster_domain = []
         for dim in range(problem.n_var):
+            is_int_dim = dim in integer_dims
+            effective_radius = max(cluster.radius, 1.0) if is_int_dim else cluster.radius
+
             cluster_lo = max(domain[dim][0], cluster.center[dim] - effective_radius)
             cluster_hi = min(domain[dim][1], cluster.center[dim] + effective_radius)
 
-            if is_diophantine and cluster_lo >= cluster_hi:
+            if is_int_dim and cluster_lo >= cluster_hi:
                 mid = (domain[dim][0] + domain[dim][1]) / 2.0
                 half = max(0.5, (domain[dim][1] - domain[dim][0]) / 2.0)
                 cluster_lo = max(domain[dim][0], mid - half)

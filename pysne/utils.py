@@ -120,6 +120,69 @@ def create_continuous_bounds(
     """
     return [(lo - margin, hi + margin) for lo, hi in integer_domain]
 
+def penalty_function(
+    f_val: float,
+    g_vals: List[float],
+    M: float = 1e15
+) -> float:
+    """
+    Static/exterior penalty function untuk masalah constrained optimization:
+
+        F(x) = f(x) + M * sum(max(0, g_i(x)))
+
+    Parameters
+    ----------
+    f_val : float
+        Nilai fungsi objektif asli f(x) (yang ingin diminimumkan).
+    g_vals : list of float
+        Nilai-nilai fungsi kendala g_i(x). Kendala dianggap melanggar batas
+        jika g_i(x) > 0.
+    M : float
+        Koefisien penalti (default 1e15, sesuai konvensi umum di literatur).
+
+    Returns
+    -------
+    float
+        Nilai F(x) setelah penalti ditambahkan.
+    """
+    violation = sum(np.maximum(0.0, g) for g in g_vals)
+    return f_val + M * violation
+
+
+def create_mixed_bounds(
+    raw_domain: List[Tuple[float, float]],
+    integer_dims,
+    margin: float = 0.5
+) -> List[Tuple[float, float]]:
+    """
+    Seperti create_continuous_bounds, tapi margin hanya diterapkan pada
+    dimensi yang ditandai sebagai integer (integer_dims). Dimensi kontinu
+    dibiarkan apa adanya.
+
+    Parameters
+    ----------
+    raw_domain : list of tuple
+        Batas asli per dimensi, misal [(2.6, 3.6), (0.7, 0.8), (17, 28), ...].
+    integer_dims : iterable of int
+        Indeks (0-based) dimensi yang bernilai integer.
+    margin : float
+        Besarnya perluasan ke kiri/kanan untuk dimensi integer saja.
+
+    Returns
+    -------
+    list of tuple
+        Domain kontinu yang siap dipakai solver, dengan dimensi integer
+        diperlebar agar titik-titik di tepi grid tetap terjangkau.
+    """
+    integer_dims = set(integer_dims)
+    bounds = []
+    for i, (lo, hi) in enumerate(raw_domain):
+        if i in integer_dims:
+            bounds.append((lo - margin, hi + margin))
+        else:
+            bounds.append((lo, hi))
+    return bounds
+
 def filter_unique_roots(candidates: List[Tuple[np.ndarray, float]], delta: float) -> np.ndarray:
     """
     Filters candidates such that only unique roots are kept.

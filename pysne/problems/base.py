@@ -1,6 +1,10 @@
 from abc import ABC, abstractmethod
 import numpy as np
-from pysne.utils import is_in_domain, objective_function, filter_unique_roots, create_continuous_bounds, sort_unique_roots
+from pysne.utils import (
+    is_in_domain, objective_function, filter_unique_roots,
+    create_continuous_bounds, sort_unique_roots,
+    penalty_function, create_mixed_bounds
+)
 
 class BaseProblem(ABC):
     """
@@ -238,6 +242,114 @@ class DiophantineProblem(BaseProblem):
         """Alias: Diophantine tetap menggunakan istilah roots."""
         return self.select_final_roots(candidates)
 
+class MixedIntegerProblem(BaseProblem):
+    """
+    Base class khusus Mixed-Integer Nonlinear Programming (MINLP) dengan
+    metode fungsi penalti (penalty function method):
+
+        F(x) = f(x) + M * sum(max(0, g_i(x)))    ,  i = 1..k
+
+    Beberapa variabel bisa kontinu, sisanya integer (campuran), ditandai
+    lewat get_integer_dims(). Solver tetap memaksimumkan 'fitness', jadi
+    fitness didefinisikan sebagai -F(x) (karena masalah ini masalah minimisasi).
+
+    Class turunan WAJIB mengoverride:
+    - name (property)
+    - get_raw_domain() -> list of (lo, hi) per variabel, x3 misalnya (17, 28)
+    - get_integer_dims() -> list indeks (0-based) variabel yang harus bulat
+    - objective(x) -> f(x) asli yang ingin diminimumkan
+    - constraints(x) -> list nilai g_i(x), melanggar jika g_i(x) > 0
+    - get_params() -> dict parameter solver (boleh sertakan 'M' utk koefisien penalti)
+    """
+    problem_type = 'MixedInteger'
+
+    def __init__(self):
+        if type(self).get_info is not MixedIntegerProblem.get_info:
+            raw_domain, self.raw_params = type(self).get_info(self)
+        else:
+            raw_domain = self.get_raw_domain()
+            self.raw_params = self.get_params()
+
+        self.raw_domain = raw_domain
+        self.integer_dims = set(self.get_integer_dims())
+        self._continuous_domain = create_mixed_bounds(raw_domain, self.integer_dims)
+
+        super().__init__()
+        self.domain = self._continuous_domain
+        self.equations = None
+
+    def get_raw_domain(self):
+        """Domain asli (belum diperlebar), misal [(2.6, 3.6), ..., (17, 28), ...]."""
+        return self.raw_domain
+
+    def get_integer_dims(self):
+        """Override: kembalikan indeks (0-based) variabel yang harus bulat/integer."""
+        return []
+
+    def get_params(self):
+        return self.raw_params if hasattr(self, 'raw_params') else {}
+
+    def get_info(self):
+        return self._continuous_domain, self.get_params()
+
+    def round_mixed(self, x):
+        """Membulatkan hanya dimensi yang ditandai integer, sisanya tetap kontinu.
+        Mendukung x berupa satu titik (n,) maupun batch titik (m, n)."""
+        x = np.array(x, dtype=float)
+        for d in self.integer_dims:
+            x[..., d] = np.round(x[..., d])
+        return x
+
+    def objective(self, x):
+        """Override: f(x) asli (fungsi yang ingin diminimumkan)."""
+        raise NotImplementedError("Subclass MixedIntegerProblem harus mengoverride objective(x).")
+
+    def constraints(self, x):
+        """Override: list nilai g_i(x). Melanggar batas jika g_i(x) > 0."""
+        return []
+
+    def g_func(self, x):
+        """F(x) = f(x) + M * sum(max(0, g_i(x))) setelah pembulatan variabel integer."""
+        x = self.round_mixed(x)
+        f_val = self.objective(x)
+        g_vals = self.constraints(x)
+        M = self.get_params().get('M', 1e15)
+        return penalty_function(f_val, g_vals, M)
+
+    def evaluate_fitness(self, x):
+        """Solver selalu memaksimumkan fitness, jadi fitness = -F(x)."""
+        return -self.g_func(x)
+
+    def select_final_optimal(self, candidates):
+        """
+        Untuk MINLP dengan penalti, yang dicari cukup solusi (global) terbaik,
+        bukan banyak puncak lokal seperti pada Multimodal. Kandidat dibulatkan
+        pada dimensi integer, difilter agar berada dalam domain asli, lalu
+        di-dedup dengan filter_unique_roots (hasil sudah terurut menurun
+        berdasarkan fitness, sehingga kandidat pertama = solusi terbaik).
+        """
+        if candidates is None or len(candidates) == 0:
+            return np.array([])
+
+        delta = self.get_params().get('delta', 0.5)
+
+        scored = []
+        seen = set()
+        for cand in candidates:
+            cand_r = self.round_mixed(cand)
+            if not is_in_domain(cand_r, self.raw_domain):
+                continue
+
+            key = tuple(cand_r.tolist())
+            if key in seen:
+                continue
+            seen.add(key)
+
+            f_val = self.evaluate_fitness(cand_r)
+            scored.append((cand_r, f_val))
+
+        return filter_unique_roots(scored, delta)
+    
 class MinimizedProblem(MultimodalProblem):
     """
     Wrapper class to invert the fitness of an existing problem for minimization search.

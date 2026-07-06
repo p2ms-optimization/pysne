@@ -1,0 +1,177 @@
+{
+    "Bids & Contracts": {
+        "required_activities": [],
+        "activity_min_time": 7,
+        "activity_normal_time": 10,
+        "normal_cost": 600,
+        "crash_cost": 60.0
+    },
+    "Grading & Building Permits": {
+        "required_activities": ["Bids & Contracts"],
+        "activity_min_time": 7,
+        "activity_normal_time": 10,
+        "normal_cost": 700,
+        "crash_cost": 70.0
+    },
+    "Site Work": {
+        "required_activities": ["Grading & Building Permits"],
+        "activity_min_time": 5,
+        "activity_normal_time": 7,
+        "normal_cost": 300,
+        "crash_cost": 30.0
+    },
+    "Foundation": {
+        "required_activities": ["Site Work"],
+        "activity_min_time": 18,
+        "activity_normal_time": 22,
+        "normal_cost": 800,
+        "crash_cost": 80.0
+    },
+    "Rough Carpentry": {
+        "required_activities": ["Foundation"],
+        "activity_min_time": 25,
+        "activity_normal_time": 30,
+        "normal_cost": 900,
+        "crash_cost": 90.0
+    },
+    "Concrete Slabs": {
+        "required_activities": ["Site Work", "Foundation"],
+        "activity_min_time": 6,
+        "activity_normal_time": 8,
+        "normal_cost": 400,
+        "crash_cost": 40.0
+    },
+    "H.V.A.C.": {
+        "required_activities": ["Rough Carpentry", "Concrete Slabs", "Exterior Finishes"],
+        "activity_min_time": 12,
+        "activity_normal_time": 17,
+        "normal_cost": 550,
+        "crash_cost": 55.0
+    },
+    "Plumbing Rough-in": {
+        "required_activities": ["Rough Carpentry", "H.V.A.C."],
+        "activity_min_time": 25,
+        "activity_normal_time": 30,
+        "normal_cost": 650,
+        "crash_cost": 65.0
+    },
+    "Electric Rough-in": {
+        "required_activities": ["Rough Carpentry"],
+        "activity_min_time": 14,
+        "activity_normal_time": 19,
+        "normal_cost": 550,
+        "crash_cost": 55.0
+    },
+    "Roofing": {
+        "required_activities": ["Rough Carpentry", "Exterior Finishes"],
+        "activity_min_time": 25,
+        "activity_normal_time": 30,
+        "normal_cost": 2000,
+        "crash_cost": 200.0
+    },
+    "Exterior Finishes": {
+        "required_activities": ["Rough Carpentry"],
+        "activity_min_time": 20,
+        "activity_normal_time": 30,
+        "normal_cost": 1800,
+        "crash_cost": 180.0
+    },
+    "Insulation": {
+        "required_activities": ["Roofing"],
+        "activity_min_time": 4,
+        "activity_normal_time": 5,
+        "normal_cost": 300,
+        "crash_cost": 30.0
+    },
+    "Drywall": {
+        "required_activities": ["Insulation"],
+        "activity_min_time": 15,
+        "activity_normal_time": 20,
+        "normal_cost": 800,
+        "crash_cost": 80.0
+    },
+    "Floor Finishes": {
+        "required_activities": ["Interior Trim"],
+        "activity_min_time": 25,
+        "activity_normal_time": 30,
+        "normal_cost": 1300,
+        "crash_cost": 130.0
+    },
+    "Paint": {
+        "required_activities": ["Drywall", "Interior Trim"],
+        "activity_min_time": 25,
+        "activity_normal_time": 30,
+        "normal_cost": 1100,
+        "crash_cost": 110.0
+    },
+    "Interior Trim": {
+        "required_activities": [],
+        "activity_min_time": 15,
+        "activity_normal_time": 20,
+        "normal_cost": 500,
+        "crash_cost": 50.0
+    },
+    "Plumbing Trim": {
+        "required_activities": ["Plumbing Rough-in", "Floor Finishes", "Paint", "Interior Trim"],
+        "activity_min_time": 3,
+        "activity_normal_time": 5,
+        "normal_cost": 400,
+        "crash_cost": 40.0
+    },
+    "Electrical Final Trim": {
+        "required_activities": ["Electric Rough-in", "Paint", "Interior Trim", "Plumbing Trim"],
+        "activity_min_time": 18,
+        "activity_normal_time": 23,
+        "normal_cost": 2500,
+        "crash_cost": 250.0
+    },
+    "Hardware": {
+        "required_activities": ["Paint"],
+        "activity_min_time": 8,
+        "activity_normal_time": 12,
+        "normal_cost": 400,
+        "crash_cost": 40.0
+    },
+    "Final Building Inspection": {
+        "required_activities": ["Paint", "Electrical Final Trim"],
+        "activity_min_time": 1,
+        "activity_normal_time": 1,
+        "normal_cost": 200,
+        "crash_cost": 20.0
+    },
+    "Use & Occupancy Certificate": {
+        "required_activities": ["Final Building Inspection"],
+        "activity_min_time": 1,
+        "activity_normal_time": 1,
+        "normal_cost": 150,
+        "crash_cost": 10.0
+    },
+    "First Walk-thru": {
+        "required_activities": ["Use & Occupancy Certificate"],
+        "activity_min_time": 1,
+        "activity_normal_time": 1,
+        "normal_cost": 100,
+        "crash_cost": 10.0
+    },
+    "Final Punch-out": {
+        "required_activities": ["Final Building Inspection", "First Walk-thru"],
+        "activity_min_time": 6,
+        "activity_normal_time": 9,
+        "normal_cost": 300,
+        "crash_cost": 30.0
+    },
+    "Cleaning": {
+        "required_activities": ["Paint", "Hardware", "Final Punch-out"],
+        "activity_min_time": 10,
+        "activity_normal_time": 14,
+        "normal_cost": 400,
+        "crash_cost": 40.0
+    },
+    "Final Walk-through": {
+        "required_activities": ["Final Punch-out", "Cleaning"],
+        "activity_min_time": 1,
+        "activity_normal_time": 1,
+        "normal_cost": 200,
+        "crash_cost": 0.0
+    }
+}

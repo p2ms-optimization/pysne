@@ -1,0 +1,38 @@
+{
+    "Excavation": {
+        "Heavy Equipment": 1,
+        "General Crew": 0
+    },
+    "Path A-1": {
+        "Heavy Equipment": 1,
+        "General Crew": 0
+    },
+    "Path B-1": {
+        "Heavy Equipment": 1,
+        "General Crew": 0
+    },
+    "Path C-1": {
+        "Heavy Equipment": 1,
+        "General Crew": 0
+    },
+    "Path A-2": {
+        "Heavy Equipment": 0,
+        "General Crew": 1
+    },
+    "Path B-2": {
+        "Heavy Equipment": 0,
+        "General Crew": 1
+    },
+    "Path C-2": {
+        "Heavy Equipment": 0,
+        "General Crew": 1
+    },
+    "Merge": {
+        "Heavy Equipment": 0,
+        "General Crew": 0
+    },
+    "Final": {
+        "Heavy Equipment": 0,
+        "General Crew": 0
+    }
+}
