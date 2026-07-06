@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 import numpy as np
-from pysne.utils import is_in_domain, objective_function, filter_unique_roots, create_continuous_bounds
+from pysne.utils import is_in_domain, objective_function, filter_unique_roots, create_continuous_bounds, sort_unique_roots
 
 class BaseProblem(ABC):
     """
@@ -48,8 +48,8 @@ class BaseProblem(ABC):
         pass
 
     @abstractmethod
-    def select_final_roots(self, candidates):
-        """Setiap tipe problem mendefinisikan sendiri cara memfilter solusi."""
+    def select_final_optimal(self, candidates):
+        """Setiap tipe problem mendefinisikan sendiri cara memfilter solusi akhir (optimal)."""
         pass
 
 
@@ -86,6 +86,10 @@ class SNEProblem(BaseProblem):
                 
         return filter_unique_roots(accurate_candidates, delta)
 
+    def select_final_optimal(self, candidates):
+        """Alias: SNE tetap menggunakan istilah roots."""
+        return self.select_final_roots(candidates)
+
 
 class MultimodalProblem(BaseProblem):
     """Base class khusus Multimodal"""
@@ -94,7 +98,7 @@ class MultimodalProblem(BaseProblem):
     def evaluate_fitness(self, x):
         return self.g_func(x)
 
-    def select_final_roots(self, candidates):
+    def select_final_optimal(self, candidates):
         domain, params = self.get_info()
         delta = params.get('delta', 0.1)
         epsilon = params.get('epsilon', 1e-7)
@@ -115,7 +119,7 @@ class MultimodalProblem(BaseProblem):
             f_val = self.evaluate_fitness(cand)
             
             if gamma is not None and gamma != -float('inf') and F_star > 0:
-                if f_val <= (1.0 - gamma) * F_star:
+                if f_val <= (1.0 - epsilon) * F_star:
                     continue
                     
             # Filter Tetangga
@@ -141,27 +145,41 @@ class MultimodalProblem(BaseProblem):
 
         return filter_unique_roots(accurate_candidates, delta)
 
-
 class DiophantineProblem(BaseProblem):
     """Base class khusus Diophantine (Integer)"""
     problem_type = 'Diophantine'
 
     def __init__(self):
-        self.integer_domain = self.get_integer_domain()
+        # Mendukung dua gaya subclass:
+        #  (a) override get_info() langsung -> (integer_domain, params), sama persis gaya SNEProblem
+        #  (b) override get_integer_domain() + get_params() saja
+        if type(self).get_info is not DiophantineProblem.get_info:
+            raw_domain, self.raw_params = type(self).get_info(self)
+        else:
+            raw_domain = self.get_integer_domain()
+            self.raw_params = self.get_params()
+
+        self.integer_domain = raw_domain
+        self._continuous_domain = create_continuous_bounds(raw_domain)
         super().__init__()
         self.equations = self.get_equations()
+        self.domain = self._continuous_domain
+        # self.integer_domain = self.get_integer_domain()
+        # super().__init__()
+        # self.equations = self.get_equations()
+        # self.domain = create_continuous_bounds(self.get_integer_domain())
 
     def get_integer_domain(self):
-        return []
+        return self.integer_domain
 
     def get_equations(self):
         return []
 
     def get_params(self):
-        return {}
+        return self.raw_params if hasattr(self, 'raw_params') else {}
 
     def get_info(self):
-        domain = create_continuous_bounds(self.integer_domain)
+        domain = self._continuous_domain #create_continuous_bounds(self.integer_domain)
         params = self.get_params()
         return domain, params
 
@@ -181,6 +199,16 @@ class DiophantineProblem(BaseProblem):
         epsilon = params.get('epsilon', 1e-7)
         delta = params.get('delta', 0.5)
         
+        symmetric_names = {
+            "DiophantineProblem3a", "DiophantineProblem3b", 
+            "DiophantineProblem4_4", "DiophantineProblem4_5", 
+            "DiophantineProblem4_6", "DiophantineProblem4_7", 
+            "DiophantineProblem4_8", "DiophantineProblem4_9", 
+            "DiophantineProblem4_10"
+        }
+        sort_solutions = params.get('sort_solutions', self.__class__.__name__ in symmetric_names)
+
+        
         accurate_candidates = []
         seen = set()
         for cand in candidates:
@@ -199,8 +227,16 @@ class DiophantineProblem(BaseProblem):
             if 1.0 - f_val <= epsilon:
                 accurate_candidates.append((q_cand_int.astype(float), f_val))
                 
-        return filter_unique_roots(accurate_candidates, delta)
+        roots = filter_unique_roots(accurate_candidates, delta)
+        if len(roots) > 0:
+            roots = sort_unique_roots(roots, sort=sort_solutions)
+            roots = np.array(roots)
+            
+        return roots
 
+    def select_final_optimal(self, candidates):
+        """Alias: Diophantine tetap menggunakan istilah roots."""
+        return self.select_final_roots(candidates)
 
 class MinimizedProblem(MultimodalProblem):
     """
@@ -226,9 +262,9 @@ class MinimizedProblem(MultimodalProblem):
     def evaluate_fitness(self, x):
         return -self.original.evaluate_fitness(x)
 
-    def select_final_roots(self, candidates):
+    def select_final_optimal(self, candidates):
         original_class = self.original.__class__
-        if hasattr(self.original, 'select_final_roots') and original_class.select_final_roots != MultimodalProblem.select_final_roots:
+        if hasattr(self.original, 'select_final_optimal') and original_class.select_final_optimal != MultimodalProblem.select_final_optimal:
             domain, params = self.get_info()
             delta = params.get('delta', 0.5)
             accurate_candidates = []
@@ -237,4 +273,4 @@ class MinimizedProblem(MultimodalProblem):
                     accurate_candidates.append((cand, self.evaluate_fitness(cand)))
             return filter_unique_roots(accurate_candidates, delta)
         else:
-            return super().select_final_roots(candidates)
+            return super().select_final_optimal(candidates)

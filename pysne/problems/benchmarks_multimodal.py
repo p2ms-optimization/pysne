@@ -75,6 +75,10 @@ class Problem3(MultimodalProblem):
     def name(self):
         return f"Problem 3: {self.n}D Rastrigin Function"
 
+    @property
+    def optima_type(self):
+        return "both"
+
     def g_func(self, x):
         x = np.asarray(x)
         if x.ndim == 1:
@@ -83,11 +87,11 @@ class Problem3(MultimodalProblem):
             return np.sum(x**2 - 10 * np.cos(2 * np.pi * x) + 10, axis=1)
 
     def get_info(self):
-        domain = [(-1, 1)] * self.n
+        domain = [(-1, 1)] * self.n if self.n == 2 else [(-1.5, 1.5)] * self.n
         
         # Contoh pengambilan parameter berdasarkan dimensi n
         params = {
-            'm_cluster': 500 * (1 if self.n == 2 else 1 if self.n == 3 else self.n),
+            'm_cluster': (500 if self.n == 2 else 4096 if self.n == 3 else self.n),
             'r_cl': 0.95,
             'theta_cl': np.pi/4,
             'k_cluster': 10 if self.n != 3 else 10,
@@ -114,7 +118,7 @@ class Problem4(MultimodalProblem):
 
     @property
     def optima_type(self):
-        return "max"
+        return "both"
 
     def g_func(self, x):
         x = np.asarray(x)
@@ -159,7 +163,7 @@ class Problem5(MultimodalProblem):
 
     @property
     def optima_type(self):
-        return "max"
+        return "both"
 
     def g_func(self, x):
         x = np.asarray(x)
@@ -184,8 +188,8 @@ class Problem5(MultimodalProblem):
                 'sdoa_k_max': 500,
                 'r': 0.95,
                 'theta': np.pi/4,
-                'gamma': 0.5,
-                'num_check_points': 2
+                'gamma': 0.2,
+                'num_check_points': 1
             }
         else:
             params = {
@@ -325,6 +329,90 @@ class Problemiwm(MultimodalProblem):
         }
         return domain, params
 
+class ProblemIMW(MultimodalProblem):
+    @property
+    def name(self):
+        return "Problem IMW"
+    
+    def g_func(self, x):
+        x = np.asarray(x)
+        # Define the cost function for IMW problem
+        cost_function = lambda d: (
+        60.0*d[0] + 70.0*d[1] + 30.0*d[2] + 80.0*d[3] + 90.0*d[4] +
+        40.0*d[5] + 55.0*d[6] + 65.0*d[7] + 55.0*d[8] + 200.0*d[9] +
+        180.0*d[10] + 30.0*d[11] + 80.0*d[12] + 130.0*d[13] + 110.0*d[14] +
+        50.0*d[15] + 40.0*d[16] + 250.0*d[17] + 40.0*d[18] + 20.0*d[19] +
+        10.0*d[20] + 10.0*d[21] + 30.0*d[22] + 40.0*d[23] + 0.0*d[24] - 38690
+        )
+        return cost_function(x)
+
+    def get_info(self):
+        # Hardcoded bounds for each task (d_min, d_max)
+        domain = [
+        (7, 10), (7, 10), (5, 7), (18, 22), (25, 30),
+        (6, 8), (12, 17), (25, 30), (14, 19), (25, 30),
+        (20, 30), (4, 5), (15, 20), (25, 30), (25, 30),
+        (15, 20), (3, 5), (18, 23), (8, 12), (1, 1),
+        (1, 1), (1, 1), (6, 9), (10, 14), (1, 1)
+        ]
+        params = {
+        'm_cluster': 6500,
+        'k_cluster': 490,
+        'gamma': 1e-5,
+        'epsilon': 1e-7, 'delta': 0.1, 'r': 0.984, 'theta': 9*np.pi/80,
+        'sdoa_m': 100, 'sdoa_k_max': 75, 'sdoa_r': 0.977, 'sdoa_theta': np.pi/16,
+        'num_check_points': 3
+        }
+        return domain, params
+
+class ProblemIMW_fix(MultimodalProblem):
+    @property
+    def name(self):
+        return "Problem IMW"
+
+    def g_func(self, x):
+        x = np.asarray(x)
+
+        weights = np.array([
+            60.0, 70.0, 30.0, 80.0, 90.0,
+            40.0, 55.0, 65.0, 55.0, 200.0,
+            180.0, 30.0, 80.0, 130.0, 110.0,
+            50.0, 40.0, 250.0, 40.0, 20.0,
+            10.0, 10.0, 30.0, 40.0, 0.0
+        ])
+        target = 38690.0
+
+        # x @ weights aman untuk x 1D (shape (25,)) maupun 2D (shape (N, 25))
+        cost = x @ weights
+        residual = cost - target
+
+        return residual ** 2  # minimum (=0) tepat saat cost == target
+
+    def get_info(self):
+        # Hardcoded bounds untuk setiap task (d_min, d_max)
+        domain = [
+            (7, 10), (7, 10), (5, 7), (18, 22), (25, 30),
+            (6, 8), (12, 17), (25, 30), (14, 19), (25, 30),
+            (20, 30), (4, 5), (15, 20), (25, 30), (25, 30),
+            (15, 20), (3, 5), (18, 23), (8, 12), (0.5, 1.5),
+            (0.5, 1.5), (0.5, 1.5), (6, 9), (10, 14), (0.5, 1.5)
+        ]
+        params = {
+            'm_cluster': 6500,
+            'r_cl': 0.984,
+            'theta_cl': 9 * np.pi / 80,
+            'k_cluster': 490,
+            'epsilon': 1e-7,
+            'delta': 0.1,
+            'sdoa_m': 100,
+            'sdoa_k_max': 75,
+            'r': 0.977,
+            'theta': np.pi / 16,
+            'gamma': 1e-5,
+            'num_check_points': 3
+        }
+        return domain, params
+
 def get_multimodal_problems():
     """Dictionary pemanggil problem."""
     return {
@@ -339,5 +427,7 @@ def get_multimodal_problems():
         'griewank': lambda: ProblemGriewank(n=2),
         'two_n_minima': lambda: Problem1(),
         'rastrigin': lambda: Problem3(n=2),
-        'iwm': lambda: Problemiwm()
+        'iwm': lambda: Problemiwm(),
+        8: lambda: ProblemIMW(),
+        9: lambda: ProblemIMW_fix()
     }

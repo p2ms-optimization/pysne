@@ -1,0 +1,356 @@
+PS C:\Users\ASUS\pysne> python experiments/Keperluan_TA_10822041/sensitivity_analysis.py --experiment gamma
+
+======================================================================
+EKSPERIMEN SENSITIVITAS: GAMMA
+  Pengaruh parameter cut-off gamma terhadap Discovery Rate (mode global-only)
+  Catatan: gamma=-inf mencari semua optima. gamma>0 memfilter hanya optima global.
+======================================================================
+
+  -- gamma = -inf --
+C:\Users\ASUS\pysne\pysne\initialization\sampling.py:36: UserWarning: The balance properties of Sobol' points require n to be a power of 2.
+  unit_points = sampler.random(n=num_points)
+    [+] 2D Second Minima          Found:   5/5   DR:  100%   (2.0s)
+    [+] Six-Hump Camel Back       Found:   8/8   DR:  100%   (2.0s)
+    [+] Rastrigin 2D              Found:  13/13  DR:  100%   (2.6s)
+    [+] Vincent 2D                Found:  61/61  DR:  100%   (20.8s)
+    [+] Shubert 2D                Found: 1376/27  DR: 5096%   (288.0s)
+
+  -- gamma = 0.1 --
+    [-] 2D Second Minima          Found:   1/5   DR:   20%   (1.4s)
+    [-] Six-Hump Camel Back       Found:   4/8   DR:   50%   (0.9s)
+    [-] Rastrigin 2D              Found:   5/13  DR:   38%   (0.9s)
+    [+] Vincent 2D                Found:  61/61  DR:  100%   (9.6s)
+    [+] Shubert 2D                Found:  27/27  DR:  100%   (60.6s)
+
+  -- gamma = 0.2 --
+    [-] 2D Second Minima          Found:   1/5   DR:   20%   (1.4s)
+    [-] Six-Hump Camel Back       Found:   4/8   DR:   50%   (0.6s)
+    [-] Rastrigin 2D              Found:   5/13  DR:   38%   (0.9s)
+    [+] Vincent 2D                Found:  61/61  DR:  100%   (7.7s)
+    [+] Shubert 2D                Found:  27/27  DR:  100%   (28.3s)
+
+  -- gamma = 0.5 --
+    [-] 2D Second Minima          Found:   1/5   DR:   20%   (1.0s)
+    [-] Six-Hump Camel Back       Found:   2/8   DR:   25%   (0.2s)
+    [-] Rastrigin 2D              Found:   5/13  DR:   38%   (0.8s)
+    [-] Vincent 2D                Found:  59/61  DR:   97%   (5.9s)
+    [+] Shubert 2D                Found:  27/27  DR:  100%   (7.5s)
+
+  -- gamma = 0.8 --
+    [-] 2D Second Minima          Found:   1/5   DR:   20%   (0.3s)
+    [-] Six-Hump Camel Back       Found:   2/8   DR:   25%   (0.1s)
+    [-] Rastrigin 2D              Found:   5/13  DR:   38%   (0.8s)
+    [-] Vincent 2D                Found:  57/61  DR:   93%   (3.1s)
+    [-] Shubert 2D                Found:  19/27  DR:   70%   (4.3s)
+
+======================================================================
+RINGKASAN DISCOVERY RATE - GAMMA
+======================================================================
+Fungsi Benchmark                -inf       0.1       0.2       0.5       0.8
+----------------------------------------------------------------------------
+2D Second Minima                100%       20%       20%       20%       20%
+Six-Hump Camel Back             100%       50%       50%       25%       25%
+Rastrigin 2D                    100%       38%       38%       38%       38%
+Vincent 2D                      100%      100%      100%       97%       93%
+Shubert 2D                     5096%      100%      100%      100%       70%
+----------------------------------------------------------------------------
+Rata-rata DR                 100.00%    61.69%    61.69%    56.04%    49.45%
+Rata-rata Waktu (s)            63.1s     14.7s      7.8s      3.1s      1.7s
+======================================================================
+
+PS C:\Users\ASUS\pysne> python experiments/Keperluan_TA_10822041/sensitivity_analysis.py --experiment m_cluster
+
+======================================================================
+EKSPERIMEN SENSITIVITAS: M_CLUSTER
+  Pengaruh jumlah titik awal clustering (m_cluster) terhadap Discovery Rate
+  Catatan: Menguji pengaruh cakupan titik awal sampling domain.
+======================================================================
+
+  -- m_cluster = 100 --
+C:\Users\ASUS\pysne\pysne\initialization\sampling.py:36: UserWarning: The balance properties of Sobol' points require n to be a power of 2.
+  unit_points = sampler.random(n=num_points)
+    [-] 2D Second Minima          Found:   4/5   DR:   80%   (0.8s)
+    [+] Six-Hump Camel Back       Found:   8/8   DR:  100%   (1.0s)
+    [+] Rastrigin 2D              Found:  13/13  DR:  100%   (0.7s)
+    [-] Vincent 2D                Found:  35/61  DR:   57%   (1.8s)
+    [-] Shubert 2D                Found:  20/27  DR:   74%   (3.8s)
+
+  -- m_cluster = 200 --
+    [-] 2D Second Minima          Found:   4/5   DR:   80%   (1.5s)
+    [+] Six-Hump Camel Back       Found:   8/8   DR:  100%   (1.8s)
+    [+] Rastrigin 2D              Found:  13/13  DR:  100%   (1.7s)
+    [-] Vincent 2D                Found:  35/61  DR:   57%   (2.4s)
+    [-] Shubert 2D                Found:  23/27  DR:   85%   (6.8s)
+
+  -- m_cluster = 500 --
+    [-] 2D Second Minima          Found:   4/5   DR:   80%   (2.7s)
+    [+] Six-Hump Camel Back       Found:   8/8   DR:  100%   (2.9s)
+    [+] Rastrigin 2D              Found:  13/13  DR:  100%   (2.7s)
+    [-] Vincent 2D                Found:  47/61  DR:   77%   (3.5s)
+    [-] Shubert 2D                Found:  24/27  DR:   89%   (10.0s)
+
+    [-] 2D Second Minima          Found:   4/5   DR:   80%   (3.8s)
+    [+] Six-Hump Camel Back       Found:   8/8   DR:  100%   (5.0s)
+    [+] Rastrigin 2D              Found:  13/13  DR:  100%   (3.1s)
+    [+] Vincent 2D                Found:  61/61  DR:  100%   (7.8s)
+    [+] Shubert 2D                Found:  27/27  DR:  100%   (19.7s)
+
+  -- m_cluster = 2000 --
+    [+] 2D Second Minima          Found:   5/5   DR:  100%   (7.1s)
+    [+] Six-Hump Camel Back       Found:   8/8   DR:  100%   (8.7s)
+    [+] Rastrigin 2D              Found:  13/13  DR:  100%   (6.1s)
+    [+] Vincent 2D                Found:  61/61  DR:  100%   (13.2s)
+    [+] Shubert 2D                Found:  27/27  DR:  100%   (26.9s)
+
+======================================================================
+RINGKASAN DISCOVERY RATE - M_CLUSTER
+======================================================================
+Fungsi Benchmark                 100       200       500      1000      2000
+----------------------------------------------------------------------------
+2D Second Minima                 80%       80%       80%       80%      100%
+Six-Hump Camel Back             100%      100%      100%      100%      100%
+Rastrigin 2D                    100%      100%      100%      100%      100%
+Vincent 2D                       57%       57%       77%      100%      100%
+Shubert 2D                       74%       85%       89%      100%      100%
+----------------------------------------------------------------------------
+Rata-rata DR                  82.29%    84.51%    89.19%    96.00%   100.00%
+Rata-rata Waktu (s)             1.6s      2.8s      4.4s      7.9s     12.4s
+======================================================================
+
+PS C:\Users\ASUS\pysne> python experiments/Keperluan_TA_10822041/sensitivity_analysis.py --experiment k_cluster
+
+======================================================================
+EKSPERIMEN SENSITIVITAS: K_CLUSTER
+  Pengaruh jumlah iterasi clustering (k_cluster) terhadap Discovery Rate dan waktu
+  Catatan: Menguji trade-off kualitas diversifikasi vs waktu komputasi.
+======================================================================
+
+  -- k_cluster = 5 --
+C:\Users\ASUS\pysne\pysne\initialization\sampling.py:36: UserWarning: The balance properties of Sobol' points require n to be a power of 2.
+  unit_points = sampler.random(n=num_points)
+    [+] 2D Second Minima          Found:   5/5   DR:  100%   (1.5s)
+    [+] Six-Hump Camel Back       Found:   8/8   DR:  100%   (2.0s)
+    [+] Rastrigin 2D              Found:  13/13  DR:  100%   (1.8s)
+    [-] Vincent 2D                Found:  59/61  DR:   97%   (5.3s)
+    [+] Shubert 2D                Found:  27/27  DR:  100%   (20.9s)
+
+  -- k_cluster = 10 --
+    [+] 2D Second Minima          Found:   5/5   DR:  100%   (2.1s)
+    [+] Six-Hump Camel Back       Found:   8/8   DR:  100%   (3.0s)
+    [+] Rastrigin 2D              Found:  13/13  DR:  100%   (2.9s)
+    [+] Vincent 2D                Found:  61/61  DR:  100%   (8.5s)
+    [+] Shubert 2D                Found:  27/27  DR:  100%   (25.8s)
+
+  -- k_cluster = 15 --
+    [+] 2D Second Minima          Found:   5/5   DR:  100%   (2.5s)
+    [+] Six-Hump Camel Back       Found:   8/8   DR:  100%   (4.2s)
+    [+] Rastrigin 2D              Found:  13/13  DR:  100%   (3.7s)
+    [+] Vincent 2D                Found:  61/61  DR:  100%   (10.8s)
+    [+] Shubert 2D                Found:  27/27  DR:  100%   (26.7s)
+
+    [+] 2D Second Minima          Found:   5/5   DR:  100%   (2.6s)
+    [+] Six-Hump Camel Back       Found:   8/8   DR:  100%   (4.6s)
+    [+] Rastrigin 2D              Found:  13/13  DR:  100%   (4.4s)
+    [+] Vincent 2D                Found:  61/61  DR:  100%   (14.1s)
+    [+] Shubert 2D                Found:  27/27  DR:  100%   (32.4s)
+
+  -- k_cluster = 30 --
+    [+] 2D Second Minima          Found:   5/5   DR:  100%   (3.9s)
+    [+] Six-Hump Camel Back       Found:   8/8   DR:  100%   (7.4s)
+    [+] Rastrigin 2D              Found:  13/13  DR:  100%   (6.3s)
+    [+] Vincent 2D                Found:  61/61  DR:  100%   (21.9s)
+    [+] Shubert 2D                Found:  27/27  DR:  100%   (35.2s)
+
+======================================================================
+RINGKASAN DISCOVERY RATE - K_CLUSTER
+======================================================================
+Fungsi Benchmark                   5        10        15        20        30
+----------------------------------------------------------------------------
+2D Second Minima                100%      100%      100%      100%      100%
+Six-Hump Camel Back             100%      100%      100%      100%      100%
+Rastrigin 2D                    100%      100%      100%      100%      100%
+Vincent 2D                       97%      100%      100%      100%      100%
+Shubert 2D                      100%      100%      100%      100%      100%
+----------------------------------------------------------------------------
+Rata-rata DR                  99.34%   100.00%   100.00%   100.00%   100.00%
+Rata-rata Waktu (s)             6.3s      8.5s      9.6s     11.6s     14.9s
+======================================================================
+
+PS C:\Users\ASUS\pysne> python experiments/Keperluan_TA_10822041/sensitivity_analysis.py --experiment num_check_points
+
+======================================================================
+EKSPERIMEN SENSITIVITAS: NUM_CHECK_POINTS
+  Pengaruh parameter num_check_points(multi-point check)
+  Catatan: Menguji penambahan titik pada fase clustering.
+======================================================================
+
+  -- num_check_points = 1 --
+C:\Users\ASUS\pysne\pysne\initialization\sampling.py:36: UserWarning: The balance properties of Sobol' points require n to be a power of 2.
+  unit_points = sampler.random(n=num_points)
+    [+] 2D Second Minima          Found:   5/5   DR:  100%   (2.2s)
+    [-] Six-Hump Camel Back       Found:   7/8   DR:   88%   (1.4s)
+    [+] Rastrigin 2D              Found:  13/13  DR:  100%   (3.0s)
+    [-] Vincent 2D                Found:  60/61  DR:   98%   (5.6s)
+    [+] Shubert 2D                Found:  27/27  DR:  100%   (27.7s)
+
+  -- num_check_points = 2 --
+    [+] 2D Second Minima          Found:   5/5   DR:  100%   (3.2s)
+    [+] Six-Hump Camel Back       Found:   8/8   DR:  100%   (2.1s)
+    [+] Rastrigin 2D              Found:  13/13  DR:  100%   (5.9s)
+    [-] Vincent 2D                Found:  60/61  DR:   98%   (6.6s)
+    [+] Shubert 2D                Found:  27/27  DR:  100%   (32.6s)
+
+  -- num_check_points = 3 --
+    [+] 2D Second Minima          Found:   5/5   DR:  100%   (3.6s)
+    [+] Six-Hump Camel Back       Found:   8/8   DR:  100%   (2.4s)
+    [+] Rastrigin 2D              Found:  13/13  DR:  100%   (7.0s)
+    [+] Vincent 2D                Found:  61/61  DR:  100%   (7.6s)
+    [+] Shubert 2D                Found:  27/27  DR:  100%   (38.3s)
+
+  -- num_check_points = 4 --
+    [+] 2D Second Minima          Found:   5/5   DR:  100%   (4.3s)
+    [+] Six-Hump Camel Back       Found:   8/8   DR:  100%   (2.7s)
+    [+] Rastrigin 2D              Found:  13/13  DR:  100%   (9.5s)
+    [+] Vincent 2D                Found:  61/61  DR:  100%   (8.9s)
+    [+] Shubert 2D                Found:  27/27  DR:  100%   (35.6s)
+
+  -- num_check_points = 5 --
+    [+] 2D Second Minima          Found:   5/5   DR:  100%   (3.7s)
+    [+] Six-Hump Camel Back       Found:   8/8   DR:  100%   (2.7s)
+    [+] Rastrigin 2D              Found:  13/13  DR:  100%   (7.9s)
+    [-] Vincent 2D                Found:  60/61  DR:   98%   (9.5s)
+    [+] Shubert 2D                Found:  27/27  DR:  100%   (40.2s)
+
+======================================================================
+RINGKASAN DISCOVERY RATE - NUM_CHECK_POINTS
+======================================================================
+Fungsi Benchmark                   1         2         3         4         5
+----------------------------------------------------------------------------
+2D Second Minima                100%      100%      100%      100%      100%
+Six-Hump Camel Back              88%      100%      100%      100%      100%
+Rastrigin 2D                    100%      100%      100%      100%      100%
+Vincent 2D                       98%       98%      100%      100%       98%
+Shubert 2D                      100%      100%      100%      100%      100%
+----------------------------------------------------------------------------
+Rata-rata DR                  97.17%    99.67%   100.00%   100.00%    99.67%
+Rata-rata Waktu (s)             8.0s     10.1s     11.8s     12.2s     12.8s
+======================================================================
+
+PS C:\Users\ASUS\pysne> python experiments/Keperluan_TA_10822041/sensitivity_analysis.py --experiment sdoa_m
+
+======================================================================
+EKSPERIMEN SENSITIVITAS: SDOA_M
+  Pengaruh ukuran populasi SDOA (sdoa_m) per cluster terhadap Discovery Rate
+  Catatan: Menguji pengaruh jumlah populasi pencarian lokal SDOA.
+======================================================================
+
+  -- sdoa_m = 50 --
+C:\Users\ASUS\pysne\pysne\initialization\sampling.py:36: UserWarning: The balance properties of Sobol' points require n to be a power of 2.
+  unit_points = sampler.random(n=num_points)
+    [-] 2D Second Minima          Found:   3/5   DR:   60%   (1.6s)
+    [+] Six-Hump Camel Back       Found:   8/8   DR:  100%   (2.2s)
+    [+] Rastrigin 2D              Found:  13/13  DR:  100%   (2.4s)
+    [+] Vincent 2D                Found:  61/61  DR:  100%   (7.1s)
+    [+] Shubert 2D                Found:  27/27  DR:  100%   (27.2s)
+
+  -- sdoa_m = 100 --
+    [-] 2D Second Minima          Found:   4/5   DR:   80%   (1.7s)
+    [+] Six-Hump Camel Back       Found:   8/8   DR:  100%   (2.4s)
+    [+] Rastrigin 2D              Found:  13/13  DR:  100%   (2.6s)
+    [+] Vincent 2D                Found:  61/61  DR:  100%   (6.8s)
+    [+] Shubert 2D                Found:  27/27  DR:  100%   (25.7s)
+
+  -- sdoa_m = 150 --
+    [-] 2D Second Minima          Found:   4/5   DR:   80%   (1.8s)
+    [+] Six-Hump Camel Back       Found:   8/8   DR:  100%   (2.4s)
+    [+] Rastrigin 2D              Found:  13/13  DR:  100%   (2.5s)
+    [+] Vincent 2D                Found:  61/61  DR:  100%   (7.9s)
+    [+] Shubert 2D                Found:  27/27  DR:  100%   (31.5s)
+
+    [+] 2D Second Minima          Found:   5/5   DR:  100%   (2.2s)
+    [+] Six-Hump Camel Back       Found:   8/8   DR:  100%   (2.8s)
+    [+] Rastrigin 2D              Found:  13/13  DR:  100%   (2.8s)
+    [+] Vincent 2D                Found:  61/61  DR:  100%   (8.4s)
+    [+] Shubert 2D                Found:  27/27  DR:  100%   (34.3s)
+
+  -- sdoa_m = 300 --
+    [+] 2D Second Minima          Found:   5/5   DR:  100%   (2.3s)
+    [+] Six-Hump Camel Back       Found:   8/8   DR:  100%   (2.9s)
+    [+] Rastrigin 2D              Found:  13/13  DR:  100%   (2.8s)
+    [+] Vincent 2D                Found:  61/61  DR:  100%   (8.3s)
+    [+] Shubert 2D                Found:  27/27  DR:  100%   (35.7s)
+
+======================================================================
+RINGKASAN DISCOVERY RATE - SDOA_M
+======================================================================
+Fungsi Benchmark                  50       100       150       200       300
+----------------------------------------------------------------------------
+2D Second Minima                 60%       80%       80%      100%      100%
+Six-Hump Camel Back             100%      100%      100%      100%      100%
+Rastrigin 2D                    100%      100%      100%      100%      100%
+Vincent 2D                      100%      100%      100%      100%      100%
+Shubert 2D                      100%      100%      100%      100%      100%
+----------------------------------------------------------------------------
+Rata-rata DR                  92.00%    96.00%    96.00%   100.00%   100.00%
+Rata-rata Waktu (s)             8.1s      7.8s      9.2s     10.1s     10.4s
+======================================================================
+
+PS C:\Users\ASUS\pysne> python experiments/Keperluan_TA_10822041/sensitivity_analysis.py --experiment delta
+
+======================================================================
+EKSPERIMEN SENSITIVITAS: DELTA
+  Pengaruh parameter resolusi jarak (delta) terhadap jumlah kandidat unik
+  Catatan: delta mengontrol resolusi penggabungan kandidat akar terdekat.
+======================================================================
+
+  -- delta = 0.001 --
+C:\Users\ASUS\pysne\pysne\initialization\sampling.py:36: UserWarning: The balance properties of Sobol' points require n to be a power of 2.
+  unit_points = sampler.random(n=num_points)
+    [+] 2D Second Minima          Found:   5/5   DR:  100%   (2.2s)
+    [+] Six-Hump Camel Back       Found:   8/8   DR:  100%   (2.2s)
+    [+] Rastrigin 2D              Found:  13/13  DR:  100%   (2.8s)
+    [+] Vincent 2D                Found:  61/61  DR:  100%   (8.1s)
+    [+] Shubert 2D                Found:  27/27  DR:  100%   (29.7s)
+
+  -- delta = 0.01 --
+    [+] 2D Second Minima          Found:   5/5   DR:  100%   (2.3s)
+    [+] Six-Hump Camel Back       Found:   8/8   DR:  100%   (2.2s)
+    [+] Rastrigin 2D              Found:  13/13  DR:  100%   (2.9s)
+    [+] Vincent 2D                Found:  61/61  DR:  100%   (8.2s)
+    [+] Shubert 2D                Found:  27/27  DR:  100%   (27.4s)
+
+  -- delta = 0.05 --
+    [+] 2D Second Minima          Found:   5/5   DR:  100%   (2.0s)
+    [+] Six-Hump Camel Back       Found:   8/8   DR:  100%   (2.2s)
+    [+] Rastrigin 2D              Found:  13/13  DR:  100%   (2.7s)
+    [+] Vincent 2D                Found:  61/61  DR:  100%   (7.2s)
+    [+] Shubert 2D                Found:  27/27  DR:  100%   (28.3s)
+
+  -- delta = 0.1 --
+    [+] 2D Second Minima          Found:   5/5   DR:  100%   (2.3s)
+    [+] Six-Hump Camel Back       Found:   8/8   DR:  100%   (2.2s)
+    [+] Rastrigin 2D              Found:  13/13  DR:  100%   (2.9s)
+    [+] Vincent 2D                Found:  61/61  DR:  100%   (8.1s)
+    [+] Shubert 2D                Found:  27/27  DR:  100%   (29.8s)
+
+  -- delta = 0.5 --
+    [+] 2D Second Minima          Found:   5/5   DR:  100%   (2.2s)
+    [+] Six-Hump Camel Back       Found:   8/8   DR:  100%   (2.3s)
+    [+] Rastrigin 2D              Found:  13/13  DR:  100%   (2.9s)
+    [-] Vincent 2D                Found:  42/61  DR:   69%   (7.8s)
+    [+] Shubert 2D                Found:  27/27  DR:  100%   (26.2s)
+
+======================================================================
+RINGKASAN DISCOVERY RATE - DELTA
+======================================================================
+Fungsi Benchmark               0.001      0.01      0.05       0.1       0.5
+----------------------------------------------------------------------------
+2D Second Minima                100%      100%      100%      100%      100%
+Six-Hump Camel Back             100%      100%      100%      100%      100%
+Rastrigin 2D                    100%      100%      100%      100%      100%
+Vincent 2D                      100%      100%      100%      100%       69%
+Shubert 2D                      100%      100%      100%      100%      100%
+----------------------------------------------------------------------------
+Rata-rata DR                 100.00%   100.00%   100.00%   100.00%    93.77%
+Rata-rata Waktu (s)             9.0s      8.6s      8.5s      9.0s      8.3s
+======================================================================
