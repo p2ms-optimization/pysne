@@ -32,9 +32,9 @@ dependencies = [
     "scipy>=1.7.0"
 ]
 
-[tool.setuptools]
-# Ini kuncinya: Hanya anggap folder 'pysne' sebagai paket library
-packages = ["pysne", "pysne.clustering", "pysne.initialization", "pysne.optimizers", "pysne.problems"]
+[tool.setuptools.packages.find]
+include = ["pysne*"]
+exclude = ["tests*", "experiments*"]
 
 [project.urls]
 "Homepage" = "https://github.com/p2ms-optimization/pysne"
