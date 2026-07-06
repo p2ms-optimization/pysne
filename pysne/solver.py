@@ -232,3 +232,7 @@ def solve_system(problem, params, verbose=False):
         'clusters': clusters,
         'time_elapsed': elapsed_time
     }
+
+
+# Public alias — more general name, not restricted to "system" semantics.
+solve = solve_system
