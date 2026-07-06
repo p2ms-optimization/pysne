@@ -145,17 +145,24 @@ class MultimodalProblem(BaseProblem):
 
         return filter_unique_roots(accurate_candidates, delta)
 
-
 class DiophantineProblem(BaseProblem):
     """Base class khusus Diophantine (Integer)"""
     problem_type = 'Diophantine'
 
     def __init__(self):
-        raw_domain, self.raw_params = self.get_info()
+        # Mendukung dua gaya subclass:
+        #  (a) override get_info() langsung -> (integer_domain, params), sama persis gaya SNEProblem
+        #  (b) override get_integer_domain() + get_params() saja
+        if type(self).get_info is not DiophantineProblem.get_info:
+            raw_domain, self.raw_params = type(self).get_info(self)
+        else:
+            raw_domain = self.get_integer_domain()
+            self.raw_params = self.get_params()
+
         self.integer_domain = raw_domain
         self._continuous_domain = create_continuous_bounds(raw_domain)
         super().__init__()
-        self.equations = self.get_equations() if hasattr(self, 'get_equations') else self.get_equation()
+        self.equations = self.get_equations()
         self.domain = self._continuous_domain
         # self.integer_domain = self.get_integer_domain()
         # super().__init__()

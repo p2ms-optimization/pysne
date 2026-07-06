@@ -217,10 +217,14 @@ def perform_iterative_clustering(
             
             # F_val = objective_function(points[i], equations)
             F_val = problem.evaluate_fitness(points[i])
-            is_sne = getattr(problem, 'problem_type', None) == 'SNE'
-            
-            if is_sne:
+            uses_absolute_cutoff = getattr(problem, 'problem_type', None) in ('SNE', 'Diophantine')
+            # is_sne = getattr(problem, 'problem_type', None) == 'SNE'
+
+            if uses_absolute_cutoff:
                 cutoff = gamma
+            # if is_sne:
+            #     cutoff = gamma
+            
             else:
                 if gamma != -float('inf') and gamma is not None:
                     cutoff = gamma * F_best if F_best > 0 else gamma

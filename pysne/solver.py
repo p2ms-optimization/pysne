@@ -55,22 +55,48 @@ def run_sdoa_on_clusters(clusters, problem, params):
     # def cluster_objective(x):
         # return objective_function(x, equations)
 
+    is_diophantine = getattr(problem, 'problem_type', None) == 'Diophantine'
+    init_method = params.get('init_method', 'sobol')
+
     for i, cluster in enumerate(clusters):
-        # Determine cluster domain (ensuring it does not exceed global boundaries)
+        effective_radius = max(cluster.radius, 1.0) if is_diophantine else cluster.radius
+
         cluster_domain = []
-        # for dim in range(len(domain)):
         for dim in range(problem.n_var):
-            cluster_lo = max(domain[dim][0], cluster.center[dim] - cluster.radius)
-            cluster_hi = min(domain[dim][1], cluster.center[dim] + cluster.radius)
+            cluster_lo = max(domain[dim][0], cluster.center[dim] - effective_radius)
+            cluster_hi = min(domain[dim][1], cluster.center[dim] + effective_radius)
+
+            if is_diophantine and cluster_lo >= cluster_hi:
+                mid = (domain[dim][0] + domain[dim][1]) / 2.0
+                half = max(0.5, (domain[dim][1] - domain[dim][0]) / 2.0)
+                cluster_lo = max(domain[dim][0], mid - half)
+                cluster_hi = min(domain[dim][1], mid + half)
+
             cluster_domain.append((cluster_lo, cluster_hi))
 
-        # Skip degenerate domains
         if any(hi - lo < 1e-12 for lo, hi in cluster_domain):
             candidates.append(cluster.center.copy())
             continue
 
-        # Generate initial points in cluster domain
         initial_points = generate_sobol_points(sdoa_params['m'], len(domain), cluster_domain)
+        # ... lanjut spiral_dynamics_optimization seperti semula
+
+    # for i, cluster in enumerate(clusters):
+    #     # Determine cluster domain (ensuring it does not exceed global boundaries)
+    #     cluster_domain = []
+    #     # for dim in range(len(domain)):
+    #     for dim in range(problem.n_var):
+    #         cluster_lo = max(domain[dim][0], cluster.center[dim] - cluster.radius)
+    #         cluster_hi = min(domain[dim][1], cluster.center[dim] + cluster.radius)
+    #         cluster_domain.append((cluster_lo, cluster_hi))
+
+    #     # Skip degenerate domains
+    #     if any(hi - lo < 1e-12 for lo, hi in cluster_domain):
+    #         candidates.append(cluster.center.copy())
+    #         continue
+
+    #     # Generate initial points in cluster domain
+    #     initial_points = generate_sobol_points(sdoa_params['m'], len(domain), cluster_domain)
 
         # Definisikan fungsi objektif lokal
         # def cluster_objective(x):
