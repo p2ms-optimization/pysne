@@ -65,19 +65,19 @@ class SpeedReducerProblem(MixedIntegerProblem):
     def get_params(self):
         return {
             # Parameter Clustering
-            'm_cluster': 30000,
-            'r_cl': 0.99,
-            'theta_cl': np.pi / 32,
-            'k_cluster': 1000,
-            'gamma': 0.001,
+            'm_cluster': 1000,
+            'r_cl': 0.95,
+            'theta_cl': np.pi / 4,
+            'k_cluster': 100,
+            'gamma': 0.5,
             # Parameter SDOA (sesuai setup di slide: m=30000, k_max=1000, r=0.99, theta=pi/32)
-            'sdoa_m': 30000,
-            'sdoa_k_max': 1000,
-            'r': 0.99,
+            'sdoa_m': 50000,
+            'sdoa_k_max': 3000,
+            'r': 0.999,
             'theta': np.pi / 32,
             # Parameter Seleksi
-            'epsilon': 1e-3,
-            'delta': 0.01,
+            'epsilon': 1e-1,
+            'delta': 0.0001,
             # Koefisien penalti
             'M': 1e15,
         }

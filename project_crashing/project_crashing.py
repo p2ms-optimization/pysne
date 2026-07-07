@@ -241,25 +241,33 @@ def evaluate_schedule_batch(X, project):
                 cap = capacity_by_id.get(rid, 0)
                 blocked |= (usage[rid] + qty > cap)
 
-            # next_blocked[:, day] = hari blocked terdekat >= day (sentinel = horizon berarti "tidak ada")
-            next_blocked = np.full((B, horizon + 1), horizon, dtype=int)
-            for day in range(horizon - 1, -1, -1):
-                next_blocked[:, day] = np.where(blocked[:, day], day, next_blocked[:, day + 1])
+            # next_blocked[:, day] = hari blocked terdekat >= day (sentinel = horizon
+            # berarti "tidak ada"). DULU: loop Python mundur sepanjang `horizon`
+            # (satu iterasi Python per hari). SEKARANG: "suffix-min" murni numpy --
+            # tandai posisi hari yang blocked (atau sentinel `horizon` bila tidak),
+            # lalu ambil running-minimum dari kanan ke kiri sekali jalan
+            # (np.minimum.accumulate atas array yang dibalik, lalu dibalik lagi).
+            # Hasilnya identik dengan loop lama, tapi 0 iterasi Python.
+            blocked_day_pos = np.where(blocked, day_idx[None, :], horizon)
+            next_blocked = np.minimum.accumulate(blocked_day_pos[:, ::-1], axis=1)[:, ::-1]
 
-            s = np.full(B, -1, dtype=int)
-            found = np.zeros(B, dtype=bool)
-            for day in range(horizon):
-                active = (~found) & (day >= earliest_start)
-                if not np.any(active):
-                    continue
-                end_window = day + d
-                ok = next_blocked[:, day] >= end_window
-                newly_ok = active & ok
-                if np.any(newly_ok):
-                    s[newly_ok] = day
-                    found |= newly_ok
-                if found.all():
-                    break
+            # Pencarian start time tercepat per titik populasi.
+            # DULU: loop Python maju sepanjang `horizon` per task (early-break
+            # kalau semua titik sudah "found"), tetap O(horizon) di kasus terburuk.
+            # SEKARANG: dibangun matriks boolean (B, horizon) sekali jalan --
+            # avail_len[:, day] = panjang jendela kosong berturutan mulai hari
+            # `day` (next_blocked - day). Kondisi layak: day >= earliest_start DAN
+            # avail_len >= durasi task. Start time tercepat = kolom True pertama
+            # per baris, diambil lewat argmax (argmax atas boolean mengembalikan
+            # indeks True pertama).
+            avail_len = next_blocked - day_idx[None, :]
+            feasible_start_mask = (
+                (day_idx[None, :] >= earliest_start[:, None]) &
+                (avail_len >= d[:, None])
+            )
+            found = feasible_start_mask.any(axis=1)
+            s = np.where(found, feasible_start_mask.argmax(axis=1), -1).astype(int)
+
             not_found = ~found
             if np.any(not_found):
                 # Tidak ketemu slot layak dalam horizon -> jadwalkan longgar di

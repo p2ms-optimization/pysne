@@ -8,26 +8,6 @@ from pysne.solver import solve_system
 # Kosongkan/hapus key kalau mau pakai default dari get_params()
 # di dalam class problem (pysne/problems/benchmarks_mixed_integer.py).
 # ============================================================
-params = {
-    # --- Parameter Clustering ---
-    'm_cluster': 30000,        # jumlah titik Sobol awal untuk clustering
-    'r_cl': 0.99,             # radius shrink factor tiap iterasi cluster
-    'theta_cl': np.pi / 32,    # sudut spiral untuk clustering
-    'k_cluster': 1000,          # jumlah iterasi clustering
-    'gamma': 0.0001,             # threshold filter global (Multimodal/MixedInteger)
-
-    # --- Parameter SDOA (local refinement per cluster) ---
-    'sdoa_m': 30000,          # jumlah titik spiral per cluster
-    'sdoa_k_max': 1000,       # jumlah iterasi SDOA per cluster
-    'r': 0.99,                # radius shrink factor SDOA
-    'theta': np.pi / 32,      # sudut rotasi spiral SDOA
-
-    # --- Parameter Seleksi & Penalti ---
-    'epsilon': 1e-7,
-    'delta': 0.05,
-    'M': 1e15,
-}
-
 
 def main(problem_id: int):
     problems = get_mixed_integer_problems()

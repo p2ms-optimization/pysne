@@ -5,30 +5,6 @@ from ..utils import objective_function, is_in_domain
 from ..initialization.sampling import generate_sobol_points
 from ..optimizers.sdoa.matrix import get_rotation_matrix
 
-
-def _batch_evaluate_fitness(problem, points):
-    """
-    Evaluasi SELURUH populasi `points` (shape (m, n)) sekaligus lewat satu
-    panggilan `problem.evaluate_fitness`, memakai jalur vektor polymorphic
-    yang sama seperti dipakai `spiral_dynamics_optimization` di
-    `pysne/optimizers/sdoa/engine.py` (g_func yang menerima 1 titik ATAU
-    sekumpulan titik).
-
-    Kalau problem TIDAK mendukung input batch (mis. beberapa problem SNE /
-    Diophantine yang evaluate_fitness-nya cuma terima 1 titik), panggilan
-    batch akan gagal atau balik shape yang salah -> fallback otomatis ke
-    evaluasi satu-per-satu seperti versi lama, supaya perilaku untuk semua
-    tipe problem tetap identik dan tidak ada yang rusak.
-    """
-    m = len(points)
-    try:
-        values = np.asarray(problem.evaluate_fitness(points))
-        if values.shape != (m,):
-            raise ValueError("Shape mismatch")
-        return values
-    except Exception:
-        return np.array([problem.evaluate_fitness(p) for p in points])
-
 def process_point_for_clustering(
     y: np.ndarray, 
     clusters: List[Cluster], 
@@ -36,8 +12,7 @@ def process_point_for_clustering(
     problem,
     gamma: float,
     params: Dict[str, Any],
-    history: List[Dict[str, Any]] = None,
-    precomputed_F_y: float = None,
+    history: List[Dict[str, Any]] = None
 ) -> List[Cluster]:
     """
     Evaluates a single coordinate point to determine its cluster assignment or if it should form a new cluster based on the objective function landscape.
@@ -65,11 +40,7 @@ def process_point_for_clustering(
         The updated list of clusters after processing the point `y`.
     """
     # F_y = objective_function(y, equations)
-    # Kalau nilai fitness titik ini sudah dihitung sebelumnya lewat batch
-    # (lihat perform_iterative_clustering), pakai itu -- hindari evaluasi
-    # ulang yang sia-sia untuk titik yang sama. Kalau tidak ada (mis. dipanggil
-    # rekursif untuk titik x_t_best yang baru), hitung seperti biasa.
-    F_y = precomputed_F_y if precomputed_F_y is not None else problem.evaluate_fitness(y)
+    F_y = problem.evaluate_fitness(y)
 
     if F_y <= gamma:
         return clusters
@@ -110,25 +81,14 @@ def process_point_for_clustering(
 
     # Dynamic Multi-point Check Logic
     x_C = nearest_cluster.center
-
+    F_xC = problem.evaluate_fitness(x_C)
+    
     # Generate t values dynamically based on num_check_points parameter
     num_check_points = params.get('num_check_points', 1)
     t_vals = [i / (num_check_points + 1) for i in range(1, num_check_points + 1)]
     x_ts = [y + t * (x_C - y) for t in t_vals]
-
-    # DULU: evaluate_fitness dipanggil satu-titik-satu-titik untuk x_C lalu
-    # setiap x_t (1 + num_check_points panggilan terpisah). Setiap panggilan
-    # satu-titik menanggung overhead tetap yang cukup besar (lihat profil:
-    # ~2ms/panggilan terlepas dari kecilnya beban kerja), jadi memanggilnya
-    # berkali-kali per titik populasi jadi mahal kalau dikali ribuan titik.
-    # SEKARANG: x_C dan seluruh x_t digabung jadi satu batch kecil, dievaluasi
-    # lewat SATU panggilan (fallback otomatis ke per-titik kalau problem tidak
-    # mendukung batch).
-    batch_points = np.vstack([x_C[None, :]] + [xt[None, :] for xt in x_ts])
-    batch_F = _batch_evaluate_fitness(problem, batch_points)
-    F_xC = batch_F[0]
-    F_xts = list(batch_F[1:])
-
+    F_xts = [problem.evaluate_fitness(xt) for xt in x_ts]
+    
     F_xt_min = min(F_xts)
     F_xt_max = max(F_xts)
 
@@ -230,10 +190,7 @@ def perform_iterative_clustering(
     # 3. Initialize First Cluster based on the current Best Point
     clusters: List[Cluster] = []
     # F_values = np.array([objective_function(p, equations) for p in points])
-    # DULU: list comprehension yang memanggil problem.evaluate_fitness() SATU
-    # TITIK PER SATU TITIK (m_cluster kali). SEKARANG: satu panggilan batch
-    # (fallback otomatis ke per-titik untuk problem yang belum mendukung batch).
-    F_values = _batch_evaluate_fitness(problem, points)
+    F_values = np.array([problem.evaluate_fitness(p) for p in points])
     best_idx = np.argmax(F_values)
     
     x_prime = points[best_idx].copy()
@@ -249,13 +206,7 @@ def perform_iterative_clustering(
 
     # 4. Main clustering loop
     for k in range(k_cluster):
-        # `F_values` di titik ini SUDAH valid untuk `points` yang sekarang --
-        # baik dari inisialisasi di atas (k==0) atau dari hasil batch di akhir
-        # iterasi sebelumnya (k>0, tepat setelah update spiral). Versi lama
-        # menghitung ulang F_values 3x per iterasi (di awal, di dalam loop per
-        # titik, dan sebelum update spiral) padahal `points` TIDAK BERUBAH di
-        # antara ketiganya -- jadi ketiganya selalu menghasilkan angka yang
-        # persis sama. Sekarang cukup dihitung SEKALI per generasi titik.
+        F_values = np.array([problem.evaluate_fitness(p) for p in points])
         F_best = np.max(F_values)
         
         # Process points for clustering
@@ -265,7 +216,7 @@ def perform_iterative_clustering(
                 continue
             
             # F_val = objective_function(points[i], equations)
-            F_val = F_values[i]  # sudah dihitung lewat batch di atas, tidak perlu evaluasi ulang
+            F_val = problem.evaluate_fitness(points[i])
             uses_absolute_cutoff = getattr(problem, 'problem_type', None) in ('SNE', 'Diophantine')
             # is_sne = getattr(problem, 'problem_type', None) == 'SNE'
 
@@ -288,16 +239,12 @@ def perform_iterative_clustering(
                 # is_center = any(np.all(np.abs(c.center - points[i]) < 1e-8) for c in clusters)
                 if not is_center:
                     # clusters = process_point_for_clustering(points[i], clusters, equations, gamma, domain)
-                    clusters = process_point_for_clustering(
-                        points[i], clusters, problem, cutoff, params, history,
-                        precomputed_F_y=F_val,
-                    )
+                    clusters = process_point_for_clustering(points[i], clusters, problem, cutoff, params, history)
 
 
         # Update points using spiral dynamics
-        # F_values dari atas masih berlaku untuk `points` saat ini (belum
-        # berubah), jadi best_idx/x_p dihitung langsung dari situ tanpa
-        # evaluasi ulang.
+        # F_values = np.array([objective_function(p, equations) for p in points])
+        F_values = np.array([problem.evaluate_fitness(p) for p in points])
         best_idx = np.argmax(F_values)
         x_p = points[best_idx].copy()
 
@@ -307,11 +254,5 @@ def perform_iterative_clustering(
             new_points[i] = S_n @ points[i] - (S_n - I_n) @ x_p
         points = new_points
         # points = (points @ S_n.T) - (x_p @ (S_n - I_n).T) # Vectorized Alternative
-
-        # Siapkan F_values untuk generasi titik yang baru (dipakai di awal
-        # iterasi berikutnya). Di-skip pada iterasi terakhir karena tidak akan
-        # dipakai lagi (fungsi langsung return clusters setelah loop selesai).
-        if k < k_cluster - 1:
-            F_values = _batch_evaluate_fitness(problem, points)
   
     return clusters

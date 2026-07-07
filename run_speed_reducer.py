@@ -83,23 +83,10 @@ domain = [(lb[i], ub[i]) for i in range(7)]
 
 # Parameter SDOA (sesuai screenshotmu)
 params = {
-    # --- Parameter Clustering ---
-    'm_cluster': 30000,        # jumlah titik Sobol awal untuk clustering
-    'r_cl': 0.99,             # radius shrink factor tiap iterasi cluster
-    'theta_cl': np.pi / 32,    # sudut spiral untuk clustering
-    'k_cluster': 1000,          # jumlah iterasi clustering
-    'gamma': 0.01,             # threshold filter global (Multimodal/MixedInteger)
-
-    # --- Parameter SDOA (local refinement per cluster) ---
-    'sdoa_m': 30000,          # jumlah titik spiral per cluster
-    'sdoa_k_max': 1000,       # jumlah iterasi SDOA per cluster
-    'r': 0.99,                # radius shrink factor SDOA
-    'theta': np.pi / 32,      # sudut rotasi spiral SDOA
-
-    # --- Parameter Seleksi & Penalti ---
-    'epsilon': 1e-3,
-    'delta': 0.001,
-    'M': 1e15,
+    'm': 10000,           # populasi
+    'r': 0.99,            # radius shrink
+    'theta': np.pi / 32,  # sudut spiral
+    'k_max': 1000         # iterasi maksimal
 }
 
 print("Menjalankan optimasi Speed Reducer (Mixed-Integer) dengan SDOA...")
