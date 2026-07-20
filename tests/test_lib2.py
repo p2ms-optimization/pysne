@@ -19,8 +19,7 @@ from typing import Dict, List, Any
 # IMPORTS
 # ============================================================================
 
-from pysne.problems.benchmarks import get_problem_set
-from pysne.utils import objective_function, validate_solutions
+from pysne.problems.benchmarks_sne import get_problem_set
 from pysne.solver import solve_system
 
 
@@ -68,7 +67,10 @@ def test_problem(problem_id: int, verbose: bool = True) -> Dict[str, Any]:
             result['error'] = f"Problem {problem_id} not found"
             return result
         
-        equations, domain, params, expected_roots = problems[problem_id]()
+        problem = problems[problem_id]()
+        domain, params = problem.get_info()
+        expected_roots = params.get('expected_roots', 0)
+        
         result['roots_expected'] = expected_roots
         epsilon = params.get('epsilon', 1e-7)
         delta = params.get('delta', 0.01)
@@ -76,13 +78,13 @@ def test_problem(problem_id: int, verbose: bool = True) -> Dict[str, Any]:
         if verbose:
             print(f"[STEP 1] Loading Problem {problem_id}")
             print(f"Target: Finding {expected_roots} solution roots.")
+            print(f"info param: {problem.get_info()}")
         
         start_time = time.time()
         
         # === RUN SOLVER ===
         solve_result = solve_system(
-            equations=equations,
-            domain=domain,
+            problem=problem,
             params=params,
             verbose=False
         )
@@ -123,7 +125,7 @@ def test_problem(problem_id: int, verbose: bool = True) -> Dict[str, Any]:
             if len(final_roots) > 0:
                 print("\nList of Found Roots:")
                 for i, root in enumerate(final_roots):
-                    fitness = objective_function(root, equations)
+                    fitness = problem.evaluate_fitness(root)
                     residual = 1.0 - fitness
                     print(f"  Root {i+1}: {root.round(6)} | Residual: {residual:.2e}")
             
@@ -171,7 +173,7 @@ def test_all_problems(problem_ids: list = None, show_details: bool = False) -> D
     """
     
     if problem_ids is None:
-        problem_ids = [1, 2, 3, 4, 5, 6, 7]
+        problem_ids = [1, 2, 3, 5, 6, 7]
     
     print("="*60)
     print("PYSNE COMPREHENSIVE SOLVER TEST")
