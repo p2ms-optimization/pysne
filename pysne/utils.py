@@ -150,7 +150,8 @@ def calculate_sobol_discrepancy(
     num_points: int = None, 
     dimension: int = None, 
     points: np.ndarray = None, 
-    domain: List[Tuple[float, float]] = None
+    domain: List[Tuple[float, float]] = None,
+    method: str = 'CD'
 ) -> float:
     """
     Menghitung nilai discrepancy dari distribusi titik.
@@ -185,7 +186,7 @@ def calculate_sobol_discrepancy(
                 denom[denom == 0] = 1.0
                 pts = (pts - lower_bounds) / denom
             pts = np.clip(pts, 0.0, 1.0)
-            discrepancy_val = qmc.discrepancy(pts)
+            discrepancy_val = qmc.discrepancy(pts, method=method)
             return float(discrepancy_val)
         except Exception as e:
             warnings.warn(f"Gagal menghitung discrepancy dari points: {e}", RuntimeWarning)
@@ -200,7 +201,7 @@ def calculate_sobol_discrepancy(
     
     try:
         points_gen = sampler.random(n=num_points)
-        discrepancy_val = qmc.discrepancy(points_gen)
+        discrepancy_val = qmc.discrepancy(points_gen, method=method)
         return float(discrepancy_val)
     except Exception as e:
         warnings.warn(f"Gagal menghitung discrepancy: {e}", RuntimeWarning)
