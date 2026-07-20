@@ -98,10 +98,10 @@ class problem_3(SNEProblem):
     def get_info(self):
         domain = [(-5, 5)] * 6
         params = {
-            'm_cluster': 1000,
+            'm_cluster': 300,
             'r_cl': 0.95, # r
             'theta_cl': np.pi/4, # theta
-            'k_cluster': 15,
+            'k_cluster': 10,
             'epsilon': 1e-7,
             'delta': 0.5,
             'sdoa_m': 420,
