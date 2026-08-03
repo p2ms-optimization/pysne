@@ -3,7 +3,7 @@
 # PySNE
 
 **Finding *all* solutions of a system of nonlinear equations**
-via Spiral Dynamics Optimization Algorithm (SDOA) + Iterative Clustering
+via Spiral Optimization (SPO) + Iterative Clustering
 
 [![Python](https://img.shields.io/badge/python-3.8%2B-blue.svg)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
@@ -40,7 +40,7 @@ mechanisms to recover all isolated roots in a single run:
 
 1. **Iterative Clustering** — partitions the domain into neighborhoods (clusters)
    that are likely to contain a root.
-2. **Spiral Dynamics Optimization Algorithm (SDOA)** — a deterministic, rotation-based
+2. **Spiral Optimization (SPO)** — a deterministic, rotation-based
    metaheuristic that refines each cluster down to a precise candidate root.
 
 A final **selection & validation** stage merges duplicates and keeps only the
@@ -99,7 +99,7 @@ problem = problems[1]()                 # instantiate the chosen problem
 # 2. Use the problem's recommended domain + hyperparameters
 domain, params = problem.get_info()
 
-# 3. Run the full clustering + SDOA pipeline
+# 3. Run the full clustering + SPO pipeline
 result = solve_system(problem, params, verbose=True)
 
 # 4. Inspect the results
@@ -143,10 +143,10 @@ high-fitness regions. Points are moved iteratively using the spiral operator
 toward the current best point, growing and merging clusters that bracket
 potential roots. *(`pysne/clustering/`)*
 
-### Phase 2 — SDOA per Cluster
+### Phase 2 — SPO per Cluster
 For each cluster, a local hypercube domain is constructed from its center and
 radius (clamped to the global bounds). Fresh Sobol points are generated inside
-that hypercube and refined by SDOA:
+that hypercube and refined by SPO:
 
 ```text
 xₖ₊₁ = Sₙ · xₖ − (Sₙ − Iₙ) · x*ₖ ,     Sₙ = r · Rₙ(θ)
@@ -154,7 +154,7 @@ xₖ₊₁ = Sₙ · xₖ − (Sₙ − Iₙ) · x*ₖ ,     Sₙ = r · Rₙ(θ
 
 where `Rₙ(θ)` is the composed n-dimensional rotation matrix, `r` the spiral
 radius, `θ` the rotation angle, and `x*` the incumbent best. Early stopping
-triggers once the residual drops below `ε`. *(`pysne/optimizers/sdoa/`)*
+triggers once the residual drops below `ε`. *(`pysne/optimizers/spo/`)*
 
 ### Phase 3 — Selection & Validation
 Candidate roots are filtered: near-duplicates within distance `δ` are merged, and
@@ -172,9 +172,9 @@ Hyperparameters are passed via the `params` dictionary.
 | `k_cluster`          | Clustering  | Iterations of the clustering loop.                   |
 | `gamma`              | Clustering  | Fitness threshold for accepting/creating clusters.   |
 | `r_cl`, `theta_cl`   | Clustering  | Spiral radius / angle used during clustering.        |
-| `sdoa_m`             | SDOA        | Points per cluster (aliased as `m`).                 |
-| `sdoa_k_max`         | SDOA        | Max SDOA iterations (aliased as `k_max`).            |
-| `r`, `theta`         | SDOA        | Spiral radius (≈0.95) and angle (≈π/4).              |
+| `spo_m`             | SPO        | Points per cluster (aliased as `m`).                 |
+| `spo_k_max`         | SPO        | Max SPO iterations (aliased as `k_max`).            |
+| `r`, `theta`         | SPO        | Spiral radius (≈0.95) and angle (≈π/4).              |
 | `epsilon` (`ε`)      | Validation  | Residual tolerance for accepting a root.             |
 | `delta` (`δ`)        | Validation  | Distance threshold for merging duplicate roots.      |
 
@@ -204,7 +204,7 @@ pysne/                              <-- Root repository
 │   ├── __init__.py
 │   ├── solver.py                   # solve_system() — the 3-phase pipeline
 │   ├── utils.py                    # objective_function, is_in_domain, validate_solutions
-│   ├── version.py                  # __version__ = "0.1.0"
+│   ├── version.py                  # __version__ = "0.2.0"
 │   │
 │   ├── initialization/
 │   │   └── sampling.py             # generate_sobol_points (Sobol / SciPy QMC)
@@ -215,8 +215,8 @@ pysne/                              <-- Root repository
 │   │   └── modified_clustering_process.py   # perform_iterative_clustering
 │   │
 │   ├── optimizers/
-│   │   └── sdoa/
-│   │       ├── engine.py           # spiral_dynamics_optimization (SDOA core loop)
+│   │   └── spo/
+│   │       ├── engine.py           # spiral_optimization (SPO core loop)
 │   │       └── matrix.py           # get_rotation_matrix (n-D rotation)
 │   │
 │   └── problems/
@@ -241,7 +241,7 @@ pytest -v
 ```
 
 Smoke/integration tests (e.g. `tests/test_gecco.py`) run the full pipeline on a
-fast benchmark to verify that clustering, SDOA, and selection compose correctly.
+fast benchmark to verify that clustering, SPO, and selection compose correctly.
 
 ---
 

@@ -1,15 +1,43 @@
-# this will later become the main optimization engine with SDOA after all related functions are pushed
-
 import numpy as np
 from .matrix import get_rotation_matrix
 from pysne.utils import is_in_domain
-# from scipy.stats import qmc #
 from pysne.initialization.sampling import generate_sobol_points
 
-def spiral_dynamics_optimization(objective_func, domain, params, minimization=False,
+def spiral_optimization(objective_func, domain, params, minimization=False,
                                  custom_initial_points=None, equations=None, epsilon=None, return_history=False):
     """
-    Implementation of SDOA with early stopping.
+    Performs Spiral Optimization (SPO) with early stopping.
+
+    This function optimizes an objective function over a bounded domain using
+    the spiral dynamics operator. Points are iteratively rotated and contracted
+    toward the current global best, converging on optimal solutions.
+
+    Parameters
+    ----------
+    objective_func : callable
+        The objective function to optimize. Accepts a numpy.ndarray and returns a float.
+    domain : list of tuple
+        The search space boundaries in the format [(min, max), ...].
+    params : dict
+        SPO hyperparameters with keys 'm' (population size), 'r' (contraction rate),
+        'theta' (rotation angle), and 'k_max' (maximum iterations).
+    minimization : bool, optional
+        If True, minimizes the objective function. Default is False (maximization).
+    custom_initial_points : numpy.ndarray, optional
+        Pre-generated initial points. If None, Sobol points are generated.
+    equations : list of callable, optional
+        System of equations for early stopping in SNE problems. If provided,
+        the algorithm stops when the residual falls below epsilon.
+    epsilon : float, optional
+        Tolerance for early stopping. Default is 1e-7.
+    return_history : bool, optional
+        If True, returns a tuple of (best_point, convergence_history). Default is False.
+
+    Returns
+    -------
+    numpy.ndarray or tuple
+        The best solution found. If return_history is True, returns
+        (best_point, list_of_best_values_per_iteration).
     """
     # Parameter extraction
     m = params.get('m', 20)
@@ -55,14 +83,11 @@ def spiral_dynamics_optimization(objective_func, domain, params, minimization=Fa
 
         # Evaluate all points
         try:
-            # Vectorized
             current_values = np.array(objective_func(search_points))
-            
-            # Validasi aman: jika shape kacau akibat persamaan SNE yang tidak mendukung 2D
+            # Safety check: ensure shape is valid for SNE equations that don't support 2D input
             if current_values.shape != (m,):
                 raise ValueError("Shape mismatch")
         except:
-            # list comprehension
             current_values = np.array([objective_func(point) for point in search_points])
 
         # Update Global Best
@@ -77,7 +102,7 @@ def spiral_dynamics_optimization(objective_func, domain, params, minimization=Fa
 
         history.append(best_value)
 
-        # 6. Early Stopping (Hanya untuk SNE)
+        # Early Stopping (only for SNE problems with known equations)
         if equations is not None:
             residual = 1.0 - best_value
             if residual <= epsilon:

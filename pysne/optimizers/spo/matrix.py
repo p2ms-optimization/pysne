@@ -12,7 +12,7 @@ def get_rotation_matrix(n: int, theta: float) -> np.ndarray:
     n : int
         The dimensionality of the search space (number of variables).
     theta : float
-        The rotation angle in radians (typically pi/4 or pi/2 in standard SDOA).
+        The rotation angle in radians (typically pi/4 or pi/2 in standard SPO).
 
     Returns
     -------
