@@ -3,16 +3,14 @@ from typing import List, Dict, Any, Tuple, Callable
 from .model import Cluster
 from ..utils import objective_function, is_in_domain
 from ..initialization.sampling import generate_sobol_points
-from ..optimizers.sdoa.matrix import get_rotation_matrix
+from ..optimizers.spo.matrix import get_rotation_matrix
 
 def process_point_for_clustering(
     y: np.ndarray, 
     clusters: List[Cluster], 
-    # equations: List[Callable], 
     problem,
     gamma: float,
     history: List[Dict[str, Any]] = None
-    # domain: List[Tuple[float, float]]
 ) -> List[Cluster]:
     """
     Evaluates a single coordinate point to determine its cluster assignment or if it should form a new cluster based on the objective function landscape.
@@ -27,19 +25,18 @@ def process_point_for_clustering(
         The current search point being evaluated.
     clusters : list of Cluster
         The current list of identified clusters in the search space.
-    equations : list of callable
-        The system of nonlinear equations to be solved.
+    problem : BaseProblem
+        The problem instance providing domain bounds and fitness evaluation.
     gamma : float
         The cut-off threshold for the objective function. Points with an objective value below this threshold are ignored.
-    domain : list of tuple
-        The boundaries of the search space in the format [(min, max), ...].
+    history : list of dict, optional
+        If provided, records clustering decisions for debugging and visualization.
 
     Returns
     -------
     list of Cluster
         The updated list of clusters after processing the point `y`.
     """
-    # F_y = objective_function(y, equations)
     F_y = problem.evaluate_fitness(y)
 
     if F_y <= gamma:
@@ -55,15 +52,6 @@ def process_point_for_clustering(
             })
         return clusters
 
-    # Nearest Cluster Search
-    # min_dist = float('inf')
-    # nearest_cluster = None
-    # for cluster in clusters:
-    #     dist = np.linalg.norm(y - cluster.center)
-    #     if dist < min_dist:
-    #         min_dist = dist
-    #         nearest_cluster = cluster
-
     # Nearest Cluster Search (Vectorized)
     centers = np.array([c.center for c in clusters])
     dists = np.linalg.norm(centers - y, axis=1)
@@ -71,13 +59,10 @@ def process_point_for_clustering(
     nearest_cluster = clusters[closest_idx]
     min_dist = dists[closest_idx]
 
-
     # Mid-point Check Logic
     x_C = nearest_cluster.center
-    # F_xC = objective_function(x_C, equations)
     F_xC = problem.evaluate_fitness(x_C)
     x_t = (y + x_C) / 2.0
-    # F_xt = objective_function(x_t, equations)
     F_xt = problem.evaluate_fitness(x_t)
 
     # Clustering Logic
@@ -91,7 +76,6 @@ def process_point_for_clustering(
         # Case 2: Midpoint is a better peak; form a new cluster and recurse
         case_triggered = 'Case 2 (Mid better)'
         clusters.append(Cluster(y.copy(), dist_y_xt))
-        # clusters = process_point_for_clustering(x_t, clusters, equations, gamma, domain)
         clusters = process_point_for_clustering(x_t, clusters, problem, gamma, history)
     elif F_y > F_xC:
         # Case 3: Update center as y is closer to the root's peak
@@ -117,8 +101,6 @@ def process_point_for_clustering(
     return clusters
 
 def perform_iterative_clustering(
-    # equations: List[Callable], 
-    # domain: List[Tuple[float, float]],
     problem, 
     params: Dict[str, Any],
     history: List[Dict[str, Any]] = None
@@ -132,12 +114,12 @@ def perform_iterative_clustering(
 
     Parameters
     ----------
-    equations : list of callable
-        The system of nonlinear equations to be solved.
-    domain : list of tuple
-        The boundaries of the search space in the format [(min, max), ...].
+    problem : BaseProblem
+        The problem instance providing domain bounds and fitness evaluation.
     params : dict
-        A dictionary containing hyperparameters for the clustering phase. Expected keys include 'm_cluster', 'gamma', 'k_cluster', 'r', and 'theta'.
+        A dictionary containing hyperparameters for the clustering phase. Expected keys include 'm_cluster', 'gamma', 'k_cluster', 'r_cl', and 'theta_cl'.
+    history : list of dict, optional
+        If provided, records clustering state for debugging and visualization.
 
     Returns
     -------
@@ -145,17 +127,11 @@ def perform_iterative_clustering(
         A list of distinct Cluster objects representing the neighborhoods of potential roots found in the search space.
     """
     # Parameter Extraction
-    # m_cluster = int(params.get('m_cluster', 200))
     m_cluster = params['m_cluster']
-    # gamma = float(params.get('gamma', 0.1))
     gamma = params.get('gamma', -float('inf'))
-    # k_cluster = int(params.get('k_cluster', 10))
     k_cluster = params['k_cluster']
-    # r = float(params.get('r', 0.95))
     r = params.get('r_cl', 0.95)
-    # theta = float(params.get('theta', np.pi/4))
     theta = params.get('theta_cl', np.pi/4)
-    # n = len(domain)
 
     n = problem.n_var
     domain = problem.domain
@@ -170,7 +146,6 @@ def perform_iterative_clustering(
 
     # 3. Initialize First Cluster based on the current Best Point
     clusters: List[Cluster] = []
-    # F_values = np.array([objective_function(p, equations) for p in points])
     F_values = np.array([problem.evaluate_fitness(p) for p in points])
     best_idx = np.argmax(F_values)
     
@@ -196,7 +171,6 @@ def perform_iterative_clustering(
             if not is_in_domain(points[i], domain):
                 continue
             
-            # F_val = objective_function(points[i], equations)
             F_val = problem.evaluate_fitness(points[i])
             is_sne = getattr(problem, 'problem_type', None) == 'SNE'
             
@@ -211,13 +185,10 @@ def perform_iterative_clustering(
             if F_val > cutoff:
                 centers = np.array([c.center for c in clusters])
                 is_center = np.any(np.all(np.abs(centers - points[i]) < 1e-8, axis=1)) if len(centers) > 0 else False
-                # is_center = any(np.allclose(points[i], cluster.center, atol=1e-8) for cluster in clusters)
                 if not is_center:
-                    # clusters = process_point_for_clustering(points[i], clusters, equations, gamma, domain)
                     clusters = process_point_for_clustering(points[i], clusters, problem, cutoff, history)
 
         # Update points using spiral dynamics
-        # F_values = np.array([objective_function(p, equations) for p in points])
         F_values = np.array([problem.evaluate_fitness(p) for p in points])
         best_idx = np.argmax(F_values)
         x_p = points[best_idx].copy()
@@ -227,6 +198,5 @@ def perform_iterative_clustering(
         for i in range(m_cluster):
             new_points[i] = S_n @ points[i] - (S_n - I_n) @ x_p
         points = new_points
-        # points = (points @ S_n.T) - (x_p @ (S_n - I_n).T) # Vectorized Alternative
   
     return clusters
