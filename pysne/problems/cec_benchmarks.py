@@ -1,6 +1,6 @@
 """
-Integration module untuk menggunakan benchmark functions dari opfunu
-dengan SDOA algorithm di pysne.
+Integration module for using opfunu benchmark functions
+with the SPO algorithm in pysne.
 """
 
 import numpy as np
@@ -8,7 +8,7 @@ import opfunu
 from pysne.problems.base import MultimodalProblem
 
 class OpfunuBenchmarkWrapper(MultimodalProblem):
-    """Base class untuk wrapper opfunu benchmark functions, compatible with pysne solver"""
+    """Base class wrapper for opfunu benchmark functions, compatible with pysne solver."""
 
     def __init__(self, func_instance, ndim, name=None, custom_params=None):
         self.func = func_instance
@@ -31,46 +31,40 @@ class OpfunuBenchmarkWrapper(MultimodalProblem):
         return self._name
 
     def g_func(self, x):
-        """Evaluasi fungsi pada titik x"""
+        """Evaluates the function at point x."""
         return self.func.evaluate(x)
         
     def evaluate(self, x):
-        """Alias untuk g_func untuk compatibility luar"""
+        """Alias for g_func for external compatibility."""
         return self.g_func(x)
 
     def get_info(self):
-        """Return (domain, params) untuk pysne solver"""
+        """Returns (domain, params) for the pysne solver."""
         params = {
-            # 'm_cluster': 1500,
-            # 'k_cluster': 20,
-            # 'm': 100,
-            # 'k_max': 100,
-            # 'delta': 0.01,
-            # 'epsilon': 1e-7
             'm_cluster': 1500,
-            'r_cl': 0.95, # r
-            'theta_cl': np.pi/4, # theta
+            'r_cl': 0.95,
+            'theta_cl': np.pi/4,
             'k_cluster': 20,
             'epsilon': 1e-7,
             'delta': 0.01,
-            'sdoa_m': 250,
-            'sdoa_k_max': 250,
-            'r': 0.95, # sdoa_r
-            'theta': np.pi/4, # sdoa_theta
+            'spo_m': 250,
+            'spo_k_max': 250,
+            'r': 0.95,
+            'theta': np.pi/4,
             'gamma': 0.01
         }
-        # Timpa default parameter dengan parameter spesifik jika ada
+        # Override default parameters with problem-specific ones if provided
         params.update(self.custom_params)
         return self.domain, params
 
 class CEC2013Benchmark:
-    """Collection dari CEC 2013 benchmark functions"""
+    """Collection of CEC 2013 benchmark functions."""
     FUNCTIONS = {f'F{i}': f'F{i}2013' for i in range(1, 29)}
 
     @staticmethod
     def get_function(func_name, ndim, custom_params=None):
         if func_name not in CEC2013Benchmark.FUNCTIONS:
-            raise ValueError(f"Function {func_name} tidak ditemukan. "
+            raise ValueError(f"Function {func_name} not found. "
                            f"Available: {list(CEC2013Benchmark.FUNCTIONS.keys())}")
         class_name = CEC2013Benchmark.FUNCTIONS[func_name]
         func_class = getattr(opfunu.cec_based, class_name)
@@ -78,13 +72,13 @@ class CEC2013Benchmark:
         return OpfunuBenchmarkWrapper(func_instance, ndim, name=f"CEC2013_{func_name}", custom_params=custom_params)
 
 class CEC2014Benchmark:
-    """Collection dari CEC 2014 benchmark functions"""
+    """Collection of CEC 2014 benchmark functions."""
     FUNCTIONS = {f'F{i}': f'F{i}2014' for i in range(1, 31)}
 
     @staticmethod
     def get_function(func_name, ndim, custom_params=None):
         if func_name not in CEC2014Benchmark.FUNCTIONS:
-            raise ValueError(f"Function {func_name} tidak ditemukan. "
+            raise ValueError(f"Function {func_name} not found. "
                            f"Available: {list(CEC2014Benchmark.FUNCTIONS.keys())}")
         class_name = CEC2014Benchmark.FUNCTIONS[func_name]
         func_class = getattr(opfunu.cec_based, class_name)
@@ -92,7 +86,7 @@ class CEC2014Benchmark:
         return OpfunuBenchmarkWrapper(func_instance, ndim, name=f"CEC2014_{func_name}", custom_params=custom_params)
 
 class NameBasedBenchmark:
-    """Collection dari name-based benchmark functions"""
+    """Collection of name-based benchmark functions."""
     AVAILABLE_FUNCTIONS = [
         'Ackley02', 'Ackley03', 'Beale', 'BiggsExp02', 'BiggsExp03',
         'Bohachevsky1', 'Bohachevsky2', 'Booth', 'Branin01', 'Brown',
@@ -103,7 +97,7 @@ class NameBasedBenchmark:
     @staticmethod
     def get_function(func_name, ndim=None, custom_params=None):
         if not hasattr(opfunu.name_based, func_name):
-            raise ValueError(f"Function {func_name} tidak ditemukan")
+            raise ValueError(f"Function {func_name} not found")
         func_class = getattr(opfunu.name_based, func_name)
         if ndim is not None:
             func_instance = func_class(ndim=ndim)
@@ -128,5 +122,5 @@ def create_benchmark_suite(benchmark_type='cec2014', ndim=10, num_functions=5):
             try:
                 functions[func_name] = NameBasedBenchmark.get_function(func_name, ndim)
             except Exception as e:
-                print(f"Warning: Tidak bisa load {func_name}: {e}")
+                print(f"Warning: Could not load {func_name}: {e}")
     return functions

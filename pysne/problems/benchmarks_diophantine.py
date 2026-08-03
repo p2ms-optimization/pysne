@@ -6,10 +6,10 @@ class DiophantineProblem1(DiophantineProblem):
     """
     Problem 1: 15x + 11y = 12  (Linear, 2D)
 
-    Persamaan linear Diophantine dengan dua variabel.
-    Expected roots: 7 solusi integer dalam domain [-50, 50]^2.
+    A linear Diophantine equation with two variables.
+    Expected roots: 7 integer solutions in domain [-50, 50]^2.
 
-    Referensi: Sumarti et al. (2023)
+    Reference: Sumarti et al. (2023)
     """
 
     @property
@@ -18,45 +18,45 @@ class DiophantineProblem1(DiophantineProblem):
 
     def get_integer_domain(self) -> List[tuple]:
         """
-        Domain bilangan bulat asli.
-        Di base class, domain untuk solver otomatis dikonversi
-        ke continuous_bounds (integer ± 0.5) melalui get_info().
+        Original integer domain.
+        In the base class, the solver domain is automatically converted
+        to continuous bounds (integer ± 0.5) via get_info().
         """
         return [(-50, 50), (-50, 50)]
 
     def get_equations(self) -> List[Callable]:
-        """Persamaan f_i(x) = 0 yang dicari solusi integer-nya."""
+        """Equations f_i(x) = 0 whose integer solutions are sought."""
         return [
             lambda var: 15 * var[0] + 11 * var[1] - 12
         ]
 
     def get_params(self) -> dict:
         """
-        Hyperparameter algoritma untuk problem ini.
+        Algorithm hyperparameters for this problem.
 
-        Kunci parameter:
+        Parameter keys:
         - m_cluster, k_cluster, gamma, r_cl, theta_cl : clustering phase
-        - sdoa_m, sdoa_k_max, r, theta               : SDOA phase
-        - epsilon, delta                              : seleksi solusi
-        - num_check_points                            : jumlah titik cek antar cluster
-        - expected_roots                              : metadata (jumlah solusi yang diharapkan)
+        - spo_m, spo_k_max, r, theta               : SPO phase
+        - epsilon, delta                              : solution selection
+        - num_check_points                            : number of interpolation check points
+        - expected_roots                              : metadata (expected number of solutions)
         """
         return {
-            # Parameter Clustering
+            # Clustering Parameters
             'm_cluster': 375,
             'k_cluster': 10,
             'gamma': 0.01,
             'r_cl': 0.95,
             'theta_cl': np.pi / 4,
-            # Parameter SDOA
+            # SPO Parameters
             'r': 0.95,
             'theta': np.pi / 4,
-            'sdoa_m': 30,
-            'sdoa_k_max': 10,
-            # Parameter Seleksi
+            'spo_m': 30,
+            'spo_k_max': 10,
+            # Selection Parameters
             'epsilon': 1e-7,
             'delta': 0.1,
-            # Parameter num_check_points (modifikasi multi-point)
+            # Multi-point check parameter
             'num_check_points': 3,
             # Metadata
             'expected_roots': 7
@@ -64,7 +64,7 @@ class DiophantineProblem1(DiophantineProblem):
 
 class Problem2(DiophantineProblem):
     """
-    Sistem Persamaan Diophantine Eksponensial 2D:
+    Exponential-Polynomial Diophantine System (2D):
     f1(x) = 3^x1 - x2^2 - 8 = 0
     f2(x) = x1^2 + x2^2 - 13 = 0
     """
@@ -89,8 +89,8 @@ class Problem2(DiophantineProblem):
             'k_cluster': 5,
             'epsilon': 1e-5,
             'delta': 0.5,
-            'sdoa_m': 30,
-            'sdoa_k_max': 50,
+            'spo_m': 30,
+            'spo_k_max': 50,
             'r': 0.95,
             'theta': np.pi/4,
             'expected_roots': 2
@@ -100,7 +100,7 @@ class Problem2(DiophantineProblem):
 class DiophantineProblem3a(DiophantineProblem):
     """
     Problem 3a: x1^3 + x2^3 = 1008 (Cubic, 2D)
-    Expected roots: 1 solusi
+    Expected roots: 1 solution.
     """
     @property
     def name(self) -> str:
@@ -121,8 +121,8 @@ class DiophantineProblem3a(DiophantineProblem):
             'theta_cl': np.pi / 4,
             'r': 0.95,
             'theta': np.pi / 4,
-            'sdoa_m': 50,
-            'sdoa_k_max': 50,
+            'spo_m': 50,
+            'spo_k_max': 50,
             'epsilon': 1e-5,
             'delta': 0.01,
             'num_check_points': 3,
@@ -132,7 +132,7 @@ class DiophantineProblem3a(DiophantineProblem):
 class DiophantineProblem3b(DiophantineProblem):
     """
     Problem 3b: x1^9 + x2^9 = 1000019683 (9th Degree, 2D)
-    Expected roots: 1 solusi.
+    Expected roots: 1 solution.
     """
     @property
     def name(self) -> str:
@@ -153,8 +153,8 @@ class DiophantineProblem3b(DiophantineProblem):
             'theta_cl': np.pi / 4,
             'r': 0.95,
             'theta': np.pi / 4,
-            'sdoa_m': 50,
-            'sdoa_k_max': 50,
+            'spo_m': 50,
+            'spo_k_max': 50,
             'epsilon': 1e-5,
             'delta': 0.01,
             'num_check_points': 3,
@@ -164,7 +164,7 @@ class DiophantineProblem3b(DiophantineProblem):
 class DiophantineProblem4_4(DiophantineProblem):
     """
     Problem 4.4: x1^2 + x2^2 + x3^2 + x4^2 = 4 * x1*x2*x3*x4 (4D)
-    Expected roots: 5 solusi.
+    Expected roots: 5 solutions.
     """
     @property
     def name(self) -> str:
@@ -185,8 +185,8 @@ class DiophantineProblem4_4(DiophantineProblem):
             'theta_cl': np.pi / 4,
             'r': 0.95,
             'theta': np.pi / 4,
-            'sdoa_m': 80,
-            'sdoa_k_max': 20,
+            'spo_m': 80,
+            'spo_k_max': 20,
             'epsilon': 1e-7,
             'delta': 0.1,
             'num_check_points': 3,
@@ -196,7 +196,7 @@ class DiophantineProblem4_4(DiophantineProblem):
 class DiophantineProblem4_5(DiophantineProblem):
     """
     Problem 4.5: x1^2 + ... + x5^2 = 4 * x1*...*x5 (5D)
-    Expected roots: 5 solusi.
+    Expected roots: 5 solutions.
     """
     @property
     def name(self) -> str:
@@ -217,8 +217,8 @@ class DiophantineProblem4_5(DiophantineProblem):
             'theta_cl': np.pi / 4,
             'r': 0.975,
             'theta': np.pi / 6,
-            'sdoa_m': 150,
-            'sdoa_k_max': 30,
+            'spo_m': 150,
+            'spo_k_max': 30,
             'epsilon': 1e-7,
             'delta': 0.1,
             'num_check_points': 3,
@@ -228,7 +228,7 @@ class DiophantineProblem4_5(DiophantineProblem):
 class DiophantineProblem4_6(DiophantineProblem):
     """
     Problem 4.6: x1^2 + ... + x6^2 = 3 * x1*...*x6 (6D)
-    Expected roots: 5 solusi.
+    Expected roots: 5 solutions.
     """
     @property
     def name(self) -> str:
@@ -249,8 +249,8 @@ class DiophantineProblem4_6(DiophantineProblem):
             'theta_cl': np.pi / 4,
             'r': 0.95,
             'theta': np.pi / 4,
-            'sdoa_m': 50,
-            'sdoa_k_max': 10,
+            'spo_m': 50,
+            'spo_k_max': 10,
             'epsilon': 1e-7,
             'delta': 0.1,
             'num_check_points': 3,
@@ -260,7 +260,7 @@ class DiophantineProblem4_6(DiophantineProblem):
 class DiophantineProblem4_7(DiophantineProblem):
     """
     Problem 4.7: x1^2 + ... + x7^2 = 2 * x1*...*x7 (7D)
-    Expected roots: 5 solusi.
+    Expected roots: 5 solutions.
     """
     @property
     def name(self) -> str:
@@ -281,8 +281,8 @@ class DiophantineProblem4_7(DiophantineProblem):
             'theta_cl': np.pi / 4,
             'r': 0.95,
             'theta': np.pi / 4,
-            'sdoa_m': 250,
-            'sdoa_k_max': 15,
+            'spo_m': 250,
+            'spo_k_max': 15,
             'epsilon': 1e-7,
             'delta': 0.1,
             'num_check_points': 3,
@@ -292,7 +292,7 @@ class DiophantineProblem4_7(DiophantineProblem):
 class DiophantineProblem4_8(DiophantineProblem):
     """
     Problem 4.8: x1^2 + ... + x8^2 = 1 * x1*...*x8 (8D)
-    Expected roots: 3 solusi.
+    Expected roots: 3 solutions.
     """
     @property
     def name(self) -> str:
@@ -313,8 +313,8 @@ class DiophantineProblem4_8(DiophantineProblem):
             'theta_cl': np.pi / 4,
             'r': 0.95,
             'theta': np.pi / 4,
-            'sdoa_m': 100,
-            'sdoa_k_max': 20,
+            'spo_m': 100,
+            'spo_k_max': 20,
             'epsilon': 1e-7,
             'delta': 0.1,
             'num_check_points': 3,
@@ -324,7 +324,7 @@ class DiophantineProblem4_8(DiophantineProblem):
 class DiophantineProblem4_9(DiophantineProblem):
     """
     Problem 4.9: x1^2 + ... + x9^2 = 6 * x1*...*x9 (9D)
-    Expected roots: 4 solusi.
+    Expected roots: 4 solutions.
     """
     @property
     def name(self) -> str:
@@ -345,8 +345,8 @@ class DiophantineProblem4_9(DiophantineProblem):
             'theta_cl': np.pi / 4,
             'r': 0.95,
             'theta': np.pi / 4,
-            'sdoa_m': 80,
-            'sdoa_k_max': 15,
+            'spo_m': 80,
+            'spo_k_max': 15,
             'epsilon': 1e-7,
             'delta': 0.1,
             'num_check_points': 3,
@@ -356,7 +356,7 @@ class DiophantineProblem4_9(DiophantineProblem):
 class DiophantineProblem4_10(DiophantineProblem):
     """
     Problem 4.10: x1^2 + ... + x10^2 = 1 * x1*...*x10 (10D)
-    Expected roots: 3 solusi.
+    Expected roots: 3 solutions.
     """
     @property
     def name(self) -> str:
@@ -377,8 +377,8 @@ class DiophantineProblem4_10(DiophantineProblem):
             'theta_cl': np.pi / 4,
             'r': 0.95,
             'theta': np.pi / 4,
-            'sdoa_m': 100,
-            'sdoa_k_max': 20,
+            'spo_m': 100,
+            'spo_k_max': 20,
             'epsilon': 1e-7,
             'delta': 0.1,
             'num_check_points': 3,
@@ -388,7 +388,7 @@ class DiophantineProblem4_10(DiophantineProblem):
 class DiophantineProblem5a(DiophantineProblem):
     """
     Problem 5a: Ramanujan-Nagell: x^2 + 7 = y^n (3D: x, y, n)
-    Expected roots: 7 solusi.
+    Expected roots: 7 solutions.
     """
     @property
     def name(self) -> str:
@@ -409,8 +409,8 @@ class DiophantineProblem5a(DiophantineProblem):
             'theta_cl': np.pi / 16,
             'r': 0.975,
             'theta': np.pi / 16,
-            'sdoa_m': 150,
-            'sdoa_k_max': 30,
+            'spo_m': 150,
+            'spo_k_max': 30,
             'epsilon': 0.001,
             'delta': 0.1,
             'num_check_points': 3,
@@ -420,7 +420,7 @@ class DiophantineProblem5a(DiophantineProblem):
 class DiophantineProblem6a(DiophantineProblem):
     """
     Problem 6a: x^2 + 2^a * 11^b = y^n (For n=3, 4D: x, y, a, b)
-    Expected roots: 8 solusi.
+    Expected roots: 8 solutions.
     """
     @property
     def name(self) -> str:
@@ -441,8 +441,8 @@ class DiophantineProblem6a(DiophantineProblem):
             'theta_cl': np.pi / 4,
             'r': 0.95,
             'theta': np.pi / 4,
-            'sdoa_m': 100,
-            'sdoa_k_max': 20,
+            'spo_m': 100,
+            'spo_k_max': 20,
             'epsilon': 1e-5,
             'delta': 0.01,
             'num_check_points': 3,
@@ -453,7 +453,7 @@ class DiophantineProblem6a(DiophantineProblem):
 class DiophantineProblem6b(DiophantineProblem):
     """
     Problem 6b: x^2 + 2^a * 11^b = y^n (For n=4, 4D: x, y, a, b)
-    Expected roots: 5 solusi.
+    Expected roots: 5 solutions.
     """
     @property
     def name(self) -> str:
@@ -474,8 +474,8 @@ class DiophantineProblem6b(DiophantineProblem):
             'theta_cl': np.pi / 3,
             'r': 0.95,
             'theta': np.pi / 4,
-            'sdoa_m': 100,
-            'sdoa_k_max': 20,
+            'spo_m': 100,
+            'spo_k_max': 20,
             'epsilon': 1e-7,
             'delta': 0.001,
             'num_check_points': 3,
@@ -486,7 +486,7 @@ class DiophantineProblem6b(DiophantineProblem):
 class DiophantineProblem7(DiophantineProblem):
     """
     Problem 7: 2^k + 3*x^2 = y^3 (3D: x, y, k)
-    Expected roots: 9 solusi.
+    Expected roots: 9 solutions.
     """
     @property
     def name(self) -> str:
@@ -507,8 +507,8 @@ class DiophantineProblem7(DiophantineProblem):
             'theta_cl': np.pi / 60,
             'r': 0.90,
             'theta': np.pi / 60,
-            'sdoa_m': 50,
-            'sdoa_k_max': 50,
+            'spo_m': 50,
+            'spo_k_max': 50,
             'epsilon': 1e-5,
             'delta': 0.01,
             'num_check_points': 3,
@@ -519,7 +519,7 @@ class DiophantineProblem7(DiophantineProblem):
 class DiophantineProblem8(DiophantineProblem):
     """
     Problem 8: 5^x1 + 5^x2 = 3^x3 + 7^x4 (4D)
-    Expected roots: 9 solusi.
+    Expected roots: 9 solutions.
     """
     @property
     def name(self) -> str:
@@ -540,8 +540,8 @@ class DiophantineProblem8(DiophantineProblem):
             'theta_cl': np.pi / 4,
             'r': 0.95,
             'theta': np.pi / 4,
-            'sdoa_m': 20,
-            'sdoa_k_max': 20,
+            'spo_m': 20,
+            'spo_k_max': 20,
             'epsilon': 1e-7,
             'delta': 0.1,
             'num_check_points': 3,
@@ -552,7 +552,7 @@ class DiophantineProblem8(DiophantineProblem):
 class DiophantineProblem9a(DiophantineProblem):
     """
     Problem 9a: Pell Equations (p=2, 3D: x, y, z)
-    Expected roots: 1 solusi.
+    Expected roots: 1 solution.
     """
     @property
     def name(self) -> str:
@@ -576,8 +576,8 @@ class DiophantineProblem9a(DiophantineProblem):
             'theta_cl': np.pi / 4,
             'r': 0.95,
             'theta': np.pi / 4,
-            'sdoa_m': 100,
-            'sdoa_k_max': 20,
+            'spo_m': 100,
+            'spo_k_max': 20,
             'epsilon': 1e-7,
             'delta': 0.1,
             'num_check_points': 3,
@@ -588,7 +588,7 @@ class DiophantineProblem9a(DiophantineProblem):
 class DiophantineProblem9b(DiophantineProblem):
     """
     Problem 9b: Pell Equations (p=11, 3D: x, y, z)
-    Expected roots: 1 solusi.
+    Expected roots: 1 solution.
     """
     @property
     def name(self) -> str:
@@ -612,8 +612,8 @@ class DiophantineProblem9b(DiophantineProblem):
             'theta_cl': np.pi / 4,
             'r': 0.95,
             'theta': np.pi / 4,
-            'sdoa_m': 20,
-            'sdoa_k_max': 10,
+            'spo_m': 20,
+            'spo_k_max': 10,
             'epsilon': 1e-7,
             'delta': 0.1,
             'num_check_points': 3,
@@ -637,47 +637,15 @@ class problem_4(DiophantineProblem):
         domain = [(-40, 40), (-40, 40), (-40, 40)]
         params = {
             'm_cluster': 1000,
-            'r_cl': 0.95, # r
-            'theta_cl': np.pi/4, # theta
+            'r_cl': 0.95,
+            'theta_cl': np.pi/4,
             'k_cluster': 10,
             'epsilon': 1e-3,
             'delta': 0.001,
-            'sdoa_m': 100,
-            'sdoa_k_max': 50,
-            'r': 0.95, # sdoa_r
-            'theta': np.pi/4, # sdoa_theta
-            'gamma': 1e-7,
-            'num_check_points': 5
-        }
-        params['expected_roots'] = 6
-        return domain, params 
-
-class problem_4(DiophantineProblem):
-    @property
-    def name(self):
-        return "Problem 4 Benchmark System Non-linear Equation"
-
-    def get_equations(self):
-        equations = [
-            lambda x: x[0]*x[1] - (x[0]-2*x[2])*(x[1]-2*x[2]) - 165,
-            lambda x: (x[0]*x[1]**3)/12 - ((x[0]-2*x[2])*(x[1]-2*x[2])**3)/12 - 9369,
-            lambda x: ((2 * (x[1]-x[2])**2 * (x[0]-x[2])**2 * x[2]) / (x[1] + x[0] - 2*x[2] + 1e-10)) - 6835
-        ]
-        return equations 
-
-    def get_info(self):
-        domain = [(-40, 40), (-40, 40), (-40, 40)]
-        params = {
-            'm_cluster': 1000,
-            'r_cl': 0.95, # r
-            'theta_cl': np.pi/4, # theta
-            'k_cluster': 10,
-            'epsilon': 1e-3,
-            'delta': 0.001,
-            'sdoa_m': 100,
-            'sdoa_k_max': 50,
-            'r': 0.95, # sdoa_r
-            'theta': np.pi/4, # sdoa_theta
+            'spo_m': 100,
+            'spo_k_max': 50,
+            'r': 0.95,
+            'theta': np.pi/4,
             'gamma': 1e-7,
             'num_check_points': 5
         }
@@ -689,7 +657,7 @@ class problemIMW_Fix(DiophantineProblem):
     def name(self):
         return "Problem project IMW FIX"
     
-    def get_equation(self):
+    def get_equations(self):
         equations = [lambda d: (
             60.0*d[0] + 70.0*d[1] + 30.0*d[2] + 80.0*d[3] + 90.0*d[4] +
             40.0*d[5] + 55.0*d[6] + 65.0*d[7] + 55.0*d[8] + 200.0*d[9] +
@@ -699,8 +667,8 @@ class problemIMW_Fix(DiophantineProblem):
         )]
         return equations
 
-    # Hardcoded bounds for each task (d_min, d_max)
     def get_info(self):
+        # Hardcoded bounds for each task (d_min, d_max)
         domain = [
             (7, 10), (7, 10), (5, 7), (18, 22), (25, 30),
             (6, 8), (12, 17), (25, 30), (14, 19), (25, 30),
@@ -708,14 +676,12 @@ class problemIMW_Fix(DiophantineProblem):
             (15, 20), (3, 5), (18, 23), (8, 12), (1, 1),
             (1, 1), (1, 1), (6, 9), (10, 14), (1, 1)
         ]
-        # equations = [lambda var: 15*var[0] + 11*var[1] - 12]
-        # domain = [(-50, 50), (-50, 50)]
         params = {
             'm_cluster': 1024,
             'k_cluster': 500,
             'gamma': 0.0001,
             'epsilon': 1e-7, 'delta': 0.1, 'r': 0.95, 'theta': np.pi/4,
-            'sdoa_m': 2048, 'sdoa_k_max': 100, 'sdoa_r': 0.95, 'sdoa_theta': np.pi/4,
+            'spo_m': 2048, 'spo_k_max': 100, 'spo_r': 0.95, 'spo_theta': np.pi/4,
             'num_check_points': 3
         }
         return domain, params
@@ -735,23 +701,6 @@ class ProblemIMW(DiophantineProblem):
         )]
         return equations 
 
-#     def g_func(self, x):
-#         x = np.asarray(x)
-#         cost_function = lambda d: (
-#     60.0*d[0] + 70.0*d[1] + 30.0*d[2] + 80.0*d[3] + 90.0*d[4] + 
-#     40.0*d[5] + 55.0*d[6] + 65.0*d[7] + 55.0*d[8] + 200.0*d[9] + 
-#     180.0*d[10] + 30.0*d[11] + 80.0*d[12] + 130.0*d[13] + 110.0*d[14] + 
-#     50.0*d[15] + 40.0*d[16] + 250.0*d[17] + 40.0*d[18] + 20.0*d[19] + 
-#     10.0*d[20] + 10.0*d[21] + 30.0*d[22] + 40.0*d[23] + 0.0*d[24]
-# )
-
-        # x1 = x[0] if x.ndim == 1 else x[:, 0]
-        # x2 = x[1] if x.ndim == 1 else x[:, 1]
-        # term1 = (4 - 2.1 * x1**2 + (x1**4) / 3) * x1**2
-        # term2 = x1 * x2
-        # term3 = (-4 + 4 * x2**2) * x2**2
-        # return (term1 + term2 + term3)
-
     def get_info(self):
         # Hardcoded bounds for each task (d_min, d_max)
         domain = [
@@ -768,13 +717,12 @@ class ProblemIMW(DiophantineProblem):
             'k_cluster': 5,
             'epsilon': 1e-7,
             'delta': 0.01,
-            'sdoa_m': 128,
-            'sdoa_k_max': 50,
+            'spo_m': 128,
+            'spo_k_max': 50,
             'r': 0.95,
             'theta': np.pi/4,
             'gamma': 0.2,
             'num_check_points': 1,
-
         }
         return domain, params
 

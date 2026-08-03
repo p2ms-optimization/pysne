@@ -32,8 +32,8 @@ class F1_FiveUnevenPeakTrap(MultimodalProblem):
             'k_cluster': 10,
             'epsilon': 1e-7,
             'delta': 0.01,
-            'sdoa_m': 100,
-            'sdoa_k_max': 200,
+            'spo_m': 100,
+            'spo_k_max': 200,
             'r': 0.95,
             'theta': np.pi/4,
             'gamma': 100
@@ -59,8 +59,8 @@ class F2_EqualMaxima(MultimodalProblem):
             'k_cluster': 10,
             'epsilon': 1e-5,
             'delta': 0.01,
-            'sdoa_m': 50,
-            'sdoa_k_max': 50,
+            'spo_m': 50,
+            'spo_k_max': 50,
             'r': 0.95,
             'theta': np.pi/4,
             'gamma': 0.5
@@ -84,7 +84,6 @@ class F3_UnevenDecreasingMaxima(MultimodalProblem):
     def get_info(self):
         domain = [(0.0, 1.0)]
         
-        # Contoh pengambilan parameter berdasarkan dimensi n
         params = {
             'm_cluster': 300,
             'r_cl': 0.95,
@@ -92,8 +91,8 @@ class F3_UnevenDecreasingMaxima(MultimodalProblem):
             'k_cluster': 10,
             'epsilon': 1e-7,
             'delta': 0.01,
-            'sdoa_m': 100,
-            'sdoa_k_max': 100,
+            'spo_m': 100,
+            'spo_k_max': 100,
             'r': 0.95,
             'theta': np.pi/4,
             'gamma': 0.8
@@ -103,7 +102,7 @@ class F3_UnevenDecreasingMaxima(MultimodalProblem):
 class F4_Himmelblau(MultimodalProblem):
     def __init__(self, n=2):
         self.n = n
-        # Panggil init parent untuk setup n_var dan domain
+        # Call parent init to set up n_var and domain
         super().__init__()
 
     @property
@@ -163,8 +162,8 @@ class F5_SixHumpCamelBack(MultimodalProblem):
             'k_cluster': 15,
             'epsilon': 1e-6,
             'delta': 0.5,
-            'sdoa_m': 200,
-            'sdoa_k_max': 200,
+            'spo_m': 200,
+            'spo_k_max': 200,
             'r': 0.95,
             'theta': np.pi/4,
             'gamma': 0
@@ -209,8 +208,8 @@ class F6_Shubert(MultimodalProblem):
             'k_cluster': 20,
             'epsilon': 1e-6,
             'delta': 0.5,
-            'sdoa_m': 200,
-            'sdoa_k_max': 200,
+            'spo_m': 200,
+            'spo_k_max': 200,
             'r': 0.95,
             'theta': np.pi/4,
             'gamma': 100.0
@@ -220,21 +219,17 @@ class F6_Shubert(MultimodalProblem):
 class F7_Vincent(MultimodalProblem):
     def __init__(self, n=2):
         self.n = n
-        # Panggil init parent untuk setup n_var dan domain
+        # Call parent init to set up n_var and domain
         super().__init__()
 
     @property
     def name(self):
-        return f"F7: Vincent ({n}D)"
+        return f"F7: Vincent ({self.n}D)"
 
     def g_func(self, x):
         x = np.asarray(x)
         x1 = x[0] if x.ndim == 1 else x[:, 0]
         x2 = x[1] if x.ndim == 1 else x[:, 1]
-        
-        # Protect log from negative values when Nelder-Mead probes out of bounds
-        # x1 = np.clip(x1, 1e-9, None)
-        # x2 = np.clip(x2, 1e-9, None)
         
         term1 = np.sin(10 * np.log(x1))
         term2 = np.sin(10 * np.log(x2))
@@ -264,7 +259,7 @@ class F8_ModifiedRastrigin(MultimodalProblem):
     def name(self):
         return "F8: Modified Rastrigin - All Global Optima (2D)"
 
-    def g_func(x):
+    def g_func(self, x):
         x = np.asarray(x)
         x1 = x[0] if x.ndim == 1 else x[:, 0]
         x2 = x[1] if x.ndim == 1 else x[:, 1]
@@ -294,7 +289,7 @@ class F8_ModifiedRastrigin(MultimodalProblem):
 class Pool_Basic_Function():
     def sphere(x):
         """Sphere function"""
-        return np.sup(x**2, axis=-1)
+        return np.sum(x**2, axis=-1)
     
     def rastrigin(x):
         """Rastrigin function"""
@@ -311,24 +306,24 @@ class Pool_Basic_Function():
 class Composition_Function():
     
     def composition_function(x, basic_functions, params):
-        # params berisi o_i, lambda_i, M_i, dan sigma_i untuk tiap fungsi
+        # params contains o_i, lambda_i, M_i, and sigma_i for each function
         total_fitness = 0
-        weights = calculate_weights(x, params) # langkah 3
+        weights = calculate_weights(x, params) # step 3
         
         for i, func in enumerate(basic_functions):
-            # 1. Transformasi koordinat
+            # 1. Coordinate transformation
             z = (x - params['o'][i]) / params['lambda'][i] @ params['M'][i]
             
-            # 2. Hitung nilai fungsi ter-normalisasi
-            f_hat = normalized_basic_func(func, z) # langkah 2
+            # 2. Compute normalized function value
+            f_hat = normalized_basic_func(func, z) # step 2
             
-            # 3. Akumulasi terbobot
+            # 3. Weighted accumulation
             total_fitness += weights[i] * f_hat
             
         return total_fitness  
 
 def get_gecco_problems():
-    """Dictionary pemanggil problem."""
+    """Returns a dictionary of GECCO problem caller functions."""
     return {
         1: lambda: F1_FiveUnevenPeakTrap(),
         2: lambda: F2_EqualMaxima(),

@@ -4,25 +4,25 @@ from pysne.utils import is_in_domain, objective_function, filter_unique_roots, c
 
 class BaseProblem(ABC):
     """
-    Abstract Base Class untuk semua problem optimisasi di pysne.
+    Abstract Base Class for all optimization problems in pysne.
     """
 
     @property
     @abstractmethod
     def name(self):
-        """Nama problem (wajib diisi oleh class turunan)"""
+        """Name of the problem (must be defined by subclasses)."""
         pass
 
     @property
     def optima_type(self):
-        """Tipe optimisasi: 'max', 'min', atau 'both'"""
+        """Type of optimization: 'max', 'min', or 'both'."""
         return "both"
 
     @abstractmethod
     def g_func(self, x):
         """
-        Fungsi objektif utama (Objective Function).
-        Menerima input x dan mengembalikan nilai fitness.
+        Primary objective function.
+        Accepts input x and returns the fitness value.
         """
         pass
 
@@ -38,23 +38,23 @@ class BaseProblem(ABC):
     @abstractmethod
     def get_info(self):
         """
-        Mengembalikan tuple (domain, params) atau just domain.
+        Returns the problem configuration as a tuple (domain, params) or just domain.
         """
         pass
 
     @abstractmethod
     def evaluate_fitness(self, x):
-        """Setiap tipe problem mendefinisikan sendiri cara menghitung fitness."""
+        """Each problem type defines its own fitness evaluation method."""
         pass
 
     @abstractmethod
     def select_final_optimal(self, candidates):
-        """Setiap tipe problem mendefinisikan sendiri cara memfilter solusi akhir (optimal)."""
+        """Each problem type defines its own method for filtering final optimal solutions."""
         pass
 
 
 class SNEProblem(BaseProblem):
-    """Base class khusus SNE agar punya filter 1.0 - f < eps"""
+    """Base class for Systems of Nonlinear Equations with residual-based filtering (1.0 - f < eps)."""
     problem_type = 'SNE'
 
     def __init__(self):
@@ -87,12 +87,12 @@ class SNEProblem(BaseProblem):
         return filter_unique_roots(accurate_candidates, delta)
 
     def select_final_optimal(self, candidates):
-        """Alias: SNE tetap menggunakan istilah roots."""
+        """Alias: SNE problems use the term 'roots'."""
         return self.select_final_roots(candidates)
 
 
 class MultimodalProblem(BaseProblem):
-    """Base class khusus Multimodal"""
+    """Base class for multimodal optimization problems."""
     problem_type = 'Multimodal'
 
     def evaluate_fitness(self, x):
@@ -122,7 +122,7 @@ class MultimodalProblem(BaseProblem):
                 if f_val <= (1.0 - epsilon) * F_star:
                     continue
                     
-            # Filter Tetangga
+            # Neighbor filter
             is_peak = True
             pert_step = epsilon
             
@@ -146,13 +146,13 @@ class MultimodalProblem(BaseProblem):
         return filter_unique_roots(accurate_candidates, delta)
 
 class DiophantineProblem(BaseProblem):
-    """Base class khusus Diophantine (Integer)"""
+    """Base class for Diophantine (integer) equation problems."""
     problem_type = 'Diophantine'
 
     def __init__(self):
-        # Mendukung dua gaya subclass:
-        #  (a) override get_info() langsung -> (integer_domain, params), sama persis gaya SNEProblem
-        #  (b) override get_integer_domain() + get_params() saja
+        # Supports two subclass styles:
+        #  (a) override get_info() directly -> (integer_domain, params), same as SNEProblem
+        #  (b) override get_integer_domain() + get_params() only
         if type(self).get_info is not DiophantineProblem.get_info:
             raw_domain, self.raw_params = type(self).get_info(self)
         else:
@@ -164,10 +164,6 @@ class DiophantineProblem(BaseProblem):
         super().__init__()
         self.equations = self.get_equations()
         self.domain = self._continuous_domain
-        # self.integer_domain = self.get_integer_domain()
-        # super().__init__()
-        # self.equations = self.get_equations()
-        # self.domain = create_continuous_bounds(self.get_integer_domain())
 
     def get_integer_domain(self):
         return self.integer_domain
@@ -179,7 +175,7 @@ class DiophantineProblem(BaseProblem):
         return self.raw_params if hasattr(self, 'raw_params') else {}
 
     def get_info(self):
-        domain = self._continuous_domain #create_continuous_bounds(self.integer_domain)
+        domain = self._continuous_domain
         params = self.get_params()
         return domain, params
 
@@ -235,7 +231,7 @@ class DiophantineProblem(BaseProblem):
         return roots
 
     def select_final_optimal(self, candidates):
-        """Alias: Diophantine tetap menggunakan istilah roots."""
+        """Alias: Diophantine problems use the term 'roots'."""
         return self.select_final_roots(candidates)
 
 class MinimizedProblem(MultimodalProblem):

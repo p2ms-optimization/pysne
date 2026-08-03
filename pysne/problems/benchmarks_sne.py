@@ -39,10 +39,10 @@ class problem_1(SNEProblem):
             'k_cluster': 10,
             'epsilon': 1e-7,
             'delta': 0.01,
-            'sdoa_m': 250,
-            'sdoa_k_max': 270,
-            'r': 0.95, # sdoa_r
-            'theta': np.pi/4, # sdoa_theta
+            'spo_m': 250,
+            'spo_k_max': 270,
+            'r': 0.95, # spo_r
+            'theta': np.pi/4, # spo_theta
             'gamma': 0.2
         }
         params['expected_roots'] = 6
@@ -70,10 +70,10 @@ class problem_2(SNEProblem):
             'k_cluster': 10,
             'epsilon': 1e-7,
             'delta': 0.1,
-            'sdoa_m': 300,
-            'sdoa_k_max': 300,
-            'r': 0.95, # sdoa_r
-            'theta': np.pi/4, # sdoa_theta
+            'spo_m': 300,
+            'spo_k_max': 300,
+            'r': 0.95, # spo_r
+            'theta': np.pi/4, # spo_theta
             'gamma': 0.3
         }
         params['expected_roots'] = 12
@@ -104,10 +104,10 @@ class problem_3(SNEProblem):
             'k_cluster': 15,
             'epsilon': 1e-7,
             'delta': 0.5,
-            'sdoa_m': 420,
-            'sdoa_k_max': 420,
-            'r': 0.95, # sdoa_r
-            'theta': np.pi/4, # sdoa_theta
+            'spo_m': 420,
+            'spo_k_max': 420,
+            'r': 0.95, # spo_r
+            'theta': np.pi/4, # spo_theta
             'gamma': 0.1
         }
         params['expected_roots'] = 2
@@ -135,10 +135,10 @@ class problem_4(SNEProblem):
             'k_cluster': 10,
             'epsilon': 1e-3,
             'delta': 0.001,
-            'sdoa_m': 500,
-            'sdoa_k_max': 500,
-            'r': 0.95, # sdoa_r
-            'theta': np.pi/4, # sdoa_theta
+            'spo_m': 500,
+            'spo_k_max': 500,
+            'r': 0.95, # spo_r
+            'theta': np.pi/4, # spo_theta
             'gamma': 1e-7
         }
         params['expected_roots'] = 6
@@ -168,10 +168,10 @@ class problem_5(SNEProblem):
             'k_cluster': 10,
             'epsilon': 5e-4,
             'delta': 0.01,
-            'sdoa_m': 200,
-            'sdoa_k_max': 200,
-            'r': 0.95, # sdoa_r
-            'theta': np.pi/4, # sdoa_theta
+            'spo_m': 200,
+            'spo_k_max': 200,
+            'r': 0.95, # spo_r
+            'theta': np.pi/4, # spo_theta
             'gamma': 0.1
         }
         params['expected_roots'] = 3
@@ -204,10 +204,10 @@ class problem_6(SNEProblem):
             'k_cluster': 5,
             'epsilon': 1e-6,
             'delta': 0.01,
-            'sdoa_m': 300,
-            'sdoa_k_max': 300,
-            'r': 0.95, # sdoa_r
-            'theta': np.pi/4, # sdoa_theta
+            'spo_m': 300,
+            'spo_k_max': 300,
+            'r': 0.95, # spo_r
+            'theta': np.pi/4, # spo_theta
             'gamma': 0.2
         }
         params['expected_roots'] = 16
@@ -242,10 +242,10 @@ class problem_7(SNEProblem):
             'k_cluster': 50,
             'epsilon': 1e-7,
             'delta': 0.0001,
-            'sdoa_m': 150,
-            'sdoa_k_max': 150,
-            'r': 0.95, # sdoa_r
-            'theta': np.pi/4, # sdoa_theta
+            'spo_m': 150,
+            'spo_k_max': 150,
+            'r': 0.95, # spo_r
+            'theta': np.pi/4, # spo_theta
             'gamma': 0.9
         }
         params['expected_roots'] = 9

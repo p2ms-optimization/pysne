@@ -23,8 +23,8 @@ class Problem1(MultimodalProblem):
             'k_cluster': 10,
             'epsilon': 1e-7,
             'delta': 0.1,
-            'sdoa_m': 200,
-            'sdoa_k_max': 230,
+            'spo_m': 200,
+            'spo_k_max': 230,
             'r': 0.95,
             'theta': np.pi/4,
             'gamma': -float('inf')
@@ -54,8 +54,8 @@ class Problem2(MultimodalProblem):
             'k_cluster': 5,
             'epsilon': 1e-5,
             'delta': 0.1,
-            'sdoa_m': 50,
-            'sdoa_k_max': 250,
+            'spo_m': 50,
+            'spo_k_max': 250,
             'r': 0.95,
             'theta': np.pi/4,
             'gamma': -float('inf'),
@@ -68,7 +68,7 @@ class Problem2(MultimodalProblem):
 class Problem3(MultimodalProblem):
     def __init__(self, n=2):
         self.n = n
-        # Panggil init parent untuk setup n_var dan domain
+        # Call parent init to set up n_var and domain
         super().__init__()
 
     @property
@@ -89,7 +89,7 @@ class Problem3(MultimodalProblem):
     def get_info(self):
         domain = [(-1, 1)] * self.n if self.n == 2 else [(-1.5, 1.5)] * self.n
         
-        # Contoh pengambilan parameter berdasarkan dimensi n
+        # Parameters scaled based on dimension n
         params = {
             'm_cluster': (500 if self.n == 2 else 4096 if self.n == 3 else self.n),
             'r_cl': 0.95,
@@ -97,8 +97,8 @@ class Problem3(MultimodalProblem):
             'k_cluster': 10 if self.n != 3 else 10,
             'epsilon': 1e-6 if self.n == 2 else 1e-5,
             'delta': 0.1,
-            'sdoa_m': 200,
-            'sdoa_k_max': 300,
+            'spo_m': 200,
+            'spo_k_max': 300,
             'r': 0.95,
             'theta': np.pi/4,
             'gamma': -float('inf'),
@@ -109,7 +109,7 @@ class Problem3(MultimodalProblem):
 class Problem4(MultimodalProblem):
     def __init__(self, n=2):
         self.n = n
-        # Panggil init parent untuk setup n_var dan domain
+        # Call parent init to set up n_var and domain
         super().__init__()
 
     @property
@@ -184,8 +184,8 @@ class Problem5(MultimodalProblem):
                 'k_cluster': 15,
                 'epsilon': 1e-06,
                 'delta': 0.1,
-                'sdoa_m': 100,
-                'sdoa_k_max': 500,
+                'spo_m': 100,
+                'spo_k_max': 500,
                 'r': 0.95,
                 'theta': np.pi/4,
                 'gamma': 0.2,
@@ -199,8 +199,8 @@ class Problem5(MultimodalProblem):
                 'k_cluster': 100,
                 'epsilon': 1e-4,
                 'delta': 0.2,
-                'sdoa_m': 512,
-                'sdoa_k_max': 300,
+                'spo_m': 512,
+                'spo_k_max': 300,
                 'r': 0.95,
                 'theta': np.pi/4,
                 'gamma': 0.1,
@@ -234,8 +234,8 @@ class ProblemSchwefel(MultimodalProblem):
             'k_cluster': 10,
             'epsilon': 1e-6,
             'delta': 0.1,
-            'sdoa_m': 20,
-            'sdoa_k_max': 100,
+            'spo_m': 20,
+            'spo_k_max': 100,
             'r': 0.95,
             'theta': np.pi/4,
             'gamma': -float('inf'),
@@ -272,8 +272,8 @@ class ProblemGriewank(MultimodalProblem):
             'k_cluster': 10,
             'epsilon': 1e-6,
             'delta': 0.1,
-            'sdoa_m': 50,
-            'sdoa_k_max': 200,
+            'spo_m': 50,
+            'spo_k_max': 200,
             'r': 0.95,
             'theta': np.pi/4,
             'gamma': -float('inf'),
@@ -319,8 +319,8 @@ class Problemiwm(MultimodalProblem):
             'k_cluster': 5,
             'epsilon': 1e-5,
             'delta': 0.1,
-            'sdoa_m': 50,
-            'sdoa_k_max': 250,
+            'spo_m': 50,
+            'spo_k_max': 250,
             'r': 0.95,
             'theta': np.pi/4,
             'gamma': -float('inf'),
@@ -360,7 +360,7 @@ class ProblemIMW(MultimodalProblem):
         'k_cluster': 490,
         'gamma': 1e-5,
         'epsilon': 1e-7, 'delta': 0.1, 'r': 0.984, 'theta': 9*np.pi/80,
-        'sdoa_m': 100, 'sdoa_k_max': 75, 'sdoa_r': 0.977, 'sdoa_theta': np.pi/16,
+        'spo_m': 100, 'spo_k_max': 75, 'spo_r': 0.977, 'spo_theta': np.pi/16,
         'num_check_points': 3
         }
         return domain, params
@@ -382,14 +382,14 @@ class ProblemIMW_fix(MultimodalProblem):
         ])
         target = 38690.0
 
-        # x @ weights aman untuk x 1D (shape (25,)) maupun 2D (shape (N, 25))
+        # x @ weights is safe for both 1D (shape (25,)) and 2D (shape (N, 25))
         cost = x @ weights
         residual = cost - target
 
-        return residual ** 2  # minimum (=0) tepat saat cost == target
+        return residual ** 2  # minimum (=0) exactly when cost == target
 
     def get_info(self):
-        # Hardcoded bounds untuk setiap task (d_min, d_max)
+        # Hardcoded bounds for each task (d_min, d_max)
         domain = [
             (7, 10), (7, 10), (5, 7), (18, 22), (25, 30),
             (6, 8), (12, 17), (25, 30), (14, 19), (25, 30),
@@ -404,8 +404,8 @@ class ProblemIMW_fix(MultimodalProblem):
             'k_cluster': 490,
             'epsilon': 1e-7,
             'delta': 0.1,
-            'sdoa_m': 100,
-            'sdoa_k_max': 75,
+            'spo_m': 100,
+            'spo_k_max': 75,
             'r': 0.977,
             'theta': np.pi / 16,
             'gamma': 1e-5,
@@ -414,7 +414,7 @@ class ProblemIMW_fix(MultimodalProblem):
         return domain, params
 
 def get_multimodal_problems():
-    """Dictionary pemanggil problem."""
+    """Returns a dictionary of multimodal problem caller functions."""
     return {
         1: lambda: Problem1(), # Two N Minima
         2: lambda: Problem2(), # Camel Back
