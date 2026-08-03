@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pysne"
-version = "0.1.0"
-description = "A Python library for finding all solutions of nonlinear equations using Spiral Dynamics Inspired Optimization (SDOA) with Clustering."
+version = "0.2.0"
+description = "A Python library for finding all solutions of nonlinear equations using Spiral Optimization (SPO) with Clustering."
 readme = "README.md"
 requires-python = ">=3.8"
 license = { text = "MIT License" }
@@ -13,7 +13,7 @@ authors = [
     { name = "Aldy Nugraha Hermawan", email = "aldynugrahahermawan1702@gmail.com" },
     { name = "Azarya Benhanan Isriyanto", email = "azaryaben@gmail.com" }
 ]
-keywords = ["optimization", "nonlinear-equations", "sdoa", "clustering", "numerical-methods", "sobol-sequence"]
+keywords = ["optimization", "nonlinear-equations", "spo", "clustering", "numerical-methods", "sobol-sequence"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Science/Research",
