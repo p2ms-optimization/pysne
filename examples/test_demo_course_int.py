@@ -16,7 +16,7 @@ class MyDiophantineProblem(DiophantineProblem):
             'm_cluster': 375, 'k_cluster': 10,
             'r_cl': 0.95, 'theta_cl': np.pi/4,
             'gamma': 0.01,
-            'sdoa_m': 30, 'sdoa_k_max': 10,
+            'spo_m': 30, 'spo_k_max': 10,
             'r': 0.95, 'theta': np.pi/4,
             'epsilon': 1e-7, 'delta': 0.1,
             'num_check_points': 3,

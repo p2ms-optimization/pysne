@@ -10,7 +10,7 @@ from pysne.problems.base import BaseProblem, MinimizedProblem
 
 
 
-def test_multimodal_pipeline_execution():
+def run_multimodal_pipeline_execution():
     """
     Tes sederhana (smoke test) untuk memastikan pipeline multimodal 
     berjalan dari awal hingga akhir menggunakan OOP benchmarks.
@@ -52,7 +52,7 @@ def test_multimodal_pipeline_execution():
 # if __name__ == "__main__":
     # test_multimodal_pipeline_execution()
 
-def test_multimodal_problem(
+def run_multimodal_problem(
     problem_id: int,
     verbose: bool = True
     ) -> Dict[str, Any]:
@@ -146,7 +146,7 @@ def test_multimodal_problem(
 
     return result
 
-def test_all_multimodal_problems(problem_ids: list = None, show_details: bool = False):
+def run_all_multimodal_problems(problem_ids: list = None, show_details: bool = False):
     if problem_ids is None:
         problem_ids = [1, 2, 3, 4, 5, 6, 7]
         
@@ -158,7 +158,7 @@ def test_all_multimodal_problems(problem_ids: list = None, show_details: bool = 
     total_start = time.time()
     
     for problem_id in problem_ids:
-        results[problem_id] = test_multimodal_problem(problem_id, verbose=show_details)
+        results[problem_id] = run_multimodal_problem(problem_id, verbose=show_details)
         
     total_time = time.time() - total_start
 
@@ -181,14 +181,14 @@ if __name__ == "__main__":
     print("\nPySNE Multimodal Test Suite")
     print("Testing objective function optimizers\n")
     
-    # test_multimodal_problem(2, verbose=True)
+    # run_multimodal_problem(2, verbose=True)
     if len(sys.argv) > 1:
         command = sys.argv[1].lower()
         if command == "all":
-            test_all_multimodal_problems(show_details=False)
+            run_all_multimodal_problems(show_details=False)
         elif command == "all-verbose":
-            test_all_multimodal_problems(show_details=True)
+            run_all_multimodal_problems(show_details=True)
         elif command.isdigit():
-            test_multimodal_problem(int(command), verbose=True)
+            run_multimodal_problem(int(command), verbose=True)
     else:
-        test_all_multimodal_problems(show_details=False)
+        run_all_multimodal_problems(show_details=False)
