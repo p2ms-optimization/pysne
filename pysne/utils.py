@@ -95,13 +95,13 @@ def create_continuous_bounds(
     margin: float = 0.5
 ) -> List[Tuple[float, float]]:
     """
-    Memperluas setiap dimensi integer_domain sebesar margin ke kiri dan kanan.
+    Expands each dimension of the integer domain by a margin on both sides.
 
-    Tujuan: titik spiral bebas bergerak di ruang kontinu yang sedikit
-    lebih lebar dari grid integer, sehingga titik-titik di tepi domain
-    integer tetap bisa dievaluasi dengan benar.
+    Purpose: allows spiral search points to move freely in a continuous space
+    slightly wider than the integer grid, so that points at the edges of the
+    integer domain can still be evaluated correctly.
 
-    Contoh:
+    Example:
         integer_domain = [(-50, 50), (-50, 50)]
         create_continuous_bounds(integer_domain, margin=0.5)
         → [(-50.5, 50.5), (-50.5, 50.5)]
@@ -109,14 +109,14 @@ def create_continuous_bounds(
     Parameters
     ----------
     integer_domain : list of tuple
-        Batas bilangan bulat per dimensi, misal [(-50, 50), (-50, 50)].
+        Integer bounds per dimension, e.g. [(-50, 50), (-50, 50)].
     margin : float
-        Besarnya perluasan ke kiri dan kanan. Default 0.5 (setengah jarak antar integer).
+        The expansion amount on each side. Default 0.5 (half the distance between integers).
 
     Returns
     -------
     list of tuple
-        Continuous bounds yang sudah diperluas.
+        Expanded continuous bounds.
     """
     return [(lo - margin, hi + margin) for lo, hi in integer_domain]
 
@@ -153,25 +153,27 @@ def calculate_sobol_discrepancy(
     domain: List[Tuple[float, float]] = None
 ) -> float:
     """
-    Menghitung nilai discrepancy dari distribusi titik.
-    Jika `points` diberikan, menghitung discrepancy dari titik tersebut (diskalakan kembali ke [0, 1]^d jika `domain` diberikan).
-    Jika tidak, men-generate titik Sobol baru menggunakan scipy.stats.qmc pada dimensi dan jumlah titik tertentu.
+    Calculates the discrepancy of a point distribution.
+
+    If `points` is provided, computes the discrepancy of those points (rescaled
+    back to [0, 1]^d if `domain` is given). Otherwise, generates new Sobol
+    points using scipy.stats.qmc for the specified dimension and number of points.
     
     Parameters
     ----------
     num_points : int, optional
-        Jumlah titik sampel yang digenerasikan (jika points tidak disuapkan).
+        Number of sample points to generate (if points is not provided).
     dimension : int, optional
-        Dimensi dari ruang pencarian (jika points tidak disuapkan).
+        Dimensionality of the search space (if points is not provided).
     points : numpy.ndarray, optional
-        Titik-titik sampel yang akan dihitung nilai discrepancy-nya.
+        Sample points whose discrepancy will be calculated.
     domain : list of tuple, optional
-        Batas pencarian untuk penskalaan kembali titik sampel ke [0, 1]^d.
+        Search bounds for rescaling sample points back to [0, 1]^d.
         
     Returns
     -------
     float
-        Nilai discrepancy (discrepancy yang lebih rendah menunjukkan distribusi yang lebih merata).
+        The discrepancy value (lower discrepancy indicates a more uniform distribution).
     """
     from scipy.stats import qmc
     
@@ -188,14 +190,14 @@ def calculate_sobol_discrepancy(
             discrepancy_val = qmc.discrepancy(pts)
             return float(discrepancy_val)
         except Exception as e:
-            warnings.warn(f"Gagal menghitung discrepancy dari points: {e}", RuntimeWarning)
+            warnings.warn(f"Failed to compute discrepancy from points: {e}", RuntimeWarning)
             return -1.0
 
     if num_points is None or dimension is None:
-        warnings.warn("Parameter num_points dan dimension harus diberikan jika points tidak disuapkan.", RuntimeWarning)
+        warnings.warn("Parameters num_points and dimension must be provided if points is not supplied.", RuntimeWarning)
         return -1.0
 
-    # Menggunakan Sobol sampler bawaan scipy
+    # Generate points using the built-in scipy Sobol sampler
     sampler = qmc.Sobol(d=dimension, scramble=True)
     
     try:
@@ -203,31 +205,31 @@ def calculate_sobol_discrepancy(
         discrepancy_val = qmc.discrepancy(points_gen)
         return float(discrepancy_val)
     except Exception as e:
-        warnings.warn(f"Gagal menghitung discrepancy: {e}", RuntimeWarning)
+        warnings.warn(f"Failed to compute discrepancy: {e}", RuntimeWarning)
         return -1.0
     
 def sort_unique_roots(roots, sort=False):
     """
-    Menghapus solusi duplikat berdasarkan nilai, dengan opsi mengabaikan urutan.
+    Removes duplicate solutions based on value, with an option to ignore order.
 
     Parameters
     ----------
     roots : list of tuple
-        Solusi-solusi yang sudah terseleksi (masing-masing sebagai tuple integer).
+        Selected solutions (each as an integer tuple).
     sort : bool
-        Jika True, setiap solusi diurutkan (sorted) sebelum dibandingkan,
-        sehingga solusi yang hanya berbeda urutan dianggap sama.
-        Jika False, hanya solusi identik persis yang akan dihapus.
+        If True, each solution is sorted before comparison, so solutions
+        that differ only in order are treated as identical.
+        If False, only exactly identical solutions are removed.
 
     Returns
     -------
     list of tuple
-        Solusi unik dalam format tuple.
+        Unique solutions in tuple format.
     """
     seen = set()
     unique = []
     for root in roots:
-        # Buat kunci: urutkan jika sort=True, jika tidak gunakan aslinya
+        # Create key: sort if sort=True, otherwise use as-is
         key = tuple(sorted(root)) if sort else tuple(root)
         if key not in seen:
             seen.add(key)

@@ -6,7 +6,7 @@ from typing import Dict, List, Tuple, Any
 from pysne.problems.benchmarks_sne import get_problem_set
 from pysne.utils import objective_function, validate_solutions
 from pysne.clustering.clustering_process import perform_iterative_clustering
-from pysne.solver import solve_system, run_sdoa_on_clusters
+from pysne.solver import solve_system, run_spo_on_clusters
 
 
 
@@ -34,16 +34,16 @@ def test_integration_run():
         clusters = perform_iterative_clustering(problem, params)
         print(f"Found {len(clusters)} potential regions (clusters).")
 
-        # 3. SDOA Phase (Local Optimization)
-        print("\n[STEP 3] Running SDOA on each cluster...")
+        # 3. SPO Phase (Local Optimization)
+        print("\n[STEP 3] Running SPO on each cluster...")
         sdoa_params = {
-            'm': params.get('sdoa_m', 50),
-            'r': params.get('sdoa_r', 0.95),
-            'theta': params.get('sdoa_theta', np.pi/4),
-            'k_max': params.get('sdoa_k_max', 200)
+            'm': params.get('spo_m', 50),
+            'r': params.get('spo_r', 0.95),
+            'theta': params.get('spo_theta', np.pi/4),
+            'k_max': params.get('spo_k_max', 200)
         }
-        candidates = run_sdoa_on_clusters(clusters, problem, params)
-        print(f"Generated {len(candidates)} candidate points from SDOA.")
+        candidates = run_spo_on_clusters(clusters, problem, params)
+        print(f"Generated {len(candidates)} candidate points from SPO.")
 
         # 4. Selection & Validation Phase
         print("\n[STEP 4] Performing final selection and duplicate elimination...")
