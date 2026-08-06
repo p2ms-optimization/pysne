@@ -3,299 +3,480 @@
 # PySNE
 
 **Finding *all* solutions of a system of nonlinear equations**
-via Spiral Optimization (SPO) + Iterative Clustering
+using Spiral Optimization (SPO) with Clustering Technique
 
-[![Python](https://img.shields.io/badge/python-3.8%2B-blue.svg)](https://www.python.org/)
-[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Status](https://img.shields.io/badge/status-alpha-orange.svg)](https://github.com/p2ms-optimization/pysne)
-[![Docs](https://img.shields.io/badge/docs-website-0b78bf.svg)](https://p2ms-optimization.github.io/pysne-web/)
+![Python](https://img.shields.io/badge/python-3.8%2B-blue.svg)
+![Version](https://img.shields.io/badge/version-0.2.0-blue.svg)
+![License](https://img.shields.io/badge/license-MIT-green.svg)
+![Status](https://img.shields.io/badge/status-alpha-orange.svg)
+[![Documentation](https://img.shields.io/badge/docs-website-0b78bf.svg)](https://p2ms-optimization.github.io/pysne-web/)
 
-[Documentation](https://p2ms-optimization.github.io/pysne-web/) ·
-[Quick Start](#-quick-start) ·
-[Algorithm](#-how-it-works) ·
-[Benchmarks](#-benchmark-problem-sets) ·
-[Contributing](#-contributing)
+[Overview](#overview) ·
+[Installation](#installation) ·
+[Quick start](#quick-start) ·
+[Custom problems](#defining-a-custom-nonlinear-system) ·
+[Algorithm](#how-pysne-works) ·
+[Testing](#running-the-tests)
 
 </div>
 
 ---
 
-## 📌 Overview
+## Overview
 
-**PySNE** is a Python library for locating **every root** of a system of nonlinear
-equations (SNE) inside a bounded search space — not just a single solution, as
-classical Newton-type methods typically return.
+PySNE is a Python library for searching **every root** (all solutions) of a system of nonlinear equations (SNE) inside a bounded search space — not just a single solution, as classical Newton-type methods typically return. Its main use case is a system of nonlinear equations
 
-Given a system
-
-```text
-f₁(x) = 0
-f₂(x) = 0
-   ⋮
-fₙ(x) = 0,        x ∈ Ω ⊂ ℝⁿ
+```math
+\mathbf{f}:D\to\mathbb{R}^m,
+\qquad
+\mathbf{f}(\mathbf{x})
+=
+\begin{bmatrix}
+f_1(\mathbf{x}) \\
+f_2(\mathbf{x}) \\
+\vdots \\
+f_m(\mathbf{x})
+\end{bmatrix}
+= \mathbf{0}_m,
+\qquad
+\mathbf{x} = (x_1,\ldots,x_n)^{\mathsf T}
+\in D
+= \prod_{j=1}^{n}[a_j,b_j]
+\subset \mathbb{R}^n.
 ```
 
-PySNE reformulates the problem as a global optimization task and combines two
-mechanisms to recover all isolated roots in a single run:
+PySNE transforms the root-finding problem into a maximization problem by defining
+the fitness $F$ as
 
-1. **Iterative Clustering** — partitions the domain into neighborhoods (clusters)
-   that are likely to contain a root.
-2. **Spiral Optimization (SPO)** — a deterministic, rotation-based
-   metaheuristic that refines each cluster down to a precise candidate root.
+```math
 
-A final **selection & validation** stage merges duplicates and keeps only the
-unique solutions whose residual `‖F(x)‖` falls below a tolerance `ε`.
+F(\mathbf{x})
+= \frac{1}{1 + \sum_{i=1}^{m} \left|f_i(\mathbf{x})\right|}.
+```
 
-> PySNE is developed as part of an undergraduate thesis in **Actuarial Science, ITB**,
-> and is intended both as a reproducible research artifact and a reusable library.
+For finite equation values, $0 < F(\mathbf{x}) \le 1$, and
+$F(\mathbf{x})=1$ if and only if $\mathbf{f}(\mathbf{x})=\mathbf{0}$.
 
----
+Candidate solution regions are identified through the Function Cluster procedure and then
+refined independently with Spiral Optimization (SPO). The package also contains
+experimental support for multimodal optimization and integer/Diophantine
+systems.
 
-## ✨ Features
+> [!IMPORTANT]
+> PySNE is research software under active development. It is designed to search
+> for multiple solutions, but it does **not** mathematically guarantee that every
+> root or optimum in a domain will be found. Results depend on the search bounds,
+> parameter settings, dimensionality, and numerical properties of the problem.
 
-- **All-solutions search** for multivariate nonlinear systems over a bounded domain.
-- **Three-phase pipeline**: clustering → spiral optimization → validated selection.
-- **Low-discrepancy initialization** using Sobol sequences (via SciPy QMC) for uniform domain coverage.
-- **n-dimensional spiral operator** built from a composed rotation matrix `Sₙ = r·Rₙ(θ)`.
-- **Built-in benchmark suites** (SNE, multimodal, GECCO, Diophantine) for reproducible evaluation.
-- **Object-oriented `Problem` API** — bring your own equations, domain, and hyperparameters.
-- Lightweight dependencies: only **NumPy** and **SciPy**.
+PySNE is being developed as part of undergraduate research in Actuarial Science
+at Institut Teknologi Bandung (ITB), with the goal of providing a reproducible
+research implementation and a reusable experimental library.
 
----
+## Current status
 
-## 📦 Installation
+- Current package version: **0.2.0**.
+- Development status: **Alpha**.
+- The source repository is currently private and accessible to authorized
+  contributors.
+- The package is not yet published on PyPI.
+- A development release is available through TestPyPI.
+- The package metadata currently declares support for Python **3.8 or newer**.
+- Required runtime dependencies are NumPy and SciPy.
 
-**Requirements:** Python ≥ 3.8, NumPy ≥ 1.20, SciPy ≥ 1.7.
+## Supported problem types
 
-From PyPI (when published):
+| Problem type | Base class | Result terminology | Status |
+| --- | --- | --- | --- |
+| Systems of nonlinear equations | `SNEProblem` | Roots | Primary use case |
+| Multimodal optimization | `MultimodalProblem` | Optimal points | Experimental |
+| Integer/Diophantine systems | `DiophantineProblem` | Integer roots | Experimental |
+
+## Features
+
+- Bounded search for multiple roots of nonlinear equation systems.
+- Three-stage solver pipeline: clustering, local SPO refinement, and final
+  filtering.
+- Sobol low-discrepancy initialization through `scipy.stats.qmc`.
+- An $n$-dimensional spiral transformation based on a composed rotation matrix.
+- Duplicate filtering using a configurable distance threshold.
+- Built-in SNE, multimodal, and Diophantine benchmark collections.
+- Object-oriented problem classes for custom equations and search domains.
+- Only NumPy and SciPy are required by the core package.
+
+## Installation
+
+### Requirements
+
+The current `pyproject.toml` declares:
+
+- Python `>=3.8`
+- NumPy `>=1.20.0`
+- SciPy `>=1.7.0`
+
+### Installation from source
+
+```bash
+git clone https://github.com/p2ms-optimization/pysne.git
+cd pysne
+python -m pip install --upgrade pip
+python -m pip install -e .
+```
+
+Verify the installation:
+
+```bash
+python -c "import pysne; print(pysne.__version__)"
+```
+
+The expected version for this repository state is:
+
+```text
+0.2.0
+```
+
+### PyPI installation
+
+PySNE is not currently available as a public PyPI package. The following command
+is planned for a future public release, but should not be presented as an
+available installation method yet:
 
 ```bash
 pip install pysne
 ```
 
-From source (recommended during development):
+## Quick start
 
-```bash
-git clone https://github.com/p2ms-optimization/pysne.git
-cd pysne
-pip install -e .
-```
-
----
-
-## 🚀 Quick Start
-
-The core entry point is `solve_system(problem, params)`. The fastest way to try
-PySNE is to load a built-in benchmark `Problem` object:
+The public solver entry point is `solve_system(problem, params)`. The following
+example runs the first built-in nonlinear-system benchmark with its configured
+search domain and parameters:
 
 ```python
-from pysne.problems.benchmarks_sne import get_problem_set
-from pysne.solver import solve_system
+import numpy as np
 
-# 1. Load a benchmark problem
-problems = get_problem_set()
-problem = problems[1]()                 # instantiate the chosen problem
+from pysne import solve_system
+from pysne.problems import get_problem_set
 
-# 2. Use the problem's recommended domain + hyperparameters
-domain, params = problem.get_info()
+# Instantiate benchmark problem 1.
+problem = get_problem_set()[1]()
 
-# 3. Run the full clustering + SPO pipeline
+# Built-in problems provide recommended solver parameters.
+_, params = problem.get_info()
+
+# Run the clustering phase, SPO per Cluster, and final selection.
 result = solve_system(problem, params, verbose=True)
 
-# 4. Inspect the results
-print("Roots found:", len(result["roots"]))
+print(f"Roots found: {len(result['roots'])}")
+print(f"Elapsed time: {result['time_elapsed']:.3f} seconds")
+
+# Independently inspect the equation residuals of each returned root.
+for index, root in enumerate(result["roots"], start=1):
+    residuals = np.abs([equation(root) for equation in problem.equations])
+    print(
+        f"Root {index}: {np.round(root, 8)} | "
+        f"max residual={residuals.max():.3e}"
+    )
+```
+
+A typical run of benchmark problem 1 finds six roots. Exact execution
+time and numerical coordinates can vary across environments.
+
+### Solver result
+
+`solve_system` returns a dictionary with the following keys:
+
+| Key | Type | Description |
+| --- | --- | --- |
+| `roots` | `numpy.ndarray` | Filtered roots or optimal points returned by the problem class. |
+| `optimals` | `numpy.ndarray` | Alias of `roots` for optimization-oriented usage. |
+| `clusters` | `list[Cluster]` | Candidate regions found during iterative clustering. |
+| `time_elapsed` | `float` | Total solver time in seconds. |
+
+For SNE problems, returned points pass the package's internal fitness-based
+acceptance rule. Users should still evaluate the original equations directly,
+as shown above, when reporting numerical results.
+
+## Defining a custom nonlinear system
+
+Create a subclass of `SNEProblem` and implement:
+
+- `name`
+- `get_equations()`
+- `get_info()`
+
+This example searches the positive quadrant for the intersection of a unit
+circle and the line $x_1=x_2$:
+
+```python
+import numpy as np
+
+from pysne import solve_system
+from pysne.problems.base import SNEProblem
+
+
+class PositiveCircleLineIntersection(SNEProblem):
+    @property
+    def name(self):
+        return "Positive circle-line intersection"
+
+    def get_equations(self):
+        return [
+            lambda x: x[0] ** 2 + x[1] ** 2 - 1.0,
+            lambda x: x[0] - x[1],
+        ]
+
+    def get_info(self):
+        domain = [
+            (0.0, 1.5),
+            (0.0, 1.5),
+        ]
+
+        params = {
+            # Iterative clustering
+            "m_cluster": 128,
+            "k_cluster": 10,
+            "gamma": 0.2,
+            "r_cl": 0.95,
+            "theta_cl": np.pi / 4,
+            "num_check_points": 1,
+
+            # SPO refinement inside each cluster
+            "spo_m": 128,
+            "spo_k_max": 200,
+            "r": 0.95,
+            "theta": np.pi / 4,
+
+            # Final acceptance and duplicate filtering
+            "epsilon": 1e-7,
+            "delta": 1e-3,
+        }
+
+        return domain, params
+
+
+problem = PositiveCircleLineIntersection()
+_, params = problem.get_info()
+result = solve_system(problem, params, verbose=True)
+
 print(result["roots"])
-print(f"Elapsed: {result['time_elapsed']:.3f}s")
 ```
 
-`solve_system` returns a dictionary:
+The exact solution in the specified positive domain is
+$\mathbf{x}^{\star}=(\frac{1}{\sqrt{2}},\,\frac{1}{\sqrt{2}})^{\mathsf T}$, or approximately
+$\mathbf{x}^{\star}=(0.70710678,\,0.70710678)^{\mathsf T}$.
 
-| Key            | Type            | Description                                            |
-| -------------- | --------------- | ------------------------------------------------------ |
-| `roots`        | `np.ndarray`    | Validated, de-duplicated solution points.              |
-| `clusters`     | `list[Cluster]` | Clusters discovered during the localization phase.     |
-| `time_elapsed` | `float`         | Total computation time in seconds.                     |
+## How PySNE works
 
-### Defining your own system
+PySNE executes a three-phase pipeline (`pysne/solver.py`):
 
-Subclass the base `Problem` to solve a custom system — for example the
-**Circle–Exponential** system:
+### Phase 1 — Clustering Phase
 
-```text
-x₁² + x₂² − 1 = 0
-x₁ − e^(−x₂)  = 0
+The solver generates a Sobol population over the bounded domain. It evaluates
+the points, identifies promising regions using `gamma`, and updates cluster
+centers and radius while the population follows spiral dynamics toward the
+current best point.
+
+Implementation: `pysne/clustering/modified_clustering_process.py`.
+
+### Phase 2 — Spiral Optimization Phase (SPO per cluster)
+
+For each cluster, PySNE constructs a local bounded search region, generates a new
+Sobol population, and applies Spiral Optimization:
+
+```math
+\begin{aligned}
+\mathbf{x}_i(k+1)
+&= \mathbf{x}^{\star}(k)
+ + S_n(r,\theta)
+   \left(\mathbf{x}_i(k)-\mathbf{x}^{\star}(k)\right) \\
+&= S_n(r,\theta)\mathbf{x}_i(k)
+ - \left(S_n(r,\theta)-I_n\right)\mathbf{x}^{\star}(k), \\
+S_n(r,\theta) &= rR^{(n)}(\theta).
+\end{aligned}
 ```
 
-Provide the equations, the search domain `[(min, max), ...]`, and the
-hyperparameters described in [Configuration](#%EF%B8%8F-key-hyperparameters), then
-pass the instance to `solve_system`. See `pysne/problems/base.py` and the existing
-benchmark modules for complete, working templates.
+Here, $\mathbf{x}_i(k)$ is search point $i$ at iteration $k$,
+$\mathbf{x}^{\star}(k)$ is the current best point, $0<r<1$ is the
+contraction factor, $I_n$ is the $n\times n$ identity matrix, and
+$R^{(n)}(\theta)$ is the composed $n$-dimensional rotation matrix.
 
----
+Implementation: `pysne/optimizers/spo/`.
 
-## 🧠 How It Works
+### Phase 3 — Final Selection
 
-PySNE executes a deterministic three-phase pipeline (`pysne/solver.py`):
+Each problem class determines how final candidates are selected:
 
-### Phase 1 — Iterative Clustering
-A Sobol-distributed population is dynamically grouped into clusters around
-high-fitness regions. Points are moved iteratively using the spiral operator
-toward the current best point, growing and merging clusters that bracket
-potential roots. *(`pysne/clustering/`)*
+* `SNEProblem` accepts a candidate $\mathbf{x}$ when
+  $1-F(\mathbf{x})<\varepsilon$ and it lies inside the domain.
+* Candidates $\mathbf{x}$ and $\mathbf{y}$ are treated as duplicates when
+  $\lVert\mathbf{x}-\mathbf{y}\rVert\le\delta$; the point with the higher
+  fitness is retained.
+* `MultimodalProblem` accepts in-domain candidates that pass a local-extremum
+  check in every coordinate direction, then removes nearby duplicates.
+* `DiophantineProblem` forms
+  $\mathbf{q}=\operatorname{round}(\mathbf{x})$, checks that $\mathbf{q}$ lies
+  in the integer domain, and accepts it when
+  $1-F(\mathbf{q})\le\varepsilon$; repeated integer solutions are removed.
 
-### Phase 2 — SPO per Cluster
-For each cluster, a local hypercube domain is constructed from its center and
-radius (clamped to the global bounds). Fresh Sobol points are generated inside
-that hypercube and refined by SPO:
 
-```text
-xₖ₊₁ = Sₙ · xₖ − (Sₙ − Iₙ) · x*ₖ ,     Sₙ = r · Rₙ(θ)
+## Key parameters
+
+Parameters are supplied as a dictionary to `solve_system`.
+
+| Parameter | Stage | Description |
+| --- | --- | --- |
+| `m_cluster` | Clustering | Number of initial Sobol points. Required. Powers of two provide the best Sobol balance properties. |
+| `k_cluster` | Clustering | Number of clustering iterations. Required. |
+| `gamma` | Clustering | Fitness cutoff. SNE and Diophantine problems use the absolute condition ($F(\mathbf{x})>\gamma$). Multimodal problems can use the relative condition ($F(\mathbf{x})>\gamma F(\mathbf{x}^*)$). |
+| `r_cl` | Clustering | Spiral contraction factor during clustering. Default: `0.95`. |
+| `theta_cl` | Clustering | Spiral rotation angle during clustering. Default: $\pi/4$. |
+| `num_check_points` | Clustering | Number of interpolation points evaluated between a candidate and its nearest cluster center. Default: `1`. |
+| `spo_m` | SPO | Number of Sobol points generated inside each cluster. Fallback alias: `m`. |
+| `spo_k_max` | SPO | Maximum number of SPO iterations per cluster. Fallback alias: `k_max`. |
+| `r` | SPO | SPO contraction factor. Default: `0.95`. |
+| `theta` | SPO | SPO rotation angle. Default: $\pi/4$. |
+| `epsilon` | Selection | For SNE and Diophantine problems, the fitness-gap tolerance $\varepsilon$ applied to $1-F$. Multimodal problems also use it in final peak filtering. Default: $10^{-7}$. |
+| `delta` | Selection | Euclidean duplicate threshold: candidates within $\lVert\mathbf{x}-\mathbf{y}\rVert\le\delta$ are merged. |
+
+Built-in benchmarks may also define `expected_roots` as testing metadata. It is
+used by tests and examples to evaluate solver results, but it is not used by the
+solver to discover solutions.
+
+## Benchmark collections
+
+The repository currently includes these factories:
+
+| Factory | Module | Contents |
+| --- | --- | --- |
+| `get_problem_set()` | `pysne.problems.benchmarks_sne` | Seven nonlinear-equation benchmark systems with IDs `1-7`. |
+| `get_multimodal_problems()` | `pysne.problems.benchmarks_multimodal` | Seven numbered benchmark configurations and four named entries. |
+| `get_diophantine_problems()` | `pysne.problems.benchmarks_diophantine` | Eighteen integer/Diophantine benchmark configurations with IDs `1-18`. |
+
+Example runners are available under `examples/`:
+
+```bash
+python examples/run_sne.py 1
+python examples/run_multimodal.py 1
+python examples/run_diophantine.py 1
 ```
 
-where `Rₙ(θ)` is the composed n-dimensional rotation matrix, `r` the spiral
-radius, `θ` the rotation angle, and `x*` the incumbent best. Early stopping
-triggers once the residual drops below `ε`. *(`pysne/optimizers/spo/`)*
+The SNE and multimodal runners also accept `all` and `all-verbose` to run all
+numbered benchmark configurations. Some benchmark runs may take
+substantially longer depending on their parameters.
 
-### Phase 3 — Selection & Validation
-Candidate roots are filtered: near-duplicates within distance `δ` are merged, and
-only points satisfying the residual tolerance `ε` are retained as final roots.
+## Running the tests
 
----
+Install PySNE in editable mode together with its development dependencies:
 
-## ⚙️ Key Hyperparameters
+```bash
+pip install -e ".[dev]"
+```
 
-Hyperparameters are passed via the `params` dictionary.
+Run the complete test suite:
 
-| Parameter            | Phase       | Meaning                                              |
-| -------------------- | ----------- | ---------------------------------------------------- |
-| `m_cluster`          | Clustering  | Number of initial Sobol points.                      |
-| `k_cluster`          | Clustering  | Iterations of the clustering loop.                   |
-| `gamma`              | Clustering  | Fitness threshold for accepting/creating clusters.   |
-| `r_cl`, `theta_cl`   | Clustering  | Spiral radius / angle used during clustering.        |
-| `spo_m`             | SPO        | Points per cluster (aliased as `m`).                 |
-| `spo_k_max`         | SPO        | Max SPO iterations (aliased as `k_max`).            |
-| `r`, `theta`         | SPO        | Spiral radius (≈0.95) and angle (≈π/4).              |
-| `epsilon` (`ε`)      | Validation  | Residual tolerance for accepting a root.             |
-| `delta` (`δ`)        | Validation  | Distance threshold for merging duplicate roots.      |
+```bash
+pytest -q 
+```
 
-> Each built-in benchmark ships with tuned defaults via `problem.get_info()`.
+To run a single lightweight SNE benchmark test:
 
----
+```bash
+pytest -q "tests/test_sne.py::test_sne_problem[1]"
+```
 
-## 🧪 Benchmark Problem Sets
+Some tests run complete optimization benchmarks and may take longer than
+ordinary unit tests.
 
-PySNE bundles several reproducible suites under `pysne/problems/`:
-
-| Factory                     | Module                       | Contents                                                        |
-| --------------------------- | ---------------------------- | --------------------------------------------------------------- |
-| `get_problem_set()`         | `benchmarks_sne.py`          | Classic SNE problems (e.g. Circle–Exponential).                 |
-| `get_multimodal_problems()` | `benchmarks_multimodal.py`   | Multimodal functions (Himmelblau, Six-Hump Camel Back, Shubert).|
-| `get_gecco_problems()`      | `benchmarks_gecco.py`        | GECCO niching-style multimodal benchmarks.                      |
-| `get_diophantine_problems()`| `benchmarks_diophantine.py`  | Integer/Diophantine-flavored systems.                           |
-
----
-
-## 🗂️ Project Structure
+## Project structure
 
 ```text
-pysne/                              <-- Root repository
-│
-├── pysne/                          <-- Main library package
+pysne/
+├── pysne/
 │   ├── __init__.py
-│   ├── solver.py                   # solve_system() — the 3-phase pipeline
-│   ├── utils.py                    # objective_function, is_in_domain, validate_solutions
-│   ├── version.py                  # __version__ = "0.2.0"
-│   │
-│   ├── initialization/
-│   │   └── sampling.py             # generate_sobol_points (Sobol / SciPy QMC)
-│   │
+│   ├── solver.py
+│   ├── utils.py
+│   ├── version.py
 │   ├── clustering/
-│   │   ├── model.py                # Cluster object
+│   │   ├── model.py
 │   │   ├── clustering_process.py
-│   │   └── modified_clustering_process.py   # perform_iterative_clustering
-│   │
+│   │   └── modified_clustering_process.py
+│   ├── initialization/
+│   │   └── sampling.py
 │   ├── optimizers/
 │   │   └── spo/
-│   │       ├── engine.py           # spiral_optimization (SPO core loop)
-│   │       └── matrix.py           # get_rotation_matrix (n-D rotation)
-│   │
+│   │       ├── engine.py
+│   │       └── matrix.py
 │   └── problems/
-│       ├── base.py                 # BaseProblem / MinimizedProblem / MultimodalProblem
-│       ├── benchmarks_sne.py       # get_problem_set
-│       ├── benchmarks_multimodal.py# get_multimodal_problems
-│       └── benchmarks_diophantine.py# get_diophantine_problems
-│
-├── tests/                          # Unit & integration tests
+│       ├── base.py
+│       ├── benchmarks_sne.py
+│       ├── benchmarks_multimodal.py
+│       └── benchmarks_diophantine.py
+├── examples/
+├── tests/
 ├── pyproject.toml
-├── CHANGELOG.md
 └── README.md
 ```
 
----
+## Limitations
 
-## ✅ Running the Tests
+- PySNE requires finite bounds for every decision variable.
+- Finding every root or optimum is not guaranteed.
+- Large domains and higher-dimensional problems may require more evaluations.
+- The value of `delta` affects whether nearby solutions are merged or retained
+as separate candidates.
+- Poorly scaled variables, discontinuities, singularities, overflow, and invalid function evaluations may reduce solver reliability.
+- Sobol population sizes that are powers of two generally provide better
+balance properties.
+- The API and default parameters may change while the project remains in alpha.
 
-```bash
-pip install -e ".[dev]"   # or: pip install pytest
-pytest -v
-```
+## Documentation
 
-Smoke/integration tests (e.g. `tests/test_gecco.py`) run the full pipeline on a
-fast benchmark to verify that clustering, SPO, and selection compose correctly.
+The documentation website contains the user guide, API notes, algorithm
+explanations, examples, case studies, and research references:
 
----
+**https://p2ms-optimization.github.io/pysne-web/**
 
-## 📚 Documentation
+| Repository | Purpose |
+| --- | --- |
+| [`p2ms-optimization/pysne`](https://github.com/p2ms-optimization/pysne) | Python package source, solver, algorithms, benchmarks, and tests |
+| [`p2ms-optimization/pysne-web`](https://github.com/p2ms-optimization/pysne-web) | MkDocs documentation website source and research pages. |
 
-Full documentation — installation, user guide, API reference, algorithms,
-case studies, and an interactive 2D solution-landscape demo — lives at:
-
-**👉 https://p2ms-optimization.github.io/pysne-web/**
-
-| Repository                                                                 | Purpose                                          |
-| -------------------------------------------------------------------------- | ------------------------------------------------ |
-| [`p2ms-optimization/pysne`](https://github.com/p2ms-optimization/pysne)         | Python package, solver, algorithms, and tests.   |
-| [`p2ms-optimization/pysne-web`](https://github.com/p2ms-optimization/pysne-web) | MkDocs documentation website and research pages.  |
-
----
-
-## 🤝 Contributing
+## Contributing
 
 Contributions, bug reports, and benchmark additions are welcome.
 
-1. Fork the repository and create a feature branch.
-2. Add tests for new behavior under `tests/`.
-3. Ensure `pytest` passes before opening a pull request.
-4. Open issues at the [Bug Tracker](https://github.com/p2ms-optimization/pysne/issues).
+1. Fork the repository and create a branch for each focused change.
+2. Add or update tests under `tests/` when behavior changes.
+3. Run the relevant unit and benchmark tests locally.
+4. Update the documentation when public APIs, parameters, or behavior change.
+5. Ensure the relevant tests pass before opening a pull request.
+6. Open a pull request with a clear description of the change.
 
----
+Bugs and feature requests can be submitted through the
+[issue tracker](https://github.com/p2ms-optimization/pysne/issues).
 
-## 📝 Citation
+
+## Citation
 
 If you use PySNE in academic work, please cite it:
 
 ```bibtex
 @software{pysne2026,
-  title   = {PySNE: Finding All Solutions of Systems of Nonlinear Equations
-             via Spiral Dynamics Optimization with Clustering},
+  title   = {PySNE: Finding All Solutions of Systems of Nonlinear Equations using Spiral Optimization with Clustering},
   author  = {Hermawan, Aldy Nugraha and Isriyanto, Azarya Benhanan},
   year    = {2026},
-  url     = {https://github.com/p2ms-optimization/pysne},
-  note    = {Version 0.1.0}
+  version = {0.2.0},
+  url     = {https://github.com/p2ms-optimization/pysne}
 }
 ```
 
----
 
-## 👥 Authors
+## Authors
 
-- **Aldy Nugraha Hermawan** — aldynugrahahermawan1702@gmail.com
-- **Azarya Benhanan Isriyanto** — azaryaben@gmail.com
+- **Aldy Nugraha Hermawan** — `aldynugrahahermawan1702@gmail.com`
+- **Azarya Benhanan Isriyanto** — `azaryaben@gmail.com`
 
-Undergraduate Thesis · Actuarial Science · Institut Teknologi Bandung
+Undergraduate research · Actuarial Science · Institut Teknologi Bandung
 
----
-
-## 📄 License
+## License
 
 Distributed under the **MIT License**. See [`LICENSE`](LICENSE) for details.
