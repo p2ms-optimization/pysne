@@ -13,7 +13,7 @@ class PysneTuner:
     """
     Hyperparameter Tuner khusus untuk PySNE.
     Mengadaptasi konsep dari mealpy/tuner.py untuk mengevaluasi kombinasi parameter 
-    pada algoritma SDOA-Clustering.
+    pada algoritma SPO-Clustering.
     """
     def __init__(self, param_grid: Dict[str, List[Any]]):
         self.param_grid = param_grid
@@ -136,8 +136,8 @@ if __name__ == "__main__":
     param_grid = {
         'm_cluster': [300], # Menggunakan pangkat 2 (2^14) untuk Sobol points
         'k_cluster': [5],
-        'sdoa_m': [50],
-        'sdoa_k_max': [250],
+        'spo_m': [50],
+        'spo_k_max': [250],
         'delta': [0.1],
         'epsilon': [1e-5],
         'gamma': [-float('inf')],

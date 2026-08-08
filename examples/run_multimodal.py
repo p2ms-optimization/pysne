@@ -2,11 +2,10 @@ import numpy as np
 import time
 import sys
 from typing import Dict, Any
-import pytest
 
 from pysne.problems.benchmarks_multimodal import get_multimodal_problems
 from pysne.solver import solve_system
-from pysne.problems.base import BaseProblem, MinimizedProblem
+from pysne.problems.base import MinimizedProblem
 
 
 
