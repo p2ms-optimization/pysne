@@ -37,12 +37,21 @@ f_2(\mathbf{x}) \\
 \vdots \\
 f_m(\mathbf{x})
 \end{bmatrix}
-= \mathbf{0}_m,
+=
+\mathbf{0}_m,
 \qquad
-\mathbf{x} = (x_1,\ldots,x_n)^{\mathsf T}
-\in D
-= \prod_{j=1}^{n}[a_j,b_j]
-\subset \mathbb{R}^n.
+\mathbf{x}
+=
+\begin{bmatrix}
+x_1\\
+\vdots\\
+x_n
+\end{bmatrix}
+\in
+D
+=
+\prod_{j=1}^{n}[a_j,b_j]
+\subset\mathbb{R}^n.
 ```
 
 PySNE transforms the root-finding problem into a maximization problem by defining
@@ -261,8 +270,8 @@ print(result["roots"])
 ```
 
 The exact solution in the specified positive domain is
-$\mathbf{x}^{\star}=(\frac{1}{\sqrt{2}},\,\frac{1}{\sqrt{2}})^{\mathsf T}$, or approximately
-$\mathbf{x}^{\star}=(0.70710678,\,0.70710678)^{\mathsf T}$.
+$\mathbf{x}^*=(\frac{1}{\sqrt{2}},\,\frac{1}{\sqrt{2}})^{\mathsf T}$, or approximately
+$\mathbf{x}^*=(0.70710678,\,0.70710678)^{\mathsf T}$.
 
 ## How PySNE works
 
@@ -285,17 +294,17 @@ Sobol population, and applies Spiral Optimization:
 ```math
 \begin{aligned}
 \mathbf{x}_i(k+1)
-&= \mathbf{x}^{\star}(k)
+&= \mathbf{x}^*(k)
  + S_n(r,\theta)
    \left(\mathbf{x}_i(k)-\mathbf{x}^{\star}(k)\right) \\
 &= S_n(r,\theta)\mathbf{x}_i(k)
- - \left(S_n(r,\theta)-I_n\right)\mathbf{x}^{\star}(k), \\
+ - \left(S_n(r,\theta)-I_n\right)\mathbf{x}^*(k), \\
 S_n(r,\theta) &= rR^{(n)}(\theta).
 \end{aligned}
 ```
 
 Here, $\mathbf{x}_i(k)$ is search point $i$ at iteration $k$,
-$\mathbf{x}^{\star}(k)$ is the current best point, $0<r<1$ is the
+$\mathbf{x}^*(k)$ is the current best point, $0<r<1$ is the
 contraction factor, $I_n$ is the $n\times n$ identity matrix, and
 $R^{(n)}(\theta)$ is the composed $n$-dimensional rotation matrix.
 
