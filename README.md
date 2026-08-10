@@ -271,7 +271,7 @@ print(result["roots"])
 
 The exact solution in the specified positive domain is
 
-$\vec{x}^*=(\frac{1}{\sqrt{2}},\,\frac{1}{\sqrt{2}})^{\mathsf T}$, or approximately $\vec{x}^*=(0.70710678,\,0.70710678)^{\mathsf T}$.
+$\vec{x}^*=(\frac{1}{\sqrt{2}},\,\frac{1}{\sqrt{2}})^T$, or approximately $\vec{x}^*=(0.70710678,\,0.70710678)^T$.
 
 ## How PySNE works
 
@@ -327,7 +327,7 @@ Parameters are supplied as a dictionary to `solve_system`.
 | --- | --- | --- |
 | `m_cluster` | Clustering | Number of initial Sobol points. Required. Powers of two provide the best Sobol balance properties. |
 | `k_cluster` | Clustering | Number of clustering iterations. Required. |
-| `gamma` | Clustering | Fitness cutoff. SNE and Diophantine problems use the absolute condition ($F(\vec{x})>\gamma$). Multimodal problems can use the relative condition ($F(\vec{x})>\gamma F(\vec{x}^*)$). |
+| `gamma` | Clustering | Fitness cutoff. SNE and Diophantine problems use the absolute condition ($F(\vec{x})>\gamma$). Multimodal problems can use the relative condition ($F(\vec{x})>\gamma F(\vec{x}^{\star})$). |
 | `r_cl` | Clustering | Spiral contraction factor during clustering. Default: `0.95`. |
 | `theta_cl` | Clustering | Spiral rotation angle during clustering. Default: $\pi/4$. |
 | `num_check_points` | Clustering | Number of interpolation points evaluated between a candidate and its nearest cluster center. Default: `1`. |
