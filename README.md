@@ -27,20 +27,20 @@ using Spiral Optimization (SPO) with Clustering Technique
 PySNE is a Python library for searching **every root** (all solutions) of a system of nonlinear equations (SNE) inside a bounded search space — not just a single solution, as classical Newton-type methods typically return. Its main use case is a system of nonlinear equations
 
 ```math
-\mathbf{f}:D\to\mathbb{R}^m,
+\vec{f}:D\to\mathbb{R}^m,
 \qquad
-\mathbf{f}(\mathbf{x})
+\vec{f}(\vec{x})
 =
 \begin{bmatrix}
-f_1(\mathbf{x}) \\
-f_2(\mathbf{x}) \\
+f_1(\vec{x}) \\
+f_2(\vec{x}) \\
 \vdots \\
-f_m(\mathbf{x})
+f_m(\vec{x})
 \end{bmatrix}
 =
-\mathbf{0}_m,
+\vec{0}_m,
 \qquad
-\mathbf{x}
+\vec{x}
 =
 \begin{bmatrix}
 x_1\\
@@ -58,13 +58,13 @@ PySNE transforms the root-finding problem into a maximization problem by definin
 the fitness $F$ as
 
 ```math
-
-F(\mathbf{x})
-= \frac{1}{1 + \sum_{i=1}^{m} \left|f_i(\mathbf{x})\right|}.
+F(\vec{x})
+=
+\frac{1}{1+\sum_{i=1}^{m}\left|f_i(\vec{x})\right|}.
 ```
 
-For finite equation values, $0 < F(\mathbf{x}) \le 1$, and
-$F(\mathbf{x})=1$ if and only if $\mathbf{f}(\mathbf{x})=\mathbf{0}$.
+For finite equation values, $0<F(\vec{x})\le1$, and
+$F(\vec{x})=1$ if and only if $\vec{f}(\vec{x})=\vec{0}$.
 
 Candidate solution regions are identified through the Function Cluster procedure and then
 refined independently with Spiral Optimization (SPO). The package also contains
@@ -270,8 +270,8 @@ print(result["roots"])
 ```
 
 The exact solution in the specified positive domain is
-$\mathbf{x}^*=(\frac{1}{\sqrt{2}},\,\frac{1}{\sqrt{2}})^{\mathsf T}$, or approximately
-$\mathbf{x}^*=(0.70710678,\,0.70710678)^{\mathsf T}$.
+
+$\vec{x}^*=(\frac{1}{\sqrt{2}},\,\frac{1}{\sqrt{2}})^{\mathsf T}$, or approximately $\vec{x}^*=(0.70710678,\,0.70710678)^{\mathsf T}$.
 
 ## How PySNE works
 
@@ -292,19 +292,11 @@ For each cluster, PySNE constructs a local bounded search region, generates a ne
 Sobol population, and applies Spiral Optimization:
 
 ```math
-\begin{aligned}
-\mathbf{x}_i(k+1)
-&= \mathbf{x}^*(k)
- + S_n(r,\theta)
-   \left(\mathbf{x}_i(k)-\mathbf{x}^{\star}(k)\right) \\
-&= S_n(r,\theta)\mathbf{x}_i(k)
- - \left(S_n(r,\theta)-I_n\right)\mathbf{x}^*(k), \\
-S_n(r,\theta) &= rR^{(n)}(\theta).
-\end{aligned}
+\begin{aligned}\vec{x}_i(k+1)&= \vec{x}^*(k) + S_n(r,\theta)   \left(\vec{x}_i(k)-\vec{x}^{\star}(k)\right) \\&= S_n(r,\theta)\vec{x}_i(k) - \left(S_n(r,\theta)-I_n\right)\vec{x}^*(k), \\S_n(r,\theta) &= rR^{(n)}(\theta).\end{aligned}
 ```
 
-Here, $\mathbf{x}_i(k)$ is search point $i$ at iteration $k$,
-$\mathbf{x}^*(k)$ is the current best point, $0<r<1$ is the
+Here, $\vec{x}_i(k)$ is search point $i$ at iteration $k$,
+$\vec{x}^*(k)$ is the current best point, $0<r<1$ is the
 contraction factor, $I_n$ is the $n\times n$ identity matrix, and
 $R^{(n)}(\theta)$ is the composed $n$-dimensional rotation matrix.
 
@@ -314,17 +306,17 @@ Implementation: `pysne/optimizers/spo/`.
 
 Each problem class determines how final candidates are selected:
 
-* `SNEProblem` accepts a candidate $\mathbf{x}$ when
-  $1-F(\mathbf{x})<\varepsilon$ and it lies inside the domain.
-* Candidates $\mathbf{x}$ and $\mathbf{y}$ are treated as duplicates when
-  $\lVert\mathbf{x}-\mathbf{y}\rVert\le\delta$; the point with the higher
+* `SNEProblem` accepts a candidate $\vec{x}$ when
+  $1-F(\vec{x})<\varepsilon$ and it lies inside the domain.
+* Candidates $\vec{x}$ and $\vec{y}$ are treated as duplicates when
+  $\lVert\vec{x}-\vec{y}\rVert\le\delta$; the point with the higher
   fitness is retained.
 * `MultimodalProblem` accepts in-domain candidates that pass a local-extremum
   check in every coordinate direction, then removes nearby duplicates.
 * `DiophantineProblem` forms
-  $\mathbf{q}=\operatorname{round}(\mathbf{x})$, checks that $\mathbf{q}$ lies
+  $\vec{q}=\mathrm{round}(\vec{x})$, checks that $\vec{q}$ lies
   in the integer domain, and accepts it when
-  $1-F(\mathbf{q})\le\varepsilon$; repeated integer solutions are removed.
+  $1-F(\vec{q})\le\varepsilon$; repeated integer solutions are removed.
 
 
 ## Key parameters
@@ -335,7 +327,7 @@ Parameters are supplied as a dictionary to `solve_system`.
 | --- | --- | --- |
 | `m_cluster` | Clustering | Number of initial Sobol points. Required. Powers of two provide the best Sobol balance properties. |
 | `k_cluster` | Clustering | Number of clustering iterations. Required. |
-| `gamma` | Clustering | Fitness cutoff. SNE and Diophantine problems use the absolute condition ($F(\mathbf{x})>\gamma$). Multimodal problems can use the relative condition ($F(\mathbf{x})>\gamma F(\mathbf{x}^*)$). |
+| `gamma` | Clustering | Fitness cutoff. SNE and Diophantine problems use the absolute condition ($F(\vec{x})>\gamma$). Multimodal problems can use the relative condition ($F(\vec{x})>\gamma F(\vec{x}^*)$). |
 | `r_cl` | Clustering | Spiral contraction factor during clustering. Default: `0.95`. |
 | `theta_cl` | Clustering | Spiral rotation angle during clustering. Default: $\pi/4$. |
 | `num_check_points` | Clustering | Number of interpolation points evaluated between a candidate and its nearest cluster center. Default: `1`. |
@@ -344,7 +336,7 @@ Parameters are supplied as a dictionary to `solve_system`.
 | `r` | SPO | SPO contraction factor. Default: `0.95`. |
 | `theta` | SPO | SPO rotation angle. Default: $\pi/4$. |
 | `epsilon` | Selection | For SNE and Diophantine problems, the fitness-gap tolerance $\varepsilon$ applied to $1-F$. Multimodal problems also use it in final peak filtering. Default: $10^{-7}$. |
-| `delta` | Selection | Euclidean duplicate threshold: candidates within $\lVert\mathbf{x}-\mathbf{y}\rVert\le\delta$ are merged. |
+| `delta` | Selection | Euclidean duplicate threshold: candidates within $\lVert\vec{x}-\vec{y}\rVert\le\delta$ are merged. |
 
 Built-in benchmarks may also define `expected_roots` as testing metadata. It is
 used by tests and examples to evaluate solver results, but it is not used by the
