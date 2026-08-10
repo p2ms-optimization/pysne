@@ -3,7 +3,7 @@ import time
 
 from pysne.clustering.modified_clustering_process import perform_iterative_clustering
 from pysne.initialization.sampling import generate_sobol_points
-from pysne.utils import objective_function, is_in_domain, validate_solutions
+from pysne.utils import objective_function, is_in_domain
 from pysne.optimizers.spo.engine import spiral_optimization
 
 

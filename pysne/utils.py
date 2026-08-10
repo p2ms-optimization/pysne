@@ -56,40 +56,6 @@ def is_in_domain(point: np.ndarray, domain: List[Tuple[float, float]]) -> bool:
             return False
     return True
 
-def validate_solutions(
-    roots: List[np.ndarray], 
-    equations: List[Callable], 
-    domain: List[Tuple[float, float]], 
-    epsilon: float
-) -> List[np.ndarray]:
-    """
-    Validates a list of candidate roots by ensuring they strictly fall within the domain and their maximum absolute residual is below the 
-    specified tolerance.
-
-    Parameters
-    ----------
-    roots : list of numpy.ndarray
-        The list of candidate roots found by the solver.
-    equations : list of callable
-        The system of nonlinear equations to verify against.
-    domain : list of tuple
-        The defined search space boundaries.
-    epsilon : float
-        The maximum acceptable residual for a point to be considered a valid root.
-
-    Returns
-    -------
-    list of numpy.ndarray
-        A filtered list containing only the coordinate points that meet both the domain and accuracy criteria.
-    """
-    valid_roots = []
-    for root in roots:
-        in_domain = is_in_domain(root, domain)
-        residuals = [abs(f(root)) for f in equations]
-        if max(residuals) < epsilon and in_domain:
-            valid_roots.append(root)
-    return valid_roots
-
 def create_continuous_bounds(
     integer_domain: List[Tuple[int, int]],
     margin: float = 0.5
