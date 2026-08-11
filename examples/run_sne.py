@@ -5,9 +5,9 @@ This module tests the main solve_system() function from solver.py
 with proper assertions and comprehensive coverage.
 
 Usage:
-    python test_lib.py                          # Run default single test
-    pytest test_lib.py -v                       # Run all tests with pytest
-    pytest test_lib.py::test_problem_1 -v      # Run specific test
+    python examples/run_sne.py                          # Run default single test
+    python examples/run_sne.py all                      # Run all tests (summary)
+    python examples/run_sne.py all-verbose              # Run all tests (detailed)
 """
 
 import numpy as np
