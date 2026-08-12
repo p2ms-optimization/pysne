@@ -11,41 +11,41 @@ from pysne.problems.base import MinimizedProblem
 
 def run_multimodal_pipeline_execution():
     """
-    Tes sederhana (smoke test) untuk memastikan pipeline multimodal 
-    berjalan dari awal hingga akhir menggunakan OOP benchmarks.
+    A simple smoke test to ensure the multimodal pipeline
+    runs from start to finish using OOP benchmarks.
     """
-    # 1. Ambil daftar problem
+    # 1. Get the list of problems
     problems = get_multimodal_problems()
     
-    # 2. Inisialisasi Problem 2 (Six Hump Camel Back)
-    # Problem yang digunakan
+    # 2. Initialize Problem 2 (Six Hump Camel Back)
+    # Problem used for the test
     prob2 = problems[3]()
     
-    # 3. Ambil domain dan parameter asli
+    # 3. Get the original domain and parameters
     _, original_params = prob2.get_info()
     
-    # 4. Modifikasi (override) sebagian parameter agar tes berjalan dalam hitungan detik
+    # 4. Override selected parameters so the test runs within seconds
     test_params = original_params.copy()
     # test_params.update({
-        # 'm_cluster': 50,   # Diperkecil dari 1000
-        # 'k_cluster': 5,    # Diperkecil dari 20
-        # 'm': 50,           # Diperkecil dari 200
-        # 'k_max': 50,        # Diperkecil dari 200
+        # 'm_cluster': 50,   
+        # 'k_cluster': 5,    
+        # 'm': 50,           
+        # 'k_max': 50,        
         # 'delta': 0.1
     # })
 
-    # 5. Eksekusi fungsi utama
+    # 5. Execute the main function
     result = solve_system(prob2, test_params, verbose=True)
 
     # 6. Assertions
-    assert result is not None, "Output solver tidak boleh None"
-    assert 'roots' in result, "Hasil harus mengandung key 'roots'"
+    assert result is not None, "Solver output must not be None"
+    assert 'roots' in result, "Result must contain the 'roots' key"
 
     roots = result['roots']
-    assert isinstance(roots, np.ndarray), "Output roots harus berupa numpy array"
-    assert len(roots) > 0, f"Harus menemukan setidaknya satu optima untuk {prob2.name}"
+    assert isinstance(roots, np.ndarray), "Roots output must be a NumPy array"
+    assert len(roots) > 0, f"Must find at least one optimum for {prob2.name}"
 
-    # Print hasil untuk verifikasi
+    # Print results for verification
     print(f"\n[TEST RESULT] Found {len(roots)} optima for {prob2.name}")
 
 # if __name__ == "__main__":
@@ -68,7 +68,7 @@ def run_multimodal_problem(
             result['error'] = f"Problem {problem_id} not found"
             return result
             
-        # Inisialisasi object problem
+        # Initialize the problem object
         prob = problems[problem_id]()
 
         if verbose:
@@ -87,7 +87,7 @@ def run_multimodal_problem(
             if verbose:
                 print(f"\n[STEP 1] Loading Problem {problem_id} (Multimodal) - Finding Maxima")
             
-            print(f"info parameter: {prob.get_info()}")
+            print(f"Parameter info: {prob.get_info()}")
             # Using solve_system
             res_max = solve_system(prob, prob.get_info()[1], verbose=verbose)
             final_max = res_max['roots']
