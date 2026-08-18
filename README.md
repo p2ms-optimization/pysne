@@ -110,6 +110,7 @@ research implementation and a reusable experimental library.
 - Duplicate filtering using a configurable distance threshold.
 - Built-in SNE, multimodal, and Diophantine benchmark collections.
 - Object-oriented problem classes for custom equations and search domains.
+- Visualization module for plotting SNE and multimodal optimization results in 1D, 2D, and 3D.
 - Only NumPy and SciPy are required by the core package.
 
 ## Installation
@@ -409,11 +410,15 @@ pysne/
 │   │   └── spo/
 │   │       ├── engine.py
 │   │       └── matrix.py
-│   └── problems/
-│       ├── base.py
-│       ├── benchmarks_sne.py
-│       ├── benchmarks_multimodal.py
-│       └── benchmarks_diophantine.py
+│   ├── problems/
+│   │   ├── base.py
+│   │   ├── benchmarks_sne.py
+│   │   ├── benchmarks_multimodal.py
+│   │   └── benchmarks_diophantine.py
+│   └── visualization/
+│       ├── __init__.py
+│       ├── multimodal.py
+│       └── sne.py
 ├── examples/
 ├── tests/
 ├── pyproject.toml
