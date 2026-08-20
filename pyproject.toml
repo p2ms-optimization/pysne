@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.8"
 license = { file = "LICENSE" }
 authors = [
-    { name = "Adhe Kania", email = "adhe.kania@itb.ac.id" }
+    { name = "Adhe Kania", email = "adhe.kania@itb.ac.id" },
     { name = "Aldy Nugraha Hermawan", email = "aldynugrahahermawan1702@gmail.com" },
     { name = "Azarya Benhanan Isriyanto", email = "azaryaben@gmail.com" }
 ]
