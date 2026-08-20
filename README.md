@@ -7,8 +7,7 @@ using Spiral Optimization (SPO) with Clustering Technique
 
 ![Python](https://img.shields.io/badge/python-3.8%2B-blue.svg)
 ![Version](https://img.shields.io/badge/version-0.2.0-blue.svg)
-![License](https://img.shields.io/badge/license-MIT-green.svg)
-![Status](https://img.shields.io/badge/status-alpha-orange.svg)
+![License](https://img.shields.io/badge/license-Apache%202.0-green.svg)
 [![Documentation](https://img.shields.io/badge/docs-website-0b78bf.svg)](https://p2ms-optimization.github.io/pysne-web/)
 
 [Overview](#overview) ·
@@ -84,7 +83,6 @@ research implementation and a reusable experimental library.
 ## Current status
 
 - Current package version: **0.2.0**.
-- Development status: **Alpha**.
 - The source repository is currently private and accessible to authorized
   contributors.
 - The package is not yet published on PyPI.
@@ -435,7 +433,7 @@ as separate candidates.
 - Poorly scaled variables, discontinuities, singularities, overflow, and invalid function evaluations may reduce solver reliability.
 - Sobol population sizes that are powers of two generally provide better
 balance properties.
-- The API and default parameters may change while the project remains in alpha.
+- The API and default parameters may still change in the future releases.
 
 ## Documentation
 
@@ -463,6 +461,12 @@ Contributions, bug reports, and benchmark additions are welcome.
 Bugs and feature requests can be submitted through the
 [issue tracker](https://github.com/p2ms-optimization/pysne/issues).
 
+## References
+
+- Sidarto, K. A. & Kania, A. (2015). Finding all solutions of systems of nonlinear equations using spiral dynamics inspired optimization with clustering. JACIII, 19(5).
+- Sidarto, K. A., Kania, A., & Sumarti, N. (2017). Finding multiple solutions of multimodal optimization using spiral optimization algorithm with clustering. MENDEL, 23(1).
+- Sumarti, N., et al. (2023). A method for finding numerical solutions to diophantine equations using spiral optimization algorithm with clustering. Applied Soft Computing.
+- Tamura, K. & Yasuda, K. (2011). Spiral Dynamics Inspired Optimization. JACIII, 15(8).
 
 ## Citation
 
@@ -488,4 +492,4 @@ Undergraduate research · Actuarial Science · Institut Teknologi Bandung
 
 ## License
 
-Distributed under the **MIT License**. See [`LICENSE`](LICENSE) for details.
+Distributed under the **Apache License 2.0**. See [`LICENSE`](LICENSE) for details.
