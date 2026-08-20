@@ -6,7 +6,7 @@
 using Spiral Optimization (SPO) with Clustering Technique
 
 ![Python](https://img.shields.io/badge/python-3.8%2B-blue.svg)
-![Version](https://img.shields.io/badge/version-0.2.0-blue.svg)
+![Version](https://img.shields.io/badge/version-0.2.1-blue.svg)
 ![License](https://img.shields.io/badge/license-Apache%202.0-green.svg)
 [![Documentation](https://img.shields.io/badge/docs-website-0b78bf.svg)](https://p2ms-optimization.github.io/pysne-web/)
 
@@ -82,7 +82,7 @@ research implementation and a reusable experimental library.
 
 ## Current status
 
-- Current package version: **0.2.0**.
+- Current package version: **0.2.1**.
 - The source repository is currently private and accessible to authorized
   contributors.
 - The package is not yet published on PyPI.
@@ -475,9 +475,9 @@ If you use PySNE in academic work, please cite it:
 ```bibtex
 @software{pysne2026,
   title   = {PySNE: Finding All Solutions of Systems of Nonlinear Equations using Spiral Optimization with Clustering},
-  author  = {Hermawan, Aldy Nugraha and Isriyanto, Azarya Benhanan},
+  author  = {Kania, Adhe and Hermawan, Aldy Nugraha and Isriyanto, Azarya Benhanan},
   year    = {2026},
-  version = {0.2.0},
+  version = {0.2.1},
   url     = {https://github.com/p2ms-optimization/pysne}
 }
 ```
@@ -485,6 +485,7 @@ If you use PySNE in academic work, please cite it:
 
 ## Authors
 
+- **Adhe Kania, Ph.D.** — `adhe.kania@itb.ac.id`
 - **Aldy Nugraha Hermawan** — `aldynugrahahermawan1702@gmail.com`
 - **Azarya Benhanan Isriyanto** — `azaryaben@gmail.com`
 
