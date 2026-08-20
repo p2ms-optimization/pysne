@@ -4,21 +4,21 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pysne"
-version = "0.2.0"
+version = "0.2.1"
 description = "A Python library for finding all solutions of nonlinear equations using Spiral Optimization (SPO) with Clustering."
 readme = "README.md"
 requires-python = ">=3.8"
 license = { file = "LICENSE" }
 authors = [
+    { name = "Adhe Kania", email = "adhe.kania@itb.ac.id" }
     { name = "Aldy Nugraha Hermawan", email = "aldynugrahahermawan1702@gmail.com" },
     { name = "Azarya Benhanan Isriyanto", email = "azaryaben@gmail.com" }
 ]
 keywords = ["optimization", "nonlinear-equations", "spo", "clustering", "numerical-methods", "sobol-sequence"]
 classifiers = [
-    "Development Status :: 3 - Alpha",
     "Intended Audience :: Science/Research",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
+    "License :: OSI Approved :: Apache Software License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
