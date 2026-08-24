@@ -51,7 +51,7 @@ def run_spo_on_clusters(clusters, problem, params):
     init_method = params.get('init_method', 'sobol')
 
     for i, cluster in enumerate(clusters):
-        effective_radius = max(cluster.radius, 1.0) if is_diophantine else cluster.radius
+        effective_radius = max(cluster.radius, 0.5) if is_diophantine else cluster.radius
 
         cluster_domain = []
         for dim in range(problem.n_var):
