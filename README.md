@@ -1,6 +1,9 @@
 <div align="center">
 
-# PySNE
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://p2ms-optimization.github.io/pysne-web/assets/images/PySNE Logo Rectangle-01 (White)-02.png">
+  <img src="https://p2ms-optimization.github.io/pysne-web/assets/images/PySNE Logo Rectangle-01.png" alt="PySNE logo" width="320">
+</picture>
 
 **Finding *all* solutions of a system of nonlinear equations**
 using Spiral Optimization (SPO) with Clustering Technique
