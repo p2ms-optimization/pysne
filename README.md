@@ -1,8 +1,8 @@
 <div align="center">
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://p2ms-optimization.github.io/pysne-web/assets/images/PySNE Logo Rectangle-01 (White)-02.png">
-  <img src="https://p2ms-optimization.github.io/pysne-web/assets/images/PySNE Logo Rectangle-01.png" alt="PySNE logo" width="320">
+  <source media="(prefers-color-scheme: dark)" srcset="https://p2ms-optimization.github.io/pysne-web/assets/images/pysne-logo-rectangle-white.png">
+  <img src="https://p2ms-optimization.github.io/pysne-web/assets/images/pysne-logo-rectangle.png" alt="PySNE logo" width="320">
 </picture>
 
 **Finding *all* solutions of a system of nonlinear equations**
@@ -86,10 +86,8 @@ research implementation and a reusable experimental library.
 ## Current status
 
 - Current package version: **0.2.1**.
-- The source repository is currently private and accessible to authorized
-  contributors.
-- The package is not yet published on PyPI.
-- A development release is available through TestPyPI.
+- PySNE is published on [PyPI](https://pypi.org/project/pysne/) and can be installed with `pip install pysne`.
+- The source repository is public on GitHub.
 - The package metadata currently declares support for Python **3.8 or newer**.
 - Required runtime dependencies are NumPy and SciPy.
 
@@ -124,7 +122,27 @@ The current `pyproject.toml` declares:
 - NumPy `>=1.20.0`
 - SciPy `>=1.7.0`
 
+### Installation from PyPI
+
+```bash
+pip install pysne
+```
+
+To also install matplotlib for the visualization module:
+
+```bash
+pip install "pysne[plot]"
+```
+
+Verify the installation:
+
+```bash
+python -m pip show pysne
+```
+
 ### Installation from source
+
+Use this option if you want to modify the code or contribute.
 
 ```bash
 git clone https://github.com/p2ms-optimization/pysne.git
@@ -137,22 +155,6 @@ Verify the installation:
 
 ```bash
 python -c "import pysne; print(pysne.__version__)"
-```
-
-The expected version for this repository state is:
-
-```text
-0.2.1
-```
-
-### PyPI installation
-
-PySNE is not currently available as a public PyPI package. The following command
-is planned for a future public release, but should not be presented as an
-available installation method yet:
-
-```bash
-pip install pysne
 ```
 
 ## Quick start
