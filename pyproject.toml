@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pysne"
-version = "0.2.1"
+dynamic = ["version"]
 description = "A Python library for finding all solutions of nonlinear equations using Spiral Optimization (SPO) with Clustering."
 readme = "README.md"
 requires-python = ">=3.8"
@@ -50,6 +50,9 @@ dev = [
 [tool.setuptools.packages.find]
 include = ["pysne*"]
 exclude = ["tests*", "experiments*"]
+
+[tool.setuptools.dynamic]
+version = {attr = "pysne.version.__version__"}
 
 [project.urls]
 "Homepage" = "https://github.com/p2ms-optimization/pysne"
