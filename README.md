@@ -142,7 +142,7 @@ python -c "import pysne; print(pysne.__version__)"
 The expected version for this repository state is:
 
 ```text
-0.2.0
+0.2.1
 ```
 
 ### PyPI installation
