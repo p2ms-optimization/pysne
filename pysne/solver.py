@@ -2,19 +2,15 @@ import numpy as np
 import time
 
 from pysne.clustering.modified_clustering_process import perform_iterative_clustering
-from pysne.initialization.sampling import generate_sobol_points
-from pysne.utils import objective_function, is_in_domain
-from pysne.optimizers.spo.engine import spiral_optimization
+from pysne.optimizers import get_optimizer
 
-
-def run_spo_on_clusters(clusters, problem, params):
+def run_optimizer_on_clusters(clusters, problem, params, optimizer="spo"):
     """
-    Executes the Spiral Optimization (SPO) on each cluster
+    Executes the specified local optimizer on each cluster
     to find more precise root points.
 
     This function constructs local domain boundaries (hypercubes) for each cluster
-    based on its center and radius, generates new initial points using
-    a Sobol sequence, and runs SPO within those local domains.
+    based on its center and radius, then runs the chosen optimizer within those local domains.
 
     Parameters
     ----------
@@ -23,32 +19,20 @@ def run_spo_on_clusters(clusters, problem, params):
     problem : BaseProblem
         The problem instance providing equations, domain, and fitness evaluation.
     params : dict
-        Dictionary containing all hyperparameters for the algorithm
-        (epsilon, delta, gamma, m_cluster, k_cluster, spo_m, spo_k_max, r, theta).
+        Dictionary containing all hyperparameters for the algorithm.
+    optimizer : str, BaseOptimizer, or callable, optional
+        The local optimizer to use (default: "spo").
 
     Returns
     -------
     numpy.ndarray
-        Array containing the candidate root points optimized by SPO.
+        Array containing the candidate root points found across clusters.
     """
+    opt_instance = get_optimizer(optimizer)
     candidates = []
     domain = problem.domain
 
-    # Extract SPO-specific parameters with fallback to old SDOA names
-    spo_params = {
-        'm': params.get('spo_m', params.get('sdoa_m', params.get('m', 20))),
-        'r': params.get('spo_r', params.get('sdoa_r', params.get('r', 0.95))), 
-        'theta': params.get('spo_theta', params.get('sdoa_theta', params.get('theta', np.pi/4))),
-        'k_max': params.get('spo_k_max', params.get('sdoa_k_max', params.get('k_max', 100)))
-    }
-
-    epsilon = params.get('epsilon', 1e-7)
-
-    # Check if this is an SNE problem (to trigger early stopping in the engine)
-    is_sne = hasattr(problem, 'equations')
-
     is_diophantine = getattr(problem, 'problem_type', None) == 'Diophantine'
-    init_method = params.get('init_method', 'sobol')
 
     for i, cluster in enumerate(clusters):
         effective_radius = max(cluster.radius, 0.5) if is_diophantine else cluster.radius
@@ -70,31 +54,31 @@ def run_spo_on_clusters(clusters, problem, params):
             candidates.append(cluster.center.copy())
             continue
 
-        initial_points = generate_sobol_points(spo_params['m'], len(domain), cluster_domain)
-
-        # Run SPO in cluster domain
-        candidate = spiral_optimization(
-            objective_func=problem.evaluate_fitness,
-            domain=cluster_domain,
-            params=spo_params,
-            minimization=False, 
-            custom_initial_points=initial_points,
-            equations=problem.equations if is_sne else None,
-            epsilon=epsilon
-        )
+        if hasattr(opt_instance, 'optimize'):
+            candidate = opt_instance.optimize(problem, cluster, cluster_domain, params)
+        else:
+            candidate = opt_instance(problem, cluster, cluster_domain, params)
 
         candidates.append(candidate)
 
     return np.array(candidates)
 
-def solve_system(problem, params, verbose=False):
+
+def run_spo_on_clusters(clusters, problem, params):
+    """
+    Backward-compatible alias for running Spiral Optimization on each cluster.
+    """
+    return run_optimizer_on_clusters(clusters, problem, params, optimizer="spo")
+
+
+def solve_system(problem, params, optimizer="spo", verbose=False):
     """
     Solves a system of nonlinear equations using the integration of
-    Spiral Optimization (SPO) and the Clustering method.
+    a local optimizer (e.g. Spiral Optimization or Newton-type) and the Clustering method.
     
     This function executes an entire pipeline consisting of three phases:
-    1. Clustering Phase: Localizes potential root areas.
-    2. Optimization Phase: Runs SPO on each cluster.
+    1. Clustering Phase: Localizes potential root areas into clusters.
+    2. Optimization Phase: Runs local optimizer on each cluster.
     3. Selection Phase: Filters and validates the unique final roots.
 
     Parameters
@@ -105,6 +89,9 @@ def solve_system(problem, params, verbose=False):
     params : dict
         Dictionary containing all hyperparameters for the algorithm
         (epsilon, delta, gamma, m_cluster, k_cluster, spo_m, spo_k_max, r, theta).
+    optimizer : str, BaseOptimizer, or callable, optional
+        The local optimizer to apply to each cluster (default: "spo").
+        Supported strings: "spo", "newton", "scipy_root", "hybr", "lm".
     verbose : bool, optional
         If True, prints execution time and the number of clusters found (default: False).
 
@@ -117,13 +104,18 @@ def solve_system(problem, params, verbose=False):
         - 'clusters': list of Cluster objects found in Phase 1.
         - 'time_elapsed': float representing the computation time in seconds.
     """
+    # Safe handling if verbose was passed as 3rd positional argument
+    if isinstance(optimizer, bool):
+        verbose = optimizer
+        optimizer = "spo"
+
     start_time = time.time()
 
     # PHASE 1: Iterative Clustering
     clusters = perform_iterative_clustering(problem, params)
     
-    # PHASE 2: SPO on each cluster
-    candidates = run_spo_on_clusters(clusters, problem, params)
+    # PHASE 2: Local Optimization on each cluster
+    candidates = run_optimizer_on_clusters(clusters, problem, params, optimizer=optimizer)
     
     # PHASE 3: Final Selection and Validation
     final_roots = problem.select_final_optimal(candidates)

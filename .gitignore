@@ -21,3 +21,5 @@ build/
 
 # Testing
 .pytest_cache/
+
+AGENTS.md
